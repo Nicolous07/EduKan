@@ -1,0 +1,6 @@
+{
+  "name": "EduKan",
+  "description": "Mtandao wa kisasa wa wanafunzi Tanzania unaounganisha wanafunzi na shule, vyumba vya masomo (study rooms), fursa na usimamizi wa utawala.",
+  "requestFramePermissions": ["camera", "microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
