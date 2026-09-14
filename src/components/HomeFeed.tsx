@@ -42,6 +42,7 @@ import {
 import { Post, UserProfile, SchoolCommunity, PostCategory } from '../types';
 import { getEduPointsInfo } from '../lib/edupoints';
 import { FeedSkeleton } from './common/FeedSkeleton';
+import { ImageViewerModal } from './common/ImageViewerModal';
 import { isPostRecommendedForUser } from '../lib/recommendations';
 
 interface Props {
@@ -1599,127 +1600,12 @@ export const HomeFeed: React.FC<Props> = ({
         </div>
       )}
 
-      {/* Full Screen Image Lightbox Modal */}
-      {fullImageModal && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex flex-col justify-between select-none animate-in fade-in duration-200"
-          onClick={() => {
-            setFullImageModal(null);
-            setIsFullImageZoomed(false);
-          }}
-        >
-          {/* Header Action Bar */}
-          <div
-            className="p-3 sm:p-4 flex items-center justify-between text-white border-b border-white/10 bg-black/70 z-20"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 flex items-center justify-center font-bold text-sm shadow-xs">
-                🖼️
-              </div>
-              <div className="max-w-[170px] sm:max-w-md">
-                <h4 className="text-xs sm:text-sm font-bold text-white truncate">
-                  {fullImageModal.authorName ? `Photo by ${fullImageModal.authorName}` : 'Full Photo'}
-                </h4>
-                <p className="text-[10px] sm:text-[11px] text-gray-400 truncate">
-                  Tap image to zoom or click outside to close
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              {/* Zoom In/Out Toggle */}
-              <button
-                type="button"
-                onClick={() => setIsFullImageZoomed(!isFullImageZoomed)}
-                className="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
-                title={isFullImageZoomed ? 'Fit to screen' : 'Zoom in'}
-              >
-                {isFullImageZoomed ? (
-                  <>
-                    <ZoomOut className="w-4 h-4 text-emerald-400" />
-                    <span className="hidden sm:inline">Fit</span>
-                  </>
-                ) : (
-                  <>
-                    <ZoomIn className="w-4 h-4 text-emerald-400" />
-                    <span className="hidden sm:inline">Zoom</span>
-                  </>
-                )}
-              </button>
-
-              {/* Open original / Download */}
-              <a
-                href={fullImageModal.url}
-                target="_blank"
-                rel="noreferrer"
-                download
-                className="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
-                title="Download or open original image"
-              >
-                <Download className="w-4 h-4 text-emerald-400" />
-                <span className="hidden sm:inline">Download</span>
-              </a>
-
-              {/* Close Button */}
-              <button
-                type="button"
-                onClick={() => {
-                  setFullImageModal(null);
-                  setIsFullImageZoomed(false);
-                }}
-                className="p-1.5 sm:p-2 rounded-xl bg-white/10 hover:bg-red-600 text-white transition-colors cursor-pointer"
-                title="Close (Esc)"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-
-          {/* Main Interactive Stage - Full Uncropped Image View */}
-          <div
-            className="flex-1 flex items-center justify-center p-2 sm:p-6 overflow-auto custom-scrollbar"
-            onClick={() => {
-              setFullImageModal(null);
-              setIsFullImageZoomed(false);
-            }}
-          >
-            <div className="relative flex items-center justify-center max-w-full max-h-full">
-              <img
-                src={fullImageModal.url}
-                alt="Full Academic Photo"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsFullImageZoomed(!isFullImageZoomed);
-                }}
-                className={`max-w-full object-contain rounded-xl shadow-2xl transition-all duration-300 select-none ${
-                  isFullImageZoomed
-                    ? 'max-h-none scale-125 sm:scale-150 cursor-zoom-out my-16'
-                    : 'max-h-[75vh] sm:max-h-[82vh] cursor-zoom-in'
-                }`}
-              />
-            </div>
-          </div>
-
-          {/* Bottom Info / Caption Bar */}
-          <div
-            className="p-3 sm:p-3.5 border-t border-white/10 bg-black/70 text-center text-xs text-gray-300 z-20"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {fullImageModal.caption ? (
-              <p className="max-w-2xl mx-auto text-gray-200 line-clamp-2 text-xs leading-relaxed italic">
-                "{fullImageModal.caption}"
-              </p>
-            ) : (
-              <p className="text-[11px] text-gray-400">
-                EduKan Tanzania • Academic Visuals
-              </p>
-            )}
-          </div>
-        </div>
-      )}
+      {/* Full Screen Image Lightbox Modal with Pan and Zoom to every corner */}
+      <ImageViewerModal
+        isOpen={Boolean(fullImageModal)}
+        onClose={() => setFullImageModal(null)}
+        imageData={fullImageModal}
+      />
     </div>
   );
 };
