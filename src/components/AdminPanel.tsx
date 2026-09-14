@@ -1030,49 +1030,49 @@ export const AdminPanel: React.FC<Props> = ({
         <div className="space-y-6">
           {/* Key KPI Cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-white rounded-2xl p-5 border border-emerald-100 shadow-2xs">
-              <span className="text-[11px] uppercase tracking-wider text-gray-400 font-semibold block">Wanafunzi Waliosajiliwa</span>
-              <div className="text-2xl font-bold font-mono text-gray-900 mt-1">12,483</div>
-              <div className="text-[10px] text-emerald-700 mt-1 font-semibold flex items-center gap-1">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-emerald-100 dark:border-slate-800 shadow-2xs">
+              <span className="text-[11px] uppercase tracking-wider text-gray-400 dark:text-slate-400 font-semibold block">Wanafunzi Waliosajiliwa</span>
+              <div className="text-2xl font-bold font-mono text-gray-900 dark:text-white mt-1">12,483</div>
+              <div className="text-[10px] text-emerald-700 dark:text-emerald-400 mt-1 font-semibold flex items-center gap-1">
                 <TrendingUp className="w-3 h-3" /> +187 wapya leo (Kiwango cha juu)
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl p-5 border border-emerald-100 shadow-2xs">
-              <span className="text-[11px] uppercase tracking-wider text-gray-400 font-semibold block">Shule na Vyuo Mtandaoni</span>
-              <div className="text-2xl font-bold font-mono text-emerald-800 mt-1">{schools.length}</div>
-              <div className="text-[10px] text-gray-500 mt-1">Zote zimeidhinishwa rasmi</div>
+            <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-emerald-100 dark:border-slate-800 shadow-2xs">
+              <span className="text-[11px] uppercase tracking-wider text-gray-400 dark:text-slate-400 font-semibold block">Shule na Vyuo Mtandaoni</span>
+              <div className="text-2xl font-bold font-mono text-emerald-800 dark:text-emerald-400 mt-1">{schools.length}</div>
+              <div className="text-[10px] text-gray-500 dark:text-slate-400 mt-1">Zote zimeidhinishwa rasmi</div>
             </div>
 
-            <div className="bg-white rounded-2xl p-5 border border-emerald-100 shadow-2xs">
-              <span className="text-[11px] uppercase tracking-wider text-gray-400 font-semibold block">Machapisho & Mijadala</span>
-              <div className="text-2xl font-bold font-mono text-gray-900 mt-1">{posts.length + 1420}</div>
-              <div className="text-[10px] text-emerald-700 mt-1 font-semibold">96% ni maudhui ya kimasomo</div>
+            <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-emerald-100 dark:border-slate-800 shadow-2xs">
+              <span className="text-[11px] uppercase tracking-wider text-gray-400 dark:text-slate-400 font-semibold block">Machapisho & Mijadala</span>
+              <div className="text-2xl font-bold font-mono text-gray-900 dark:text-white mt-1">{posts.length + 1420}</div>
+              <div className="text-[10px] text-emerald-700 dark:text-emerald-400 mt-1 font-semibold">96% ni maudhui ya kimasomo</div>
             </div>
 
-            <div className="bg-white rounded-2xl p-5 border border-emerald-100 shadow-2xs">
-              <span className="text-[11px] uppercase tracking-wider text-gray-400 font-semibold block">Ulinzi wa Maudhui</span>
-              <div className="text-2xl font-bold font-mono text-emerald-700 mt-1">100% Salama</div>
-              <div className="text-[10px] text-gray-500 mt-1">0 machapisho yaliyopigwa marufuku</div>
+            <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-emerald-100 dark:border-slate-800 shadow-2xs">
+              <span className="text-[11px] uppercase tracking-wider text-gray-400 dark:text-slate-400 font-semibold block">Ulinzi wa Maudhui</span>
+              <div className="text-2xl font-bold font-mono text-emerald-700 dark:text-emerald-400 mt-1">100% Salama</div>
+              <div className="text-[10px] text-gray-500 dark:text-slate-400 mt-1">0 machapisho yaliyopigwa marufuku</div>
             </div>
           </div>
 
           {/* Graphical Analytics & Breakdown */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
             {/* Weekly Student Activity */}
-            <div className="lg:col-span-2 bg-white rounded-2xl p-5 border border-gray-200 shadow-2xs">
+            <div className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl p-5 border border-gray-200 dark:border-slate-800 shadow-2xs">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h3 className="text-sm font-bold text-gray-900 font-heading">Shughuli za Wanafunzi kwa Siku 7 Zilizopita</h3>
-                  <p className="text-[11px] text-gray-500">Mwingiliano wa usomaji, uulizaji maswali na maoni</p>
+                  <h3 className="text-sm font-bold text-gray-900 dark:text-white font-heading">Shughuli za Wanafunzi kwa Siku 7 Zilizopita</h3>
+                  <p className="text-[11px] text-gray-500 dark:text-slate-400">Mwingiliano wa usomaji, uulizaji maswali na maoni</p>
                 </div>
-                <span className="text-xs bg-emerald-50 text-emerald-800 font-bold px-2.5 py-1 rounded-lg">
+                <span className="text-xs bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-bold px-2.5 py-1 rounded-lg border border-emerald-200/50 dark:border-emerald-800/50">
                   Kilele: Alhamisi (2,840)
                 </span>
               </div>
 
               {/* Responsive SVG Bar Visual */}
-              <div className="grid grid-cols-7 gap-2 items-end h-40 pt-4 px-2 border-b border-gray-100">
+              <div className="grid grid-cols-7 gap-2 items-end h-40 pt-4 px-2 border-b border-gray-100 dark:border-slate-800">
                 {[
                   { day: 'Jtatu', value: 65, count: '1.9k' },
                   { day: 'Jnne', value: 75, count: '2.2k' },
@@ -1083,78 +1083,78 @@ export const AdminPanel: React.FC<Props> = ({
                   { day: 'Jpili', value: 80, count: '2.3k' }
                 ].map((col) => (
                   <div key={col.day} className="flex flex-col items-center gap-1.5 h-full justify-end group">
-                    <span className="text-[10px] font-mono text-gray-400 group-hover:text-emerald-700 transition-colors">
+                    <span className="text-[10px] font-mono text-gray-400 dark:text-slate-400 group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
                       {col.count}
                     </span>
                     <div
                       className="w-full bg-emerald-500 hover:bg-emerald-600 rounded-t-lg transition-all"
                       style={{ height: `${col.value}%` }}
                     />
-                    <span className="text-[10px] font-semibold text-gray-600 mt-1">{col.day}</span>
+                    <span className="text-[10px] font-semibold text-gray-600 dark:text-slate-400 mt-1">{col.day}</span>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Category Breakdown & Regional Ranks */}
-            <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-2xs space-y-4">
-              <h3 className="text-sm font-bold text-gray-900 font-heading">Mgawanyo wa Maudhui & Mikoa</h3>
+            <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-gray-200 dark:border-slate-800 shadow-2xs space-y-4">
+              <h3 className="text-sm font-bold text-gray-900 dark:text-white font-heading">Mgawanyo wa Maudhui & Mikoa</h3>
               
               {/* Category bars */}
               <div className="space-y-2 text-xs">
                 <div>
                   <div className="flex justify-between text-[11px] font-semibold mb-1">
-                    <span className="text-emerald-800">Masomo & NECTA (55%)</span>
-                    <span className="text-gray-500">1,120 posts</span>
+                    <span className="text-emerald-800 dark:text-emerald-300">Masomo & NECTA (55%)</span>
+                    <span className="text-gray-500 dark:text-slate-400">1,120 posts</span>
                   </div>
-                  <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+                  <div className="w-full bg-gray-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden">
                     <div className="bg-emerald-600 h-full rounded-full" style={{ width: '55%' }} />
                   </div>
                 </div>
 
                 <div>
                   <div className="flex justify-between text-[11px] font-semibold mb-1">
-                    <span className="text-teal-800">Ushauri wa Elimu & TCU (25%)</span>
-                    <span className="text-gray-500">510 posts</span>
+                    <span className="text-teal-800 dark:text-teal-300">Ushauri wa Elimu & TCU (25%)</span>
+                    <span className="text-gray-500 dark:text-slate-400">510 posts</span>
                   </div>
-                  <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+                  <div className="w-full bg-gray-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden">
                     <div className="bg-teal-500 h-full rounded-full" style={{ width: '25%' }} />
                   </div>
                 </div>
 
                 <div>
                   <div className="flex justify-between text-[11px] font-semibold mb-1">
-                    <span className="text-amber-800">Burudani & Michezo (20%)</span>
-                    <span className="text-gray-500">410 posts</span>
+                    <span className="text-amber-800 dark:text-amber-300">Burudani & Michezo (20%)</span>
+                    <span className="text-gray-500 dark:text-slate-400">410 posts</span>
                   </div>
-                  <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+                  <div className="w-full bg-gray-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden">
                     <div className="bg-amber-500 h-full rounded-full" style={{ width: '20%' }} />
                   </div>
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-gray-100">
-                <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider block mb-2">Mikoa Inayoongoza kwa Ushiriki:</span>
+              <div className="pt-3 border-t border-gray-100 dark:border-slate-800">
+                <span className="text-[10px] uppercase font-bold text-gray-400 dark:text-slate-400 tracking-wider block mb-2">Mikoa Inayoongoza kwa Ushiriki:</span>
                 <div className="flex flex-wrap gap-1.5 text-[11px]">
-                  <span className="bg-emerald-50 text-emerald-900 px-2 py-0.5 rounded-md font-medium">1. Dar es Salaam (34%)</span>
-                  <span className="bg-emerald-50 text-emerald-900 px-2 py-0.5 rounded-md font-medium">2. Mwanza (18%)</span>
-                  <span className="bg-emerald-50 text-emerald-900 px-2 py-0.5 rounded-md font-medium">3. Arusha (15%)</span>
-                  <span className="bg-emerald-50 text-emerald-900 px-2 py-0.5 rounded-md font-medium">4. Kilimanjaro (12%)</span>
-                  <span className="bg-emerald-50 text-emerald-900 px-2 py-0.5 rounded-md font-medium">5. Dodoma (9%)</span>
+                  <span className="bg-emerald-50 dark:bg-slate-800 text-emerald-900 dark:text-emerald-300 px-2 py-0.5 rounded-md font-medium border border-emerald-100 dark:border-slate-700">1. Dar es Salaam (34%)</span>
+                  <span className="bg-emerald-50 dark:bg-slate-800 text-emerald-900 dark:text-emerald-300 px-2 py-0.5 rounded-md font-medium border border-emerald-100 dark:border-slate-700">2. Mwanza (18%)</span>
+                  <span className="bg-emerald-50 dark:bg-slate-800 text-emerald-900 dark:text-emerald-300 px-2 py-0.5 rounded-md font-medium border border-emerald-100 dark:border-slate-700">3. Arusha (15%)</span>
+                  <span className="bg-emerald-50 dark:bg-slate-800 text-emerald-900 dark:text-emerald-300 px-2 py-0.5 rounded-md font-medium border border-emerald-100 dark:border-slate-700">4. Kilimanjaro (12%)</span>
+                  <span className="bg-emerald-50 dark:bg-slate-800 text-emerald-900 dark:text-emerald-300 px-2 py-0.5 rounded-md font-medium border border-emerald-100 dark:border-slate-700">5. Dodoma (9%)</span>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Admin Command Center Quick Actions */}
-          <div className="bg-white rounded-2xl p-4 sm:p-5 border border-emerald-100 shadow-2xs space-y-3">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-5 border border-emerald-100 dark:border-slate-800 shadow-2xs space-y-3">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-bold text-gray-900 font-heading flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4 text-emerald-700" />
+                <h3 className="text-sm font-bold text-gray-900 dark:text-white font-heading flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
                   <span>Vifaa vya Haraka vya Msimamizi (Admin Quick Actions)</span>
                 </h3>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-500 dark:text-slate-400">
                   Fikia mara moja zana muhimu zaidi za usimamizi wa jukwaa la elimu la EduKan.
                 </p>
               </div>
@@ -1163,68 +1163,68 @@ export const AdminPanel: React.FC<Props> = ({
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 pt-1">
               <button
                 onClick={() => setAdminTab('broadcasts')}
-                className="p-3 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-xl flex flex-col items-center text-center gap-1.5 transition-all group cursor-pointer"
+                className="p-3 bg-emerald-50 dark:bg-slate-800 hover:bg-emerald-100 dark:hover:bg-slate-700/80 border border-emerald-200 dark:border-slate-700 rounded-xl flex flex-col items-center text-center gap-1.5 transition-all group cursor-pointer"
               >
                 <div className="w-8 h-8 rounded-lg bg-emerald-700 text-white flex items-center justify-center shadow-2xs group-hover:scale-105 transition-transform">
                   <Radio className="w-4 h-4" />
                 </div>
-                <span className="text-xs font-bold text-gray-900">Tangaza Kitaifa</span>
-                <span className="text-[10px] text-gray-500">Wanafunzi wote</span>
+                <span className="text-xs font-bold text-gray-900 dark:text-slate-200">Tangaza Kitaifa</span>
+                <span className="text-[10px] text-gray-500 dark:text-slate-400">Wanafunzi wote</span>
               </button>
 
               <button
                 onClick={() => setAdminTab('library')}
-                className="p-3 bg-teal-50 hover:bg-teal-100 border border-teal-200 rounded-xl flex flex-col items-center text-center gap-1.5 transition-all group cursor-pointer"
+                className="p-3 bg-teal-50 dark:bg-slate-800 hover:bg-teal-100 dark:hover:bg-slate-700/80 border border-teal-200 dark:border-slate-700 rounded-xl flex flex-col items-center text-center gap-1.5 transition-all group cursor-pointer"
               >
                 <div className="w-8 h-8 rounded-lg bg-teal-700 text-white flex items-center justify-center shadow-2xs group-hover:scale-105 transition-transform">
                   <Library className="w-4 h-4" />
                 </div>
-                <span className="text-xs font-bold text-gray-900">Maktaba & Mitihani</span>
-                <span className="text-[10px] text-teal-700 font-semibold">{libraryBooks.length} vitabu</span>
+                <span className="text-xs font-bold text-gray-900 dark:text-slate-200">Maktaba & Mitihani</span>
+                <span className="text-[10px] text-teal-700 dark:text-teal-400 font-semibold">{libraryBooks.length} vitabu</span>
               </button>
 
               <button
                 onClick={() => setIsAddSchoolModalOpen(true)}
-                className="p-3 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-xl flex flex-col items-center text-center gap-1.5 transition-all group cursor-pointer"
+                className="p-3 bg-blue-50 dark:bg-slate-800 hover:bg-blue-100 dark:hover:bg-slate-700/80 border border-blue-200 dark:border-slate-700 rounded-xl flex flex-col items-center text-center gap-1.5 transition-all group cursor-pointer"
               >
                 <div className="w-8 h-8 rounded-lg bg-blue-700 text-white flex items-center justify-center shadow-2xs group-hover:scale-105 transition-transform">
                   <School className="w-4 h-4" />
                 </div>
-                <span className="text-xs font-bold text-gray-900">Sajili Shule</span>
-                <span className="text-[10px] text-gray-500">Chuo au sekondari</span>
+                <span className="text-xs font-bold text-gray-900 dark:text-slate-200">Sajili Shule</span>
+                <span className="text-[10px] text-gray-500 dark:text-slate-400">Chuo au sekondari</span>
               </button>
 
               <button
                 onClick={() => setAdminTab('opportunities')}
-                className="p-3 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-xl flex flex-col items-center text-center gap-1.5 transition-all group cursor-pointer"
+                className="p-3 bg-amber-50 dark:bg-slate-800 hover:bg-amber-100 dark:hover:bg-slate-700/80 border border-amber-200 dark:border-slate-700 rounded-xl flex flex-col items-center text-center gap-1.5 transition-all group cursor-pointer"
               >
                 <div className="w-8 h-8 rounded-lg bg-amber-600 text-white flex items-center justify-center shadow-2xs group-hover:scale-105 transition-transform">
                   <Sparkles className="w-4 h-4" />
                 </div>
-                <span className="text-xs font-bold text-gray-900">Fursa & Udhamini</span>
-                <span className="text-[10px] text-amber-800 font-semibold">{opportunities.length} zilizopo</span>
+                <span className="text-xs font-bold text-gray-900 dark:text-slate-200">Fursa & Udhamini</span>
+                <span className="text-[10px] text-amber-800 dark:text-amber-400 font-semibold">{opportunities.length} zilizopo</span>
               </button>
 
               <button
                 onClick={() => setAdminTab('students')}
-                className="p-3 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-xl flex flex-col items-center text-center gap-1.5 transition-all group cursor-pointer"
+                className="p-3 bg-indigo-50 dark:bg-slate-800 hover:bg-indigo-100 dark:hover:bg-slate-700/80 border border-indigo-200 dark:border-slate-700 rounded-xl flex flex-col items-center text-center gap-1.5 transition-all group cursor-pointer"
               >
                 <div className="w-8 h-8 rounded-lg bg-indigo-700 text-white flex items-center justify-center shadow-2xs group-hover:scale-105 transition-transform">
                   <Users className="w-4 h-4" />
                 </div>
-                <span className="text-xs font-bold text-gray-900">Wanafunzi & Akaunti</span>
-                <span className="text-[10px] text-gray-500">{students.length} zinasimamiwa</span>
+                <span className="text-xs font-bold text-gray-900 dark:text-slate-200">Wanafunzi & Akaunti</span>
+                <span className="text-[10px] text-gray-500 dark:text-slate-400">{students.length} zinasimamiwa</span>
               </button>
 
               <button
                 onClick={() => setAdminTab('settings')}
-                className="p-3 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-xl flex flex-col items-center text-center gap-1.5 transition-all group cursor-pointer"
+                className="p-3 bg-purple-50 dark:bg-slate-800 hover:bg-purple-100 dark:hover:bg-slate-700/80 border border-purple-200 dark:border-slate-700 rounded-xl flex flex-col items-center text-center gap-1.5 transition-all group cursor-pointer"
               >
                 <div className="w-8 h-8 rounded-lg bg-purple-700 text-white flex items-center justify-center shadow-2xs group-hover:scale-105 transition-transform">
                   <Settings className="w-4 h-4" />
                 </div>
-                <span className="text-xs font-bold text-gray-900">Mipangilio & Backup</span>
-                <span className="text-[10px] text-purple-700 font-semibold">Usalama & Pakua</span>
+                <span className="text-xs font-bold text-gray-900 dark:text-slate-200">Mipangilio & Backup</span>
+                <span className="text-[10px] text-purple-700 dark:text-purple-400 font-semibold">Usalama & Pakua</span>
               </button>
             </div>
           </div>
@@ -1235,26 +1235,26 @@ export const AdminPanel: React.FC<Props> = ({
       {/* 2. CONTENT & POST MODERATION TAB */}
       {/* ========================================================= */}
       {adminTab === 'content' && (
-        <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-2xs space-y-4">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-gray-200 dark:border-slate-800 shadow-2xs space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h3 className="font-heading font-bold text-gray-900 text-base">
+              <h3 className="font-heading font-bold text-gray-900 dark:text-white text-base">
                 Usimamizi na Ukaguzi wa Maudhui ({filteredPosts.length})
               </h3>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-500 dark:text-slate-400">
                 Kagua machapisho ya wanafunzi, bandika matangazo muhimu ya kimasomo, au futa maudhui yasiyofaa.
               </p>
             </div>
 
             {/* Content Search Input */}
             <div className="relative">
-              <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-gray-400" />
+              <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-gray-400 dark:text-slate-400" />
               <input
                 type="text"
                 placeholder="Tafuta kwa mada au mwandishi..."
                 value={contentSearch}
                 onChange={(e) => setContentSearch(e.target.value)}
-                className="pl-8 pr-3 py-1.5 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:bg-white"
+                className="pl-8 pr-3 py-1.5 text-xs bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-900 text-gray-900 dark:text-white"
               />
             </div>
           </div>
@@ -1265,10 +1265,10 @@ export const AdminPanel: React.FC<Props> = ({
               <button
                 key={cat}
                 onClick={() => setContentFilter(cat)}
-                className={`px-3 py-1 rounded-full font-medium transition-all ${
+                className={`px-3 py-1 rounded-full font-medium transition-all cursor-pointer ${
                   contentFilter === cat
-                    ? 'bg-emerald-800 text-white shadow-2xs font-semibold'
-                    : 'bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-200'
+                    ? 'bg-emerald-800 dark:bg-emerald-700 text-white shadow-2xs font-semibold'
+                    : 'bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200 dark:border-slate-700'
                 }`}
               >
                 {cat === 'all' && 'Maudhui Yote'}
@@ -1284,7 +1284,7 @@ export const AdminPanel: React.FC<Props> = ({
           {/* Post Table/Card List */}
           <div className="space-y-3 pt-2">
             {filteredPosts.length === 0 ? (
-              <div className="p-8 text-center bg-gray-50 rounded-2xl text-gray-500 text-xs">
+              <div className="p-8 text-center bg-gray-50 dark:bg-slate-800/60 rounded-2xl text-gray-500 dark:text-slate-400 text-xs">
                 Hakuna machapisho yanayolingana na kichujio hiki.
               </div>
             ) : (
@@ -1293,8 +1293,8 @@ export const AdminPanel: React.FC<Props> = ({
                   key={post.id}
                   className={`p-4 rounded-2xl border transition-all ${
                     post.isPinned
-                      ? 'bg-amber-50/40 border-amber-300 ring-1 ring-amber-200'
-                      : 'bg-white border-gray-200 hover:border-emerald-200'
+                      ? 'bg-amber-50/40 dark:bg-amber-950/20 border-amber-300 dark:border-amber-800/60 ring-1 ring-amber-200 dark:ring-amber-900/40'
+                      : 'bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-800 hover:border-emerald-200 dark:hover:border-emerald-800'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-3">
@@ -1302,33 +1302,33 @@ export const AdminPanel: React.FC<Props> = ({
                       <img
                         src={post.author.avatar}
                         alt={post.author.name}
-                        className="w-10 h-10 rounded-full object-cover shrink-0 ring-1 ring-gray-200"
+                        className="w-10 h-10 rounded-full object-cover shrink-0 ring-1 ring-gray-200 dark:ring-slate-700"
                       />
                       <div>
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-bold text-xs text-gray-900">{post.author.name}</span>
-                          <span className="text-[11px] text-gray-500">@{post.author.handle}</span>
-                          <span className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full font-medium">
+                          <span className="font-bold text-xs text-gray-900 dark:text-white">{post.author.name}</span>
+                          <span className="text-[11px] text-gray-500 dark:text-slate-400">@{post.author.handle}</span>
+                          <span className="text-[10px] bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 px-2 py-0.5 rounded-full font-medium">
                             {post.author.school}
                           </span>
                           {post.isPinned && (
-                            <span className="text-[10px] bg-amber-100 text-amber-900 font-bold px-2 py-0.5 rounded-md flex items-center gap-1">
-                              <Pin className="w-3 h-3 text-amber-700" />
+                            <span className="text-[10px] bg-amber-100 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300 font-bold px-2 py-0.5 rounded-md flex items-center gap-1">
+                              <Pin className="w-3 h-3 text-amber-700 dark:text-amber-400" />
                               Limebandikwa Juu
                             </span>
                           )}
                           {post.category && (
-                            <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-md uppercase">
+                            <span className="text-[10px] bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-bold px-2 py-0.5 rounded-md uppercase">
                               {post.category}
                             </span>
                           )}
                         </div>
 
-                        <p className="text-xs text-gray-700 mt-2 leading-relaxed">
+                        <p className="text-xs text-gray-700 dark:text-slate-300 mt-2 leading-relaxed">
                           {post.content}
                         </p>
 
-                        <div className="flex items-center gap-4 mt-2 text-[11px] text-gray-400">
+                        <div className="flex items-center gap-4 mt-2 text-[11px] text-gray-400 dark:text-slate-400">
                           <span>❤️ {post.likes} likes</span>
                           <span>💬 {post.commentsCount || (post.comments ? post.comments.length : 0)} maoni</span>
                           <span>🔄 {post.sharesCount} shares</span>
@@ -1347,7 +1347,7 @@ export const AdminPanel: React.FC<Props> = ({
                           setEditPostSubject(post.subject || '');
                         }}
                         title="Hariri Chapisho Hili"
-                        className="p-2 rounded-xl text-xs font-semibold bg-blue-50 hover:bg-blue-100 text-blue-700 transition-colors cursor-pointer"
+                        className="p-2 rounded-xl text-xs font-semibold bg-blue-50 dark:bg-blue-950/50 hover:bg-blue-100 dark:hover:bg-blue-900 text-blue-700 dark:text-blue-300 transition-colors cursor-pointer"
                       >
                         <Edit3 className="w-3.5 h-3.5" />
                       </button>
@@ -1360,8 +1360,8 @@ export const AdminPanel: React.FC<Props> = ({
                         title={post.isPinned ? 'Ondoa Bandiko' : 'Bandika Juu ya Feed'}
                         className={`p-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
                           post.isPinned
-                            ? 'bg-amber-200 text-amber-900 hover:bg-amber-300'
-                            : 'bg-gray-100 hover:bg-amber-100 text-gray-600 hover:text-amber-800'
+                            ? 'bg-amber-200 dark:bg-amber-900 text-amber-900 dark:text-amber-200 hover:bg-amber-300'
+                            : 'bg-gray-100 dark:bg-slate-800 hover:bg-amber-100 dark:hover:bg-amber-950 text-gray-600 dark:text-slate-300 hover:text-amber-800 dark:hover:text-amber-300'
                         }`}
                       >
                         <Pin className="w-3.5 h-3.5" />
@@ -1373,7 +1373,7 @@ export const AdminPanel: React.FC<Props> = ({
                           triggerFeedback('Chapisho limefutwa na msimamizi.');
                         }}
                         title="Futa Chapisho Hili"
-                        className="p-2 rounded-xl text-xs font-semibold bg-red-50 hover:bg-red-100 text-red-600 transition-colors cursor-pointer"
+                        className="p-2 rounded-xl text-xs font-semibold bg-red-50 dark:bg-red-950/50 hover:bg-red-100 dark:hover:bg-red-900 text-red-600 dark:text-red-400 transition-colors cursor-pointer"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -1381,11 +1381,11 @@ export const AdminPanel: React.FC<Props> = ({
                   </div>
 
                   {/* Comments Section for Admin Moderation */}
-                  <div className="mt-3 pt-2.5 border-t border-gray-100">
+                  <div className="mt-3 pt-2.5 border-t border-gray-100 dark:border-slate-800">
                     <button
                       type="button"
                       onClick={() => setExpandedCommentsPostId(expandedCommentsPostId === post.id ? null : post.id)}
-                      className="text-[11px] font-bold text-emerald-800 hover:text-emerald-950 flex items-center gap-1.5 cursor-pointer"
+                      className="text-[11px] font-bold text-emerald-800 dark:text-emerald-400 hover:text-emerald-950 dark:hover:text-emerald-300 flex items-center gap-1.5 cursor-pointer"
                     >
                       <MessageSquare className="w-3.5 h-3.5" />
                       <span>Kagua Maoni ({post.comments?.length || post.commentsCount || 0})</span>
@@ -1393,27 +1393,27 @@ export const AdminPanel: React.FC<Props> = ({
                     </button>
 
                     {expandedCommentsPostId === post.id && (
-                      <div className="mt-2.5 space-y-2 pl-3 border-l-2 border-emerald-100 bg-gray-50/50 p-3 rounded-xl">
+                      <div className="mt-2.5 space-y-2 pl-3 border-l-2 border-emerald-100 dark:border-emerald-900/60 bg-gray-50/50 dark:bg-slate-800/50 p-3 rounded-xl">
                         {(!post.comments || post.comments.length === 0) ? (
-                          <p className="text-[11px] text-gray-500 italic">Hakuna maoni kwenye chapisho hili bado.</p>
+                          <p className="text-[11px] text-gray-500 dark:text-slate-400 italic">Hakuna maoni kwenye chapisho hili bado.</p>
                         ) : (
                           post.comments.map((comment) => (
-                            <div key={comment.id} className="p-2.5 bg-white rounded-xl border border-gray-200 flex items-start justify-between gap-2">
+                            <div key={comment.id} className="p-2.5 bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-700 flex items-start justify-between gap-2">
                               <div className="flex items-start gap-2">
                                 <img src={comment.author.avatar} alt={comment.author.name} className="w-6 h-6 rounded-full object-cover shrink-0 mt-0.5" />
                                 <div>
                                   <div className="flex items-center gap-1.5 flex-wrap">
-                                    <span className="font-bold text-[11px] text-gray-900">{comment.author.name}</span>
-                                    <span className="text-[10px] text-gray-400">{comment.author.school}</span>
-                                    <span className="text-[10px] text-gray-400">• {comment.createdAt}</span>
+                                    <span className="font-bold text-[11px] text-gray-900 dark:text-white">{comment.author.name}</span>
+                                    <span className="text-[10px] text-gray-400 dark:text-slate-400">{comment.author.school}</span>
+                                    <span className="text-[10px] text-gray-400 dark:text-slate-400">• {comment.createdAt}</span>
                                   </div>
-                                  <p className="text-xs text-gray-700 mt-1 leading-snug">{comment.content}</p>
+                                  <p className="text-xs text-gray-700 dark:text-slate-300 mt-1 leading-snug">{comment.content}</p>
                                 </div>
                               </div>
                               <div className="flex items-center gap-1 shrink-0">
                                 <button
                                   onClick={() => setEditingComment({ postId: post.id, commentId: comment.id, text: comment.content })}
-                                  className="p-1 rounded-lg text-gray-500 hover:text-blue-700 hover:bg-blue-50 transition-colors cursor-pointer"
+                                  className="p-1 rounded-lg text-gray-500 dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-950 transition-colors cursor-pointer"
                                   title="Hariri Maoni Haya"
                                 >
                                   <Edit3 className="w-3 h-3" />
@@ -1433,7 +1433,7 @@ export const AdminPanel: React.FC<Props> = ({
                                       setAuditLogs(prev => [newLog, ...prev]);
                                       triggerFeedback('Maoni yamefutwa na Msimamizi.');
                                     }}
-                                    className="p-1 rounded-lg text-gray-500 hover:text-red-700 hover:bg-red-50 transition-colors cursor-pointer"
+                                    className="p-1 rounded-lg text-gray-500 dark:text-slate-400 hover:text-red-700 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950 transition-colors cursor-pointer"
                                     title="Futa Maoni Haya"
                                   >
                                     <Trash2 className="w-3 h-3" />
@@ -1457,26 +1457,26 @@ export const AdminPanel: React.FC<Props> = ({
       {/* 2b. STUDY ROOMS & QUESTIONS TAB */}
       {/* ========================================================= */}
       {adminTab === 'studyrooms' && (
-        <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-2xs space-y-4">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-gray-200 dark:border-slate-800 shadow-2xs space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h3 className="font-heading font-bold text-gray-900 text-base flex items-center gap-2">
-                <HelpCircle className="w-4 h-4 text-emerald-700" />
+              <h3 className="font-heading font-bold text-gray-900 dark:text-white text-base flex items-center gap-2">
+                <HelpCircle className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
                 <span>Usimamizi wa Vyumba vya Masomo & Maswali ({questions.length})</span>
               </h3>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-500 dark:text-slate-400">
                 Kagua maswali yaliyoulizwa na wanafunzi, rekebisha mada, kagua majibu na futa yasiyofaa.
               </p>
             </div>
 
             <div className="relative">
-              <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-gray-400" />
+              <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-gray-400 dark:text-slate-400" />
               <input
                 type="text"
                 placeholder="Tafuta swali au somo..."
                 value={studyQuestionSearch}
                 onChange={(e) => setStudyQuestionSearch(e.target.value)}
-                className="pl-8 pr-3 py-1.5 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:bg-white w-full sm:w-64"
+                className="pl-8 pr-3 py-1.5 text-xs bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-900 text-gray-900 dark:text-white w-full sm:w-64"
               />
             </div>
           </div>
@@ -1489,8 +1489,8 @@ export const AdminPanel: React.FC<Props> = ({
                 onClick={() => setStudyQuestionSubjectFilter(subj)}
                 className={`px-3 py-1 rounded-full font-medium whitespace-nowrap transition-all cursor-pointer ${
                   studyQuestionSubjectFilter === subj
-                    ? 'bg-emerald-800 text-white shadow-2xs font-semibold'
-                    : 'bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-200'
+                    ? 'bg-emerald-800 dark:bg-emerald-700 text-white shadow-2xs font-semibold'
+                    : 'bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200 dark:border-slate-700'
                 }`}
               >
                 {subj}
@@ -1501,31 +1501,31 @@ export const AdminPanel: React.FC<Props> = ({
           {/* Questions List */}
           <div className="space-y-3 pt-2">
             {filteredStudyQuestions.length === 0 ? (
-              <div className="p-8 text-center bg-gray-50 rounded-2xl text-gray-500 text-xs">
+              <div className="p-8 text-center bg-gray-50 dark:bg-slate-800/60 rounded-2xl text-gray-500 dark:text-slate-400 text-xs">
                 Hakuna maswali yaliyopatikana kwa kigezo hiki.
               </div>
             ) : (
               filteredStudyQuestions.map(q => (
-                <div key={q.id} className="p-4 rounded-2xl border border-gray-200 bg-white hover:border-emerald-200 transition-all">
+                <div key={q.id} className="p-4 rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-emerald-200 dark:hover:border-emerald-800 transition-all">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-start gap-3">
-                      <img src={q.author.avatar} alt={q.author.name} className="w-9 h-9 rounded-full object-cover shrink-0 ring-1 ring-gray-200" />
+                      <img src={q.author.avatar} alt={q.author.name} className="w-9 h-9 rounded-full object-cover shrink-0 ring-1 ring-gray-200 dark:ring-slate-700" />
                       <div>
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-bold text-xs text-gray-900">{q.author.name}</span>
-                          <span className="text-[10px] bg-emerald-50 text-emerald-800 px-2 py-0.5 rounded-md font-bold uppercase">{q.subject}</span>
-                          <span className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md">{q.topic}</span>
-                          <span className="text-[10px] text-gray-400">{q.author.school} • {q.author.form}</span>
+                          <span className="font-bold text-xs text-gray-900 dark:text-white">{q.author.name}</span>
+                          <span className="text-[10px] bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 px-2 py-0.5 rounded-md font-bold uppercase">{q.subject}</span>
+                          <span className="text-[10px] bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 px-2 py-0.5 rounded-md">{q.topic}</span>
+                          <span className="text-[10px] text-gray-400 dark:text-slate-400">{q.author.school} • {q.author.form}</span>
                         </div>
 
-                        <h4 className="text-xs font-bold text-gray-900 mt-1.5">{q.title}</h4>
-                        <p className="text-xs text-gray-600 mt-1 leading-relaxed">{q.content}</p>
+                        <h4 className="text-xs font-bold text-gray-900 dark:text-white mt-1.5">{q.title}</h4>
+                        <p className="text-xs text-gray-600 dark:text-slate-300 mt-1 leading-relaxed">{q.content}</p>
 
-                        <div className="flex items-center gap-3 mt-2 text-[11px] text-gray-400">
+                        <div className="flex items-center gap-3 mt-2 text-[11px] text-gray-400 dark:text-slate-400">
                           <span>👁️ {q.viewsCount || 1} wametazama</span>
                           <span>💬 {q.answers?.length || 0} majibu</span>
                           <span>🕒 {q.createdAt}</span>
-                          {q.hasBestAnswer && <span className="text-emerald-700 font-bold">✓ Jibu Bora Lipopo</span>}
+                          {q.hasBestAnswer && <span className="text-emerald-700 dark:text-emerald-400 font-bold">✓ Jibu Bora Lipo</span>}
                         </div>
                       </div>
                     </div>
@@ -1541,7 +1541,7 @@ export const AdminPanel: React.FC<Props> = ({
                           setEditQuestionContent(q.content);
                         }}
                         title="Hariri Swali Hili"
-                        className="p-2 rounded-xl text-xs font-semibold bg-blue-50 hover:bg-blue-100 text-blue-700 transition-colors cursor-pointer"
+                        className="p-2 rounded-xl text-xs font-semibold bg-blue-50 dark:bg-blue-950/50 hover:bg-blue-100 dark:hover:bg-blue-900 text-blue-700 dark:text-blue-300 transition-colors cursor-pointer"
                       >
                         <Edit3 className="w-3.5 h-3.5" />
                       </button>
@@ -1562,7 +1562,7 @@ export const AdminPanel: React.FC<Props> = ({
                             triggerFeedback(`Swali "${q.title}" limefutwa.`);
                           }}
                           title="Futa Swali Hili"
-                          className="p-2 rounded-xl text-xs font-semibold bg-red-50 hover:bg-red-100 text-red-600 transition-colors cursor-pointer"
+                          className="p-2 rounded-xl text-xs font-semibold bg-red-50 dark:bg-red-950/50 hover:bg-red-100 dark:hover:bg-red-900 text-red-600 dark:text-red-400 transition-colors cursor-pointer"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -1571,11 +1571,11 @@ export const AdminPanel: React.FC<Props> = ({
                   </div>
 
                   {/* Answers Collapsible List */}
-                  <div className="mt-3 pt-2.5 border-t border-gray-100">
+                  <div className="mt-3 pt-2.5 border-t border-gray-100 dark:border-slate-800">
                     <button
                       type="button"
                       onClick={() => setExpandedAnswersQuestionId(expandedAnswersQuestionId === q.id ? null : q.id)}
-                      className="text-[11px] font-bold text-emerald-800 hover:text-emerald-950 flex items-center gap-1.5 cursor-pointer"
+                      className="text-[11px] font-bold text-emerald-800 dark:text-emerald-400 hover:text-emerald-950 dark:hover:text-emerald-300 flex items-center gap-1.5 cursor-pointer"
                     >
                       <HelpCircle className="w-3.5 h-3.5" />
                       <span>Kagua Majibu ya Wanafunzi ({q.answers?.length || 0})</span>
@@ -1583,21 +1583,21 @@ export const AdminPanel: React.FC<Props> = ({
                     </button>
 
                     {expandedAnswersQuestionId === q.id && (
-                      <div className="mt-2.5 space-y-2 pl-3 border-l-2 border-emerald-100 bg-gray-50/50 p-3 rounded-xl">
+                      <div className="mt-2.5 space-y-2 pl-3 border-l-2 border-emerald-100 dark:border-emerald-900/60 bg-gray-50/50 dark:bg-slate-800/50 p-3 rounded-xl">
                         {(!q.answers || q.answers.length === 0) ? (
-                          <p className="text-[11px] text-gray-500 italic">Hakuna majibu yaliyowasilishwa bado kwenye swali hili.</p>
+                          <p className="text-[11px] text-gray-500 dark:text-slate-400 italic">Hakuna majibu yaliyowasilishwa bado kwenye swali hili.</p>
                         ) : (
                           q.answers.map(ans => (
-                            <div key={ans.id} className="p-2.5 bg-white rounded-xl border border-gray-200 flex items-start justify-between gap-2">
+                            <div key={ans.id} className="p-2.5 bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-700 flex items-start justify-between gap-2">
                               <div className="flex items-start gap-2">
                                 <img src={ans.author.avatar} alt={ans.author.name} className="w-6 h-6 rounded-full object-cover shrink-0 mt-0.5" />
                                 <div>
                                   <div className="flex items-center gap-1.5 flex-wrap">
-                                    <span className="font-bold text-[11px] text-gray-900">{ans.author.name}</span>
-                                    <span className="text-[10px] text-gray-400">{ans.author.school}</span>
-                                    {ans.isBestAnswer && <span className="text-[9px] bg-emerald-100 text-emerald-800 px-1.5 py-0.2 rounded font-bold">Jibu Bora ★</span>}
+                                    <span className="font-bold text-[11px] text-gray-900 dark:text-white">{ans.author.name}</span>
+                                    <span className="text-[10px] text-gray-400 dark:text-slate-400">{ans.author.school}</span>
+                                    {ans.isBestAnswer && <span className="text-[9px] bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 px-1.5 py-0.2 rounded font-bold">Jibu Bora ★</span>}
                                   </div>
-                                  <p className="text-xs text-gray-700 mt-1 leading-snug">{ans.content}</p>
+                                  <p className="text-xs text-gray-700 dark:text-slate-300 mt-1 leading-snug">{ans.content}</p>
                                 </div>
                               </div>
 
@@ -1616,7 +1616,7 @@ export const AdminPanel: React.FC<Props> = ({
                                     setAuditLogs(prev => [newLog, ...prev]);
                                     triggerFeedback('Jibu limefutwa na Msimamizi.');
                                   }}
-                                  className="p-1 rounded-lg text-gray-500 hover:text-red-700 hover:bg-red-50 transition-colors cursor-pointer"
+                                  className="p-1 rounded-lg text-gray-500 dark:text-slate-400 hover:text-red-700 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950 transition-colors cursor-pointer"
                                   title="Futa Jibu Hili"
                                 >
                                   <Trash2 className="w-3 h-3" />
@@ -1639,26 +1639,26 @@ export const AdminPanel: React.FC<Props> = ({
       {/* 3. SCHOOLS & CAMPUSES MANAGEMENT TAB */}
       {/* ========================================================= */}
       {adminTab === 'schools' && (
-        <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-2xs space-y-4">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-gray-200 dark:border-slate-800 shadow-2xs space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h3 className="font-heading font-bold text-gray-900 text-base">
+              <h3 className="font-heading font-bold text-gray-900 dark:text-white text-base">
                 Usimamizi wa Shule na Vyuo ({schools.length})
               </h3>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-500 dark:text-slate-400">
                 Sajili shule mpya, thibitisha vyeti vya usajili, na dhibiti jumuiya za shule.
               </p>
             </div>
 
             <div className="flex items-center gap-2">
               <div className="relative">
-                <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-gray-400" />
+                <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-gray-400 dark:text-slate-400" />
                 <input
                   type="text"
                   placeholder="Tafuta shule..."
                   value={schoolSearch}
                   onChange={(e) => setSchoolSearch(e.target.value)}
-                  className="pl-8 pr-3 py-1.5 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:bg-white"
+                  className="pl-8 pr-3 py-1.5 text-xs bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-900 text-gray-900 dark:text-white"
                 />
               </div>
 
@@ -1677,10 +1677,10 @@ export const AdminPanel: React.FC<Props> = ({
             {filteredSchools.map((sch) => (
               <div
                 key={sch.id}
-                className="rounded-2xl border border-gray-200 hover:border-emerald-300 bg-white overflow-hidden shadow-2xs hover:shadow-xs flex flex-col justify-between transition-all"
+                className="rounded-2xl border border-gray-200 dark:border-slate-800 hover:border-emerald-300 dark:hover:border-emerald-700 bg-white dark:bg-slate-900 overflow-hidden shadow-2xs hover:shadow-xs flex flex-col justify-between transition-all"
               >
                 {/* School Cover Image Banner */}
-                <div className="relative h-24 sm:h-28 w-full bg-gray-100 overflow-hidden">
+                <div className="relative h-24 sm:h-28 w-full bg-gray-100 dark:bg-slate-800 overflow-hidden">
                   <img
                     src={sch.coverImage || 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=1000&auto=format&fit=crop&q=80'}
                     alt={`Jalada la ${sch.name}`}
@@ -1700,10 +1700,10 @@ export const AdminPanel: React.FC<Props> = ({
                   <button
                     type="button"
                     onClick={() => handleStartEditSchool(sch)}
-                    className="absolute top-2.5 right-2.5 bg-white/90 hover:bg-white text-gray-800 text-[11px] font-bold px-2.5 py-1 rounded-lg shadow-sm transition-all flex items-center gap-1 cursor-pointer"
+                    className="absolute top-2.5 right-2.5 bg-white/90 dark:bg-slate-900/90 hover:bg-white dark:hover:bg-slate-900 text-gray-800 dark:text-slate-200 text-[11px] font-bold px-2.5 py-1 rounded-lg shadow-sm transition-all flex items-center gap-1 cursor-pointer"
                     title="Badilisha picha ya nembo au jalada la shule hii"
                   >
-                    <Camera className="w-3 h-3 text-emerald-700" />
+                    <Camera className="w-3 h-3 text-emerald-700 dark:text-emerald-400" />
                     <span>Picha & Taarifa</span>
                   </button>
                 </div>
@@ -1713,29 +1713,29 @@ export const AdminPanel: React.FC<Props> = ({
                     <img
                       src={sch.logo || 'https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=160&auto=format&fit=crop&q=80'}
                       alt={sch.name}
-                      className="w-14 h-14 rounded-2xl object-cover ring-2 ring-white shadow-md bg-white shrink-0"
+                      className="w-14 h-14 rounded-2xl object-cover ring-2 ring-white dark:ring-slate-800 shadow-md bg-white dark:bg-slate-800 shrink-0"
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=160&auto=format&fit=crop&q=80';
                       }}
                     />
                     <div className="flex-1 min-w-0 pt-6">
                       <div className="flex items-center gap-1.5">
-                        <h4 className="font-bold text-sm text-gray-900 truncate font-heading">{sch.name}</h4>
-                        {sch.verified && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />}
+                        <h4 className="font-bold text-sm text-gray-900 dark:text-white truncate font-heading">{sch.name}</h4>
+                        {sch.verified && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />}
                       </div>
-                      <div className="text-xs text-gray-500 mt-0.5">
+                      <div className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
                         {sch.district}, {sch.region}
                       </div>
-                      <div className="text-[11px] text-gray-600 mt-1">
-                        Mkuu wa Shule: <span className="font-semibold text-gray-800">{sch.principal}</span>
+                      <div className="text-[11px] text-gray-600 dark:text-slate-300 mt-1">
+                        Mkuu wa Shule: <span className="font-semibold text-gray-800 dark:text-white">{sch.principal}</span>
                       </div>
-                      <div className="text-[11px] text-emerald-700 font-medium mt-0.5">
+                      <div className="text-[11px] text-emerald-700 dark:text-emerald-400 font-medium mt-0.5">
                         Wanafunzi: {sch.studentCount.toLocaleString()} • Ada: TZS {(sch.annualFee || 500000).toLocaleString()}/mwaka
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between pt-3 mt-3 border-t border-gray-100 text-xs flex-wrap gap-2">
+                  <div className="flex items-center justify-between pt-3 mt-3 border-t border-gray-100 dark:border-slate-800 text-xs flex-wrap gap-2">
                     <div className="flex items-center gap-1.5">
                       <button
                         onClick={() => {
@@ -1744,8 +1744,8 @@ export const AdminPanel: React.FC<Props> = ({
                         }}
                         className={`px-3 py-1.5 rounded-xl font-semibold transition-colors flex items-center gap-1 cursor-pointer ${
                           sch.verified
-                            ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200'
-                            : 'bg-gray-100 text-gray-700 hover:bg-emerald-50'
+                            ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 hover:bg-emerald-200 dark:hover:bg-emerald-900'
+                            : 'bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/30'
                         }`}
                       >
                         <Check className="w-3.5 h-3.5" />
@@ -1755,7 +1755,7 @@ export const AdminPanel: React.FC<Props> = ({
                       <button
                         type="button"
                         onClick={() => handleStartEditSchool(sch)}
-                        className="px-3 py-1.5 rounded-xl font-semibold bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors flex items-center gap-1 cursor-pointer"
+                        className="px-3 py-1.5 rounded-xl font-semibold bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors flex items-center gap-1 cursor-pointer"
                         title="Hariri picha ya shule, cover na maelezo yake"
                       >
                         <Edit3 className="w-3.5 h-3.5" />
@@ -1769,7 +1769,7 @@ export const AdminPanel: React.FC<Props> = ({
                           onDeleteSchool(sch.id);
                           triggerFeedback(`Shule ya ${sch.name} imeondolewa.`);
                         }}
-                        className="text-red-500 hover:text-red-700 text-xs font-semibold px-2 py-1 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                        className="text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 text-xs font-semibold px-2 py-1 hover:bg-red-50 dark:hover:bg-red-950/50 rounded-lg transition-colors cursor-pointer"
                       >
                         Ondoa
                       </button>
@@ -1786,25 +1786,25 @@ export const AdminPanel: React.FC<Props> = ({
       {/* 4. STUDENT & USER MANAGEMENT TAB */}
       {/* ========================================================= */}
       {adminTab === 'students' && (
-        <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-2xs space-y-4">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-gray-200 dark:border-slate-800 shadow-2xs space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h3 className="font-heading font-bold text-gray-900 text-base">
+              <h3 className="font-heading font-bold text-gray-900 dark:text-white text-base">
                 Usimamizi wa Wanafunzi na Akaunti ({students.length})
               </h3>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-500 dark:text-slate-400">
                 Wanafunzi waliosajiliwa, zawadi za EduPoints, kubadilisha wadhifa, na uthibitisho au kupiga marufuku (ban) akaunti.
               </p>
             </div>
 
             <div className="relative">
-              <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-gray-400" />
+              <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-gray-400 dark:text-slate-400" />
               <input
                 type="text"
                 placeholder="Tafuta mwanafunzi au shule..."
                 value={studentSearch}
                 onChange={(e) => setStudentSearch(e.target.value)}
-                className="pl-8 pr-3 py-1.5 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:bg-white"
+                className="pl-8 pr-3 py-1.5 text-xs bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-900 text-gray-900 dark:text-white"
               />
             </div>
           </div>
@@ -1815,8 +1815,8 @@ export const AdminPanel: React.FC<Props> = ({
               onClick={() => setStudentFilter('all')}
               className={`px-3 py-1 rounded-full font-medium whitespace-nowrap transition-all cursor-pointer ${
                 studentFilter === 'all'
-                  ? 'bg-emerald-800 text-white shadow-2xs font-semibold'
-                  : 'bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-200'
+                  ? 'bg-emerald-800 dark:bg-emerald-700 text-white shadow-2xs font-semibold'
+                  : 'bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200 dark:border-slate-700'
               }`}
             >
               Wote ({students.length})
@@ -1825,8 +1825,8 @@ export const AdminPanel: React.FC<Props> = ({
               onClick={() => setStudentFilter('active')}
               className={`px-3 py-1 rounded-full font-medium whitespace-nowrap transition-all cursor-pointer ${
                 studentFilter === 'active'
-                  ? 'bg-emerald-800 text-white shadow-2xs font-semibold'
-                  : 'bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-200'
+                  ? 'bg-emerald-800 dark:bg-emerald-700 text-white shadow-2xs font-semibold'
+                  : 'bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200 dark:border-slate-700'
               }`}
             >
               Akaunti Hai ({students.filter(s => s.status === 'active').length})
@@ -1835,8 +1835,8 @@ export const AdminPanel: React.FC<Props> = ({
               onClick={() => setStudentFilter('banned')}
               className={`px-3 py-1 rounded-full font-medium whitespace-nowrap transition-all cursor-pointer ${
                 studentFilter === 'banned'
-                  ? 'bg-red-700 text-white shadow-2xs font-semibold'
-                  : 'bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-200'
+                  ? 'bg-red-700 dark:bg-red-800 text-white shadow-2xs font-semibold'
+                  : 'bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200 dark:border-slate-700'
               }`}
             >
               Waliopigwa Marufuku (Banned) ({students.filter(s => s.status === 'banned').length})
@@ -1845,8 +1845,8 @@ export const AdminPanel: React.FC<Props> = ({
               onClick={() => setStudentFilter('admin')}
               className={`px-3 py-1 rounded-full font-medium whitespace-nowrap transition-all cursor-pointer ${
                 studentFilter === 'admin'
-                  ? 'bg-purple-800 text-white shadow-2xs font-semibold'
-                  : 'bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-200'
+                  ? 'bg-purple-800 dark:bg-purple-700 text-white shadow-2xs font-semibold'
+                  : 'bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200 dark:border-slate-700'
               }`}
             >
               Wasimamizi (Admins) ({students.filter(s => s.role === 'admin').length})
@@ -1856,7 +1856,7 @@ export const AdminPanel: React.FC<Props> = ({
           {/* Student Management Cards */}
           <div className="space-y-3 pt-2">
             {filteredStudents.length === 0 ? (
-              <div className="p-8 text-center bg-gray-50 rounded-2xl text-gray-500 text-xs">
+              <div className="p-8 text-center bg-gray-50 dark:bg-slate-800/60 rounded-2xl text-gray-500 dark:text-slate-400 text-xs">
                 Hakuna wanafunzi waliopatikana kwa kichujio hiki.
               </div>
             ) : (
@@ -1865,8 +1865,8 @@ export const AdminPanel: React.FC<Props> = ({
                   key={student.id}
                   className={`p-4 rounded-2xl border transition-all flex flex-col md:flex-row md:items-center justify-between gap-3 ${
                     student.status === 'banned'
-                      ? 'bg-red-50/50 border-red-200'
-                      : 'bg-white border-gray-200 hover:border-emerald-200'
+                      ? 'bg-red-50/50 dark:bg-red-950/20 border-red-200 dark:border-red-900/60'
+                      : 'bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-800 hover:border-emerald-200 dark:hover:border-emerald-800'
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -1874,22 +1874,22 @@ export const AdminPanel: React.FC<Props> = ({
                       <img
                         src={student.avatar}
                         alt={student.name}
-                        className="w-12 h-12 rounded-full object-cover ring-2 ring-emerald-500/20"
+                        className="w-12 h-12 rounded-full object-cover ring-2 ring-emerald-500/20 dark:ring-emerald-500/30"
                       />
                       {student.verified && (
-                        <span className="absolute bottom-0 right-0 w-4 h-4 bg-emerald-600 rounded-full flex items-center justify-center text-white text-[9px] ring-2 ring-white">
+                        <span className="absolute bottom-0 right-0 w-4 h-4 bg-emerald-600 rounded-full flex items-center justify-center text-white text-[9px] ring-2 ring-white dark:ring-slate-900">
                           ✓
                         </span>
                       )}
                     </div>
                     <div>
                       <div className="flex items-center gap-2 flex-wrap">
-                        <h4 className="font-bold text-sm text-gray-900 font-heading">{student.name}</h4>
-                        <span className="text-xs text-gray-400">@{student.handle}</span>
+                        <h4 className="font-bold text-sm text-gray-900 dark:text-white font-heading">{student.name}</h4>
+                        <span className="text-xs text-gray-400 dark:text-slate-400">@{student.handle}</span>
                         <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${
                           student.role === 'admin'
-                            ? 'bg-purple-100 text-purple-900'
-                            : 'bg-gray-100 text-gray-700'
+                            ? 'bg-purple-100 dark:bg-purple-950/60 text-purple-900 dark:text-purple-300'
+                            : 'bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-300'
                         }`}>
                           {student.role === 'admin' ? 'Msimamizi Mkuu' : 'Mwanafunzi'}
                         </span>
@@ -1897,8 +1897,8 @@ export const AdminPanel: React.FC<Props> = ({
                           student.status === 'banned'
                             ? 'bg-red-600 text-white font-bold'
                             : student.status === 'suspended'
-                            ? 'bg-amber-100 text-amber-800'
-                            : 'bg-emerald-100 text-emerald-800'
+                            ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300'
+                            : 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300'
                         }`}>
                           {student.status === 'banned'
                             ? '🛑 Imepigwa Marufuku (Banned)'
@@ -1908,15 +1908,15 @@ export const AdminPanel: React.FC<Props> = ({
                         </span>
                       </div>
 
-                      <div className="text-xs text-gray-500 mt-0.5">
+                      <div className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
                         {student.schoolName} • {student.level} {student.combination ? `(${student.combination})` : ''}
                       </div>
 
                       <div className="flex items-center gap-3 text-xs mt-1">
-                        <span className="font-mono font-bold text-emerald-800">
+                        <span className="font-mono font-bold text-emerald-800 dark:text-emerald-400">
                           {student.points.toLocaleString()} EduPoints
                         </span>
-                        <span className="text-gray-400 text-[11px]">• Alijiunga: {student.joinDate}</span>
+                        <span className="text-gray-400 dark:text-slate-400 text-[11px]">• Alijiunga: {student.joinDate}</span>
                       </div>
                     </div>
                   </div>
@@ -1925,15 +1925,15 @@ export const AdminPanel: React.FC<Props> = ({
                   <div className="flex items-center gap-2 flex-wrap">
                     <button
                       onClick={() => setSelectedStudentForPoints(student)}
-                      className="bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-xs font-bold px-3 py-1.5 rounded-xl flex items-center gap-1 cursor-pointer transition-colors"
+                      className="bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/60 text-amber-900 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60 text-xs font-bold px-3 py-1.5 rounded-xl flex items-center gap-1 cursor-pointer transition-colors"
                     >
-                      <Award className="w-3.5 h-3.5 text-amber-600" />
+                      <Award className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                       <span>Pointi (+/-)</span>
                     </button>
 
                     <button
                       onClick={() => handleToggleStudentRole(student.id)}
-                      className="bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200 text-xs font-semibold px-3 py-1.5 rounded-xl transition-colors cursor-pointer"
+                      className="bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-200 border border-gray-200 dark:border-slate-700 text-xs font-semibold px-3 py-1.5 rounded-xl transition-colors cursor-pointer"
                     >
                       Wadhifa: {student.role === 'admin' ? 'Admin' : 'Mwanafunzi'}
                     </button>
@@ -1942,8 +1942,8 @@ export const AdminPanel: React.FC<Props> = ({
                       onClick={() => handleToggleStudentVerified(student.id)}
                       className={`text-xs font-semibold px-3 py-1.5 rounded-xl border transition-colors cursor-pointer ${
                         student.verified
-                          ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                          : 'bg-gray-50 text-gray-500 border-gray-200'
+                          ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/60'
+                          : 'bg-gray-50 dark:bg-slate-800 text-gray-500 dark:text-slate-400 border-gray-200 dark:border-slate-700'
                       }`}
                     >
                       {student.verified ? 'Imethibitishwa ✓' : 'Thibitisha'}
@@ -1954,7 +1954,7 @@ export const AdminPanel: React.FC<Props> = ({
                       className={`text-xs font-bold px-3.5 py-1.5 rounded-xl transition-all cursor-pointer ${
                         student.status === 'banned'
                           ? 'bg-emerald-700 hover:bg-emerald-800 text-white shadow-xs'
-                          : 'bg-red-50 hover:bg-red-100 text-red-700 border border-red-200'
+                          : 'bg-red-50 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-900/60 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800/60'
                       }`}
                       title={student.status === 'banned' ? 'Fungulia Mtumiaji Huyu' : 'Piga Marufuku Mtumiaji Huyu'}
                     >
@@ -1974,18 +1974,18 @@ export const AdminPanel: React.FC<Props> = ({
       {adminTab === 'broadcasts' && (
         <div className="space-y-6">
           {/* Create Broadcast Announcement Form */}
-          <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-2xs">
-            <h3 className="font-heading font-bold text-gray-900 text-base mb-1 flex items-center gap-2">
-              <Send className="w-4 h-4 text-emerald-600" />
+          <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-gray-200 dark:border-slate-800 shadow-2xs">
+            <h3 className="font-heading font-bold text-gray-900 dark:text-white text-base mb-1 flex items-center gap-2">
+              <Send className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
               Tuma Tangazo Rasmi la Utawala kwa Wanafunzi Wote
             </h3>
-            <p className="text-xs text-gray-500 mb-4">
+            <p className="text-xs text-gray-500 dark:text-slate-400 mb-4">
               Tangazo hili litaonekana juu ya feed ya kila mwanafunzi na litatuma arifa ya simu/kifaa moja kwa moja.
             </p>
 
             {broadcastSent && (
-              <div className="mb-4 p-3 bg-emerald-50 text-emerald-800 rounded-xl text-xs flex items-center gap-2 font-medium">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+              <div className="mb-4 p-3 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 rounded-xl text-xs flex items-center gap-2 font-medium border border-emerald-200 dark:border-emerald-800/60">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                 Tangazo limetumwa kwa wanafunzi wote 12,483 Tanzania nzima!
               </div>
             )}
@@ -1993,11 +1993,11 @@ export const AdminPanel: React.FC<Props> = ({
             <form onSubmit={handleBroadcast} className="space-y-3.5 text-xs">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="font-semibold text-gray-700 block mb-1">Aina ya Tangazo:</label>
+                  <label className="font-semibold text-gray-700 dark:text-slate-300 block mb-1">Aina ya Tangazo:</label>
                   <select
                     value={announcementPriority}
                     onChange={(e) => setAnnouncementPriority(e.target.value as any)}
-                    className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white text-xs"
+                    className="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-900 text-xs text-gray-900 dark:text-white"
                   >
                     <option value="normal">📢 Tangazo la Kawaida la Elimu</option>
                     <option value="exam">📚 Mwongozo wa NECTA & Mitihani</option>
@@ -2006,11 +2006,11 @@ export const AdminPanel: React.FC<Props> = ({
                 </div>
 
                 <div>
-                  <label className="font-semibold text-gray-700 block mb-1">Walengwa (Target Audience):</label>
+                  <label className="font-semibold text-gray-700 dark:text-slate-300 block mb-1">Walengwa (Target Audience):</label>
                   <select
                     value={announcementAudience}
                     onChange={(e) => setAnnouncementAudience(e.target.value)}
-                    className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white text-xs"
+                    className="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-900 text-xs text-gray-900 dark:text-white"
                   >
                     <option value="Wanafunzi Wote Tanzania">Wanafunzi Wote Tanzania</option>
                     <option value="Kidato cha Sita (Form VI)">Kidato cha Sita (Form VI)</option>
@@ -2022,25 +2022,25 @@ export const AdminPanel: React.FC<Props> = ({
               </div>
 
               <div>
-                <label className="font-semibold text-gray-700 block mb-1">Kichwa cha Tangazo:</label>
+                <label className="font-semibold text-gray-700 dark:text-slate-300 block mb-1">Kichwa cha Tangazo:</label>
                 <input
                   type="text"
                   placeholder="Mfano: Ratiba ya Kitaifa ya Majaribio ya Mock na NECTA 2026..."
                   value={announcementTitle}
                   onChange={(e) => setAnnouncementTitle(e.target.value)}
-                  className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white"
+                  className="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-900 text-gray-900 dark:text-white"
                   required
                 />
               </div>
 
               <div>
-                <label className="font-semibold text-gray-700 block mb-1">Maelezo Kamili ya Tangazo:</label>
+                <label className="font-semibold text-gray-700 dark:text-slate-300 block mb-1">Maelezo Kamili ya Tangazo:</label>
                 <textarea
                   rows={3}
                   placeholder="Weka maelezo ya kina kwa wanafunzi..."
                   value={announcementMsg}
                   onChange={(e) => setAnnouncementMsg(e.target.value)}
-                  className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white resize-none"
+                  className="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-900 text-gray-900 dark:text-white resize-none"
                   required
                 />
               </div>
@@ -2056,26 +2056,26 @@ export const AdminPanel: React.FC<Props> = ({
           </div>
 
           {/* Broadcast History */}
-          <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-2xs space-y-3">
-            <h4 className="font-heading font-bold text-gray-900 text-sm">Historia ya Matangazo Yaliyotumwa</h4>
+          <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-gray-200 dark:border-slate-800 shadow-2xs space-y-3">
+            <h4 className="font-heading font-bold text-gray-900 dark:text-white text-sm">Historia ya Matangazo Yaliyotumwa</h4>
             <div className="space-y-2.5 text-xs">
               {broadcastList.map((item) => (
-                <div key={item.id} className="p-3.5 bg-gray-50 rounded-xl border border-gray-100 flex items-start justify-between gap-3">
+                <div key={item.id} className="p-3.5 bg-gray-50 dark:bg-slate-800/60 rounded-xl border border-gray-100 dark:border-slate-800 flex items-start justify-between gap-3">
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="font-bold text-gray-900">{item.title}</span>
+                      <span className="font-bold text-gray-900 dark:text-white">{item.title}</span>
                       <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${
                         item.priority === 'urgent'
-                          ? 'bg-red-100 text-red-900'
+                          ? 'bg-red-100 dark:bg-red-950/60 text-red-900 dark:text-red-300'
                           : item.priority === 'exam'
-                          ? 'bg-blue-100 text-blue-900'
-                          : 'bg-emerald-100 text-emerald-900'
+                          ? 'bg-blue-100 dark:bg-blue-950/60 text-blue-900 dark:text-blue-300'
+                          : 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-300'
                       }`}>
                         {item.priority}
                       </span>
                     </div>
-                    <p className="text-gray-600 text-xs mt-1">{item.message}</p>
-                    <div className="text-[11px] text-gray-400 mt-1">
+                    <p className="text-gray-600 dark:text-slate-300 text-xs mt-1">{item.message}</p>
+                    <div className="text-[11px] text-gray-400 dark:text-slate-400 mt-1">
                       Walengwa: {item.audience} • Ilitumwa: {item.sentAt} • Waliofikiwa: {item.recipientsCount.toLocaleString()}
                     </div>
                   </div>
@@ -2090,12 +2090,12 @@ export const AdminPanel: React.FC<Props> = ({
       {/* 6. STUDY RESOURCES & PAST PAPERS VERIFICATION TAB */}
       {/* ========================================================= */}
       {adminTab === 'resources' && (
-        <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-2xs space-y-4">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-gray-200 dark:border-slate-800 shadow-2xs space-y-4">
           <div>
-            <h3 className="font-heading font-bold text-gray-900 text-base">
+            <h3 className="font-heading font-bold text-gray-900 dark:text-white text-base">
               Uhakiki wa Notisi na Past Papers za NECTA ({resources.length})
             </h3>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-500 dark:text-slate-400">
               Hakiki usahihi wa notisi na mitihani ya NECTA kabla au baada ya wanafunzi kupakua kwenye Study Rooms.
             </p>
           </div>
@@ -2104,26 +2104,26 @@ export const AdminPanel: React.FC<Props> = ({
             {resources.map((res) => (
               <div
                 key={res.id}
-                className="p-4 rounded-2xl border border-gray-200 bg-white hover:border-emerald-200 flex items-center justify-between gap-4 transition-all"
+                className="p-4 rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-emerald-200 dark:hover:border-emerald-800 flex items-center justify-between gap-4 transition-all"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold text-xs uppercase border border-emerald-200">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 flex items-center justify-center font-bold text-xs uppercase border border-emerald-200 dark:border-emerald-800/60">
                     {res.fileFormat}
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h4 className="font-bold text-xs text-gray-900">{res.title}</h4>
+                      <h4 className="font-bold text-xs text-gray-900 dark:text-white">{res.title}</h4>
                       {res.verified && (
-                        <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-md flex items-center gap-1">
-                          <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                        <span className="text-[10px] bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-bold px-2 py-0.5 rounded-md flex items-center gap-1">
+                          <CheckCircle2 className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
                           NECTA Verified
                         </span>
                       )}
                     </div>
-                    <div className="text-[11px] text-gray-500 mt-0.5">
+                    <div className="text-[11px] text-gray-500 dark:text-slate-400 mt-0.5">
                       Somo: {res.subject} • Topic: {res.topic} • Imetolewa na: {res.schoolOrOrg}
                     </div>
-                    <div className="text-[10px] text-gray-400 mt-0.5">
+                    <div className="text-[10px] text-gray-400 dark:text-slate-400 mt-0.5">
                       {res.fileSize} • {res.downloadsCount.toLocaleString()} vipakuliwa
                     </div>
                   </div>
@@ -2137,8 +2137,8 @@ export const AdminPanel: React.FC<Props> = ({
                     }}
                     className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
                       res.verified
-                        ? 'bg-emerald-100 text-emerald-800'
-                        : 'bg-emerald-600 text-white hover:bg-emerald-700'
+                        ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300'
+                        : 'bg-emerald-600 hover:bg-emerald-700 text-white'
                     }`}
                   >
                     {res.verified ? 'Imethibitishwa ✓' : 'Thibitisha'}
@@ -2150,7 +2150,7 @@ export const AdminPanel: React.FC<Props> = ({
                         onDeleteResource(res.id);
                         triggerFeedback(`Nyenzo ya "${res.title}" imeondolewa.`);
                       }}
-                      className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg"
+                      className="p-1.5 text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-950/50 rounded-lg cursor-pointer"
                       title="Ondoa Nyenzo"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -2167,33 +2167,33 @@ export const AdminPanel: React.FC<Props> = ({
       {/* 7. AUDIT LOGS TAB */}
       {/* ========================================================= */}
       {adminTab === 'audit' && (
-        <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-2xs space-y-4">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-gray-200 dark:border-slate-800 shadow-2xs space-y-4">
           <div>
-            <h3 className="font-heading font-bold text-gray-900 text-base">
+            <h3 className="font-heading font-bold text-gray-900 dark:text-white text-base">
               Daftari la Ukaguzi wa Mfumo (Audit Logs & Security Trail)
             </h3>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-500 dark:text-slate-400">
               Kumbukumbu ya kila kitendo kilichofanywa na wasimamizi wa EduKan kwa uwazi na usalama.
             </p>
           </div>
 
           <div className="space-y-2 text-xs pt-2">
             {auditLogs.map((log) => (
-              <div key={log.id} className="p-3 bg-gray-50 rounded-xl border border-gray-100 flex items-center justify-between gap-3">
+              <div key={log.id} className="p-3 bg-gray-50 dark:bg-slate-800/60 rounded-xl border border-gray-100 dark:border-slate-800 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold shrink-0">
-                    <ShieldCheck className="w-4 h-4 text-emerald-700" />
+                  <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 flex items-center justify-center font-bold shrink-0">
+                    <ShieldCheck className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
                   </div>
                   <div>
-                    <div className="font-bold text-gray-900">{log.action}</div>
-                    <div className="text-[11px] text-gray-600">
-                      Lengo: <span className="font-semibold text-gray-800">{log.target}</span> • Msimamizi: {log.adminName}
+                    <div className="font-bold text-gray-900 dark:text-white">{log.action}</div>
+                    <div className="text-[11px] text-gray-600 dark:text-slate-300">
+                      Lengo: <span className="font-semibold text-gray-800 dark:text-white">{log.target}</span> • Msimamizi: {log.adminName}
                     </div>
                   </div>
                 </div>
                 <div className="text-right">
-                  <span className="text-[10px] text-gray-400 font-mono block">{log.timestamp}</span>
-                  <span className="text-[10px] bg-emerald-100/80 text-emerald-900 px-2 py-0.2 rounded font-bold uppercase">
+                  <span className="text-[10px] text-gray-400 dark:text-slate-400 font-mono block">{log.timestamp}</span>
+                  <span className="text-[10px] bg-emerald-100/80 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-300 px-2 py-0.2 rounded font-bold uppercase">
                     {log.type}
                   </span>
                 </div>
@@ -2761,48 +2761,48 @@ export const AdminPanel: React.FC<Props> = ({
       {/* MODAL: AWARD/DEDUCT EDUPOINTS */}
       {/* ========================================================= */}
       {selectedStudentForPoints && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in">
-          <div className="bg-white rounded-3xl w-full max-w-sm shadow-2xl border border-gray-100 overflow-hidden" onClick={(e) => e.stopPropagation()}>
-            <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between bg-amber-50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 dark:bg-black/80 backdrop-blur-xs animate-in fade-in">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-sm shadow-2xl border border-gray-100 dark:border-slate-800 overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="px-5 py-4 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between bg-amber-50 dark:bg-amber-950/40">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center">
                   <Award className="w-4 h-4" />
                 </div>
-                <h3 className="font-bold text-gray-900 text-sm font-heading">Rekebisha EduPoints</h3>
+                <h3 className="font-bold text-gray-900 dark:text-white text-sm font-heading">Rekebisha EduPoints</h3>
               </div>
               <button
                 onClick={() => setSelectedStudentForPoints(null)}
-                className="p-1 text-gray-400 hover:text-gray-700 rounded-full"
+                className="p-1 text-gray-400 hover:text-gray-700 dark:hover:text-slate-200 rounded-full cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="p-5 space-y-3.5 text-xs">
-              <div className="flex items-center gap-3 bg-gray-50 p-3 rounded-xl border border-gray-100">
+            <div className="p-5 space-y-3.5 text-xs text-gray-800 dark:text-slate-200">
+              <div className="flex items-center gap-3 bg-gray-50 dark:bg-slate-800/60 p-3 rounded-xl border border-gray-100 dark:border-slate-700">
                 <img
                   src={selectedStudentForPoints.avatar}
                   alt={selectedStudentForPoints.name}
                   className="w-10 h-10 rounded-full object-cover ring-1 ring-amber-300"
                 />
                 <div>
-                  <div className="font-bold text-gray-900">{selectedStudentForPoints.name}</div>
-                  <div className="text-[11px] text-gray-500">{selectedStudentForPoints.schoolName}</div>
-                  <div className="text-xs font-mono font-bold text-emerald-800">
+                  <div className="font-bold text-gray-900 dark:text-white">{selectedStudentForPoints.name}</div>
+                  <div className="text-[11px] text-gray-500 dark:text-slate-400">{selectedStudentForPoints.schoolName}</div>
+                  <div className="text-xs font-mono font-bold text-emerald-800 dark:text-emerald-400">
                     Kiasi cha sasa: {selectedStudentForPoints.points} pts
                   </div>
                 </div>
               </div>
 
               <div>
-                <label className="font-semibold text-gray-700 block mb-1">
+                <label className="font-semibold text-gray-700 dark:text-slate-300 block mb-1">
                   Kiasi cha Pointi (Weka namba hasi kupunguza, k.m. -20):
                 </label>
                 <input
                   type="number"
                   value={pointsInput}
                   onChange={(e) => setPointsInput(e.target.value)}
-                  className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white text-sm font-mono font-bold"
+                  className="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-900 text-gray-900 dark:text-white text-sm font-mono font-bold"
                 />
               </div>
 
@@ -2810,14 +2810,14 @@ export const AdminPanel: React.FC<Props> = ({
                 <button
                   type="button"
                   onClick={() => setSelectedStudentForPoints(null)}
-                  className="px-3.5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-semibold"
+                  className="px-3.5 py-2 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-300 rounded-xl font-semibold cursor-pointer"
                 >
                   Ghairi
                 </button>
                 <button
                   type="button"
                   onClick={handleAwardPoints}
-                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow-xs"
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow-xs cursor-pointer"
                 >
                   Hifadhi Pointi
                 </button>
@@ -2831,45 +2831,45 @@ export const AdminPanel: React.FC<Props> = ({
       {/* MODAL: EDIT POST (ADMIN MODERATION) */}
       {/* ========================================================= */}
       {editingPost && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in">
-          <div className="bg-white rounded-3xl w-full max-w-lg shadow-2xl border border-gray-100 overflow-hidden" onClick={(e) => e.stopPropagation()}>
-            <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between bg-blue-50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 dark:bg-black/80 backdrop-blur-xs animate-in fade-in">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-lg shadow-2xl border border-gray-100 dark:border-slate-800 overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="px-5 py-4 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between bg-blue-50 dark:bg-slate-800/80">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center">
                   <Edit3 className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-gray-900 text-sm font-heading">Hariri Chapisho (Admin Moderation)</h3>
-                  <p className="text-[11px] text-gray-500">Mwandishi: {editingPost.author.name} (@{editingPost.author.handle})</p>
+                  <h3 className="font-bold text-gray-900 dark:text-white text-sm font-heading">Hariri Chapisho (Admin Moderation)</h3>
+                  <p className="text-[11px] text-gray-500 dark:text-slate-400">Mwandishi: {editingPost.author.name} (@{editingPost.author.handle})</p>
                 </div>
               </div>
               <button
                 onClick={() => setEditingPost(null)}
-                className="p-1 text-gray-400 hover:text-gray-700 rounded-full"
+                className="p-1 text-gray-400 hover:text-gray-700 dark:hover:text-slate-200 rounded-full cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveEditPost} className="p-5 space-y-4 text-xs">
+            <form onSubmit={handleSaveEditPost} className="p-5 space-y-4 text-xs text-gray-800 dark:text-slate-200">
               <div>
-                <label className="font-semibold text-gray-700 block mb-1">Maudhui ya Chapisho:</label>
+                <label className="font-semibold text-gray-700 dark:text-slate-300 block mb-1">Maudhui ya Chapisho:</label>
                 <textarea
                   rows={4}
                   value={editPostContent}
                   onChange={(e) => setEditPostContent(e.target.value)}
-                  className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-emerald-600 text-xs"
+                  className="w-full p-3 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-900 focus:outline-emerald-600 text-xs text-gray-900 dark:text-white"
                   required
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="font-semibold text-gray-700 block mb-1">Kipengele (Category):</label>
+                  <label className="font-semibold text-gray-700 dark:text-slate-300 block mb-1">Kipengele (Category):</label>
                   <select
                     value={editPostCategory}
                     onChange={(e) => setEditPostCategory(e.target.value as any)}
-                    className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white text-xs"
+                    className="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-900 text-xs text-gray-900 dark:text-white"
                   >
                     <option value="masomo">Masomo 📚</option>
                     <option value="ushauri">Ushauri 💡</option>
@@ -2879,28 +2879,28 @@ export const AdminPanel: React.FC<Props> = ({
                 </div>
 
                 <div>
-                  <label className="font-semibold text-gray-700 block mb-1">Somo (Hiari):</label>
+                  <label className="font-semibold text-gray-700 dark:text-slate-300 block mb-1">Somo (Hiari):</label>
                   <input
                     type="text"
                     value={editPostSubject}
                     onChange={(e) => setEditPostSubject(e.target.value)}
                     placeholder="k.m. Mathematics, Physics"
-                    className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white text-xs"
+                    className="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-900 text-xs text-gray-900 dark:text-white"
                   />
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-100">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-100 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setEditingPost(null)}
-                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-semibold"
+                  className="px-4 py-2 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-300 rounded-xl font-semibold cursor-pointer"
                 >
                   Ghairi
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-xs"
+                  className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-xs cursor-pointer"
                 >
                   Hifadhi Mabadiliko
                 </button>
@@ -2914,46 +2914,46 @@ export const AdminPanel: React.FC<Props> = ({
       {/* MODAL: EDIT COMMENT (ADMIN MODERATION) */}
       {/* ========================================================= */}
       {editingComment && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in">
-          <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl border border-gray-100 overflow-hidden" onClick={(e) => e.stopPropagation()}>
-            <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between bg-blue-50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 dark:bg-black/80 backdrop-blur-xs animate-in fade-in">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-md shadow-2xl border border-gray-100 dark:border-slate-800 overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="px-5 py-4 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between bg-blue-50 dark:bg-slate-800/80">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center">
                   <Edit3 className="w-4 h-4" />
                 </div>
-                <h3 className="font-bold text-gray-900 text-sm font-heading">Hariri Maoni (Admin Moderation)</h3>
+                <h3 className="font-bold text-gray-900 dark:text-white text-sm font-heading">Hariri Maoni (Admin Moderation)</h3>
               </div>
               <button
                 onClick={() => setEditingComment(null)}
-                className="p-1 text-gray-400 hover:text-gray-700 rounded-full"
+                className="p-1 text-gray-400 hover:text-gray-700 dark:hover:text-slate-200 rounded-full cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveEditComment} className="p-5 space-y-4 text-xs">
+            <form onSubmit={handleSaveEditComment} className="p-5 space-y-4 text-xs text-gray-800 dark:text-slate-200">
               <div>
-                <label className="font-semibold text-gray-700 block mb-1">Maandishi ya Maoni:</label>
+                <label className="font-semibold text-gray-700 dark:text-slate-300 block mb-1">Maandishi ya Maoni:</label>
                 <textarea
                   rows={3}
                   value={editingComment.text}
                   onChange={(e) => setEditingComment({ ...editingComment, text: e.target.value })}
-                  className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-emerald-600 text-xs"
+                  className="w-full p-3 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-900 focus:outline-emerald-600 text-xs text-gray-900 dark:text-white"
                   required
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-100">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-100 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setEditingComment(null)}
-                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-semibold"
+                  className="px-4 py-2 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-300 rounded-xl font-semibold cursor-pointer"
                 >
                   Ghairi
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-xs"
+                  className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-xs cursor-pointer"
                 >
                   Hifadhi Maoni
                 </button>
@@ -2967,45 +2967,45 @@ export const AdminPanel: React.FC<Props> = ({
       {/* MODAL: EDIT STUDY ROOM QUESTION */}
       {/* ========================================================= */}
       {editingQuestion && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in">
-          <div className="bg-white rounded-3xl w-full max-w-lg shadow-2xl border border-gray-100 overflow-hidden" onClick={(e) => e.stopPropagation()}>
-            <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between bg-blue-50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 dark:bg-black/80 backdrop-blur-xs animate-in fade-in">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-lg shadow-2xl border border-gray-100 dark:border-slate-800 overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="px-5 py-4 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between bg-blue-50 dark:bg-slate-800/80">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center">
                   <Edit3 className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-gray-900 text-sm font-heading">Hariri Swali la Kimasomo</h3>
-                  <p className="text-[11px] text-gray-500">Mwandishi: {editingQuestion.author.name}</p>
+                  <h3 className="font-bold text-gray-900 dark:text-white text-sm font-heading">Hariri Swali la Kimasomo</h3>
+                  <p className="text-[11px] text-gray-500 dark:text-slate-400">Mwandishi: {editingQuestion.author.name}</p>
                 </div>
               </div>
               <button
                 onClick={() => setEditingQuestion(null)}
-                className="p-1 text-gray-400 hover:text-gray-700 rounded-full"
+                className="p-1 text-gray-400 hover:text-gray-700 dark:hover:text-slate-200 rounded-full cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveEditQuestion} className="p-5 space-y-3.5 text-xs">
+            <form onSubmit={handleSaveEditQuestion} className="p-5 space-y-3.5 text-xs text-gray-800 dark:text-slate-200">
               <div>
-                <label className="font-semibold text-gray-700 block mb-1">Kichwa cha Swali (Title):</label>
+                <label className="font-semibold text-gray-700 dark:text-slate-300 block mb-1">Kichwa cha Swali (Title):</label>
                 <input
                   type="text"
                   value={editQuestionTitle}
                   onChange={(e) => setEditQuestionTitle(e.target.value)}
-                  className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white text-xs"
+                  className="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-900 text-xs text-gray-900 dark:text-white"
                   required
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="font-semibold text-gray-700 block mb-1">Somo (Subject):</label>
+                  <label className="font-semibold text-gray-700 dark:text-slate-300 block mb-1">Somo (Subject):</label>
                   <select
                     value={editQuestionSubject}
                     onChange={(e) => setEditQuestionSubject(e.target.value)}
-                    className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white text-xs"
+                    className="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-900 text-xs text-gray-900 dark:text-white"
                   >
                     {['Mathematics', 'Physics', 'Chemistry', 'Biology', 'Geography', 'History', 'Kiswahili', 'English'].map(s => (
                       <option key={s} value={s}>{s}</option>
@@ -3014,39 +3014,39 @@ export const AdminPanel: React.FC<Props> = ({
                 </div>
 
                 <div>
-                  <label className="font-semibold text-gray-700 block mb-1">Mada (Topic):</label>
+                  <label className="font-semibold text-gray-700 dark:text-slate-300 block mb-1">Mada (Topic):</label>
                   <input
                     type="text"
                     value={editQuestionTopic}
                     onChange={(e) => setEditQuestionTopic(e.target.value)}
                     placeholder="k.m. Thermodynamics"
-                    className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white text-xs"
+                    className="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-900 text-xs text-gray-900 dark:text-white"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="font-semibold text-gray-700 block mb-1">Maelezo ya Swali (Content):</label>
+                <label className="font-semibold text-gray-700 dark:text-slate-300 block mb-1">Maelezo ya Swali (Content):</label>
                 <textarea
                   rows={4}
                   value={editQuestionContent}
                   onChange={(e) => setEditQuestionContent(e.target.value)}
-                  className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-emerald-600 text-xs"
+                  className="w-full p-3 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-900 focus:outline-emerald-600 text-xs text-gray-900 dark:text-white"
                   required
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-100">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-100 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setEditingQuestion(null)}
-                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-semibold"
+                  className="px-4 py-2 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-300 rounded-xl font-semibold cursor-pointer"
                 >
                   Ghairi
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-xs"
+                  className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-xs cursor-pointer"
                 >
                   Hifadhi Swali
                 </button>
