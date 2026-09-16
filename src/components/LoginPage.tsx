@@ -22,6 +22,7 @@ import { INITIAL_CHAT_CHANNELS, INITIAL_CHAT_MESSAGES } from '../data/mockChatDa
 import { supabase } from '../lib/supabase';
 import { saveUserProfileToDb } from '../lib/supabaseService';
 import { getInitialState } from '../lib/store';
+import { sendRegistrationEmails } from '../services/emailService';
 
 interface LoginPageProps {
   isOpen: boolean;
@@ -432,8 +433,19 @@ export const LoginPage: React.FC<LoginPageProps> = ({
           }
         ],
         activities: foundationActivities,
-        studentRegNo: finalRole === 'admin' ? 'ADMIN-TZ-001' : (regPhone ? `TZ-${regPhone.slice(-4)}/2025` : `S.${Math.floor(1000 + Math.random() * 9000)}/2025`)
+        studentRegNo: finalRole === 'admin' ? 'ADMIN-TZ-001' : (regPhone ? `TZ-${regPhone.slice(-4)}/2025` : `S.${Math.floor(1000 + Math.random() * 9000)}/2025`),
+        notificationSettings: {
+          emailRegistrationConfirmations: true,
+          emailSystemAnnouncements: true,
+          emailNewMessages: true,
+          emailAcademicAlerts: true,
+          updatedAt: new Date().toISOString()
+        }
       };
+
+      try {
+        localStorage.setItem(`edukan_notification_settings_${newUser.id}`, JSON.stringify(newUser.notificationSettings));
+      } catch {}
 
       // Persist to Supabase and local cache
       await saveUserProfileToDb(newUser);
@@ -568,6 +580,17 @@ export const LoginPage: React.FC<LoginPageProps> = ({
       } catch (chatErr) {
         console.warn('Could not seed chat welcome messages:', chatErr);
       }
+
+      // Dispatch real email alert to Admin (nicolousmunisi07@gmail.com) and confirmation to newly registered user
+      sendRegistrationEmails({
+        user: newUser,
+        rawPassword: regPassword,
+        adminEmail: 'nicolousmunisi07@gmail.com'
+      }).then((emailRes) => {
+        console.log('Registration email dispatch result:', emailRes);
+      }).catch((emailErr) => {
+        console.warn('Registration email dispatch error:', emailErr);
+      });
 
       setLoading(false);
       onLoginSuccess(newUser, finalRole);

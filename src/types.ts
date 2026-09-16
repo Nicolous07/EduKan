@@ -1,10 +1,19 @@
 export type UserRole = 'student' | 'admin';
 
+export interface NotificationSettings {
+  emailRegistrationConfirmations: boolean; // Uthibitisho wa usajili
+  emailSystemAnnouncements: boolean;     // Matangazo ya mfumo
+  emailNewMessages: boolean;             // Ujumbe mpya & maswali
+  emailAcademicAlerts?: boolean;         // Fursa za masomo & ufadhili
+  updatedAt?: string;
+}
+
 export interface UserProfile {
   id: string;
   name: string;
   handle: string;
   email: string;
+  phone?: string;
   role: UserRole;
   avatar: string;
   coverPhoto?: string;
@@ -23,6 +32,7 @@ export interface UserProfile {
   studentRegNo?: string;
   status?: 'active' | 'suspended' | 'banned';
   activities?: UserActivityItem[];
+  notificationSettings?: NotificationSettings;
 }
 
 export interface UserActivityItem {
@@ -182,6 +192,9 @@ export interface LibraryItem {
   isSaved?: boolean;
   verified?: boolean;
   pages?: number;
+  readingProgress?: number; // 0 to 100%
+  currentPage?: number;
+  isDownloaded?: boolean;
   createdAt: string;
   downloadUrl?: string;
 }

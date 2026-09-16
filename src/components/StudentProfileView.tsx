@@ -21,11 +21,14 @@ import {
   Activity,
   ZoomIn,
   MessageSquare,
-  BookOpen
+  BookOpen,
+  Bell,
+  Mail
 } from 'lucide-react';
 import { UserProfile, Post, QuestionItem, UserActivityItem } from '../types';
 import { EditProfileModal } from './EditProfileModal';
 import { ImageViewerModal, ImageViewerData } from './common/ImageViewerModal';
+import { NotificationSettingsSection } from './NotificationSettingsSection';
 
 interface Props {
   user: UserProfile;
@@ -48,7 +51,7 @@ export const StudentProfileView: React.FC<Props> = ({
   isLoggedIn = false,
   onLogout
 }) => {
-  const [activeTab, setActiveTab] = useState<'posts' | 'activities' | 'achievements' | 'questions'>('posts');
+  const [activeTab, setActiveTab] = useState<'posts' | 'activities' | 'achievements' | 'questions' | 'notifications'>('posts');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [fullImageModal, setFullImageModal] = useState<ImageViewerData | null>(null);
@@ -189,6 +192,21 @@ export const StudentProfileView: React.FC<Props> = ({
               >
                 <Share2 className="w-3.5 h-3.5" />
                 <span>Shiriki</span>
+              </button>
+
+              <button
+                type="button"
+                id="profile-notification-settings-btn"
+                onClick={() => setActiveTab('notifications')}
+                className={`text-xs font-semibold px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition-all cursor-pointer border ${
+                  activeTab === 'notifications'
+                    ? 'bg-emerald-700 text-white border-emerald-700 shadow-xs'
+                    : 'bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800 shadow-2xs'
+                }`}
+                title="Dhibiti barua pepe na arifa unazopokea"
+              >
+                <Bell className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                <span>Mipangilio ya Arifa</span>
               </button>
 
               {/* Log Out Button inside Profile - visible when user is logged in */}
@@ -392,24 +410,32 @@ export const StudentProfileView: React.FC<Props> = ({
             { id: 'posts', label: `Machapisho (${myPosts.length})` },
             { id: 'activities', label: `Shughuli (Activities)` },
             { id: 'achievements', label: `Mataji & Beji (${user.achievements.length})` },
-            { id: 'questions', label: `Maswali ya Masomo (${myQuestions.length})` }
+            { id: 'questions', label: `Maswali ya Masomo (${myQuestions.length})` },
+            { id: 'notifications', label: `Arifa & Barua Pepe (Notifications)` }
           ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`py-3 px-4 border-b-2 transition-all whitespace-nowrap ${
+              className={`py-3 px-4 border-b-2 transition-all whitespace-nowrap flex items-center gap-1.5 ${
                 activeTab === tab.id
                   ? 'border-emerald-600 text-emerald-800 dark:text-emerald-300 font-bold'
                   : 'border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-200'
               }`}
             >
-              {tab.label}
+              {tab.id === 'notifications' && <Bell className="w-3.5 h-3.5" />}
+              <span>{tab.label}</span>
             </button>
           ))}
         </div>
       </div>
 
       {/* Tab Content */}
+      {activeTab === 'notifications' && (
+        <NotificationSettingsSection
+          user={user}
+          onUpdateProfile={handleSaveProfile}
+        />
+      )}
       {activeTab === 'posts' && (
         <div className="space-y-4">
           {myPosts.length === 0 ? (

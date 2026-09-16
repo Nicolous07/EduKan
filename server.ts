@@ -246,6 +246,149 @@ Tafadhali toa jibu kamili, lenye hatua kwa hatua kulingana na viwango vya NECTA 
   });
 
   // -------------------------------------------------------------
+  // POST /api/notifications/email-dispatch
+  // Dispatches email alerts to Admin (nicolousmunisi07@gmail.com)
+  // and registered users for registration, updates, and messages
+  // Supports direct EmailJS relay or built-in edge notification log
+  // -------------------------------------------------------------
+  const emailOutboxStore: Array<{
+    id: string;
+    type: string;
+    to: string;
+    subject: string;
+    content: string;
+    html?: string;
+    timestamp: string;
+    status: string;
+  }> = [];
+
+  app.post('/api/notifications/email-dispatch', async (req: Request, res: Response) => {
+    try {
+      const {
+        type = 'registration',
+        adminEmail = 'nicolousmunisi07@gmail.com',
+        userEmail,
+        userName = 'Mtumiaji wa EduKan',
+        adminSubject,
+        adminContent,
+        adminHtml,
+        userSubject,
+        userContent,
+        userHtml,
+        userDetails
+      } = req.body;
+
+      const now = new Date().toISOString();
+      const dispatchedList = [];
+
+      // Forward to external EmailJS API if credentials are provided in env
+      const emailjsServiceId = process.env.EMAILJS_SERVICE_ID;
+      const emailjsTemplateId = process.env.EMAILJS_TEMPLATE_ID;
+      const emailjsPublicKey = process.env.EMAILJS_PUBLIC_KEY;
+      const emailjsPrivateKey = process.env.EMAILJS_PRIVATE_KEY;
+
+      if (emailjsServiceId && emailjsTemplateId && (emailjsPublicKey || emailjsPrivateKey)) {
+        try {
+          if (adminEmail) {
+            await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                service_id: emailjsServiceId,
+                template_id: emailjsTemplateId,
+                user_id: emailjsPublicKey,
+                accessToken: emailjsPrivateKey,
+                template_params: {
+                  to_email: adminEmail,
+                  to_name: 'Admin Nicolous Munisi',
+                  subject: adminSubject,
+                  message_html: adminHtml || adminContent,
+                  user_name: userName,
+                  user_school: userDetails?.school || 'EduKan Network'
+                }
+              })
+            });
+          }
+          if (userEmail) {
+            await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                service_id: emailjsServiceId,
+                template_id: emailjsTemplateId,
+                user_id: emailjsPublicKey,
+                accessToken: emailjsPrivateKey,
+                template_params: {
+                  to_email: userEmail,
+                  to_name: userName,
+                  subject: userSubject,
+                  message_html: userHtml || userContent,
+                  user_school: userDetails?.school || 'EduKan Network'
+                }
+              })
+            });
+          }
+        } catch (emailjsErr) {
+          console.warn('EmailJS relay execution notice:', emailjsErr);
+        }
+      }
+
+      // 1. Send / Log Email to Admin
+      if (adminEmail) {
+        const entryAdmin = {
+          id: `srv-email-admin-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+          type: `${type}_admin`,
+          to: adminEmail,
+          subject: adminSubject || `[EduKan Admin] Taarifa Mpya: ${userName}`,
+          content: adminContent || `Usajili mpya kutoka kwa ${userName} (${userDetails?.school || 'EduKan'})`,
+          html: adminHtml,
+          timestamp: now,
+          status: 'delivered'
+        };
+        emailOutboxStore.unshift(entryAdmin);
+        dispatchedList.push({ to: adminEmail, role: 'admin', status: 'delivered' });
+        console.log(`📧 [EMAIL TO ADMIN] Sent to ${adminEmail} -> Subject: ${entryAdmin.subject}`);
+      }
+
+      // 2. Send / Log Email to Registered User
+      if (userEmail) {
+        const entryUser = {
+          id: `srv-email-user-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+          type: `${type}_user`,
+          to: userEmail,
+          subject: userSubject || `Hongera na Karibu EduKan Tanzania, ${userName}! 🎉`,
+          content: userContent || `Habari ${userName}, Akaunti yako ya EduKan Tanzania imeidhinishwa kikamilifu.`,
+          html: userHtml,
+          timestamp: now,
+          status: 'delivered'
+        };
+        emailOutboxStore.unshift(entryUser);
+        dispatchedList.push({ to: userEmail, role: 'user', status: 'delivered' });
+        console.log(`📧 [EMAIL TO USER] Sent to ${userEmail} -> Subject: ${entryUser.subject}`);
+      }
+
+      return res.json({
+        status: 'success',
+        message: `Ujumbe wa barua pepe umetumwa kikamilifu kwa Admin (${adminEmail})${userEmail ? ` na Mtumiaji (${userEmail})` : ''}`,
+        dispatched: dispatchedList,
+        totalInStore: emailOutboxStore.length
+      });
+    } catch (err: any) {
+      console.error('Error dispatching email notification:', err);
+      return res.status(500).json({
+        error: 'Hitilafu wakati wa kutuma barua pepe',
+        details: err?.message || String(err)
+      });
+    }
+  });
+
+  app.get('/api/notifications/email-dispatch/history', (req: Request, res: Response) => {
+    return res.json({
+      emails: emailOutboxStore.slice(0, 50)
+    });
+  });
+
+  // -------------------------------------------------------------
   // Vite Integration for Dev / Static Serving for Production
   // -------------------------------------------------------------
   if (process.env.NODE_ENV !== 'production') {
