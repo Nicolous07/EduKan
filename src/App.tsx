@@ -124,6 +124,10 @@ export default function App() {
   const [isQuickActionOpen, setIsQuickActionOpen] = useState(false);
   const [isLeaderboardOpen, setIsLeaderboardOpen] = useState(false);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
+  // User login and registration state
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => {
+    return Boolean(getInitialState('edukan_is_registered', false));
+  });
   // Opens login page right away if user is not registered yet
   const [isLoginPageOpen, setIsLoginPageOpen] = useState<boolean>(() => {
     return !getInitialState('edukan_is_registered', false);
@@ -131,6 +135,42 @@ export default function App() {
   const [isLoadingAnim, setIsLoadingAnim] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('Inapakia data za elimu...');
   const [quickActionMode, setQuickActionMode] = useState<'post' | 'question'>('post');
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    saveState('edukan_is_registered', false);
+    try {
+      localStorage.removeItem('edukan_is_registered');
+    } catch (e) {
+      console.warn('Error clearing registered session', e);
+    }
+    const guestUser: UserProfile = {
+      id: `guest-${Date.now()}`,
+      name: 'Mwanafunzi (Guest)',
+      handle: 'mgeni',
+      email: '',
+      role: 'student',
+      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop&q=80',
+      schoolName: 'EduKan Tanzania Portal',
+      schoolRegion: 'Tanzania',
+      schoolDistrict: '',
+      level: 'Kidato cha IV / VI',
+      combination: 'General Studies',
+      title: 'Mtumiaji Mgeni',
+      bio: 'Karibu EduKan Tanzania. Sajili akaunti au ingia ili kupata huduma kamili, maoni, na alama zako.',
+      points: 0,
+      followersCount: 0,
+      followingCount: 0,
+      achievements: [],
+      activities: []
+    };
+    setCurrentUser(guestUser);
+    saveState('edukan_user', guestUser);
+    setCurrentRole('student');
+    saveState('edukan_active_role', 'student');
+    setActiveTab('feed');
+    triggerAnimatedLoader('Umetoka kwenye akaunti kwa usalama.', 900);
+  };
 
   const triggerAnimatedLoader = (msg = 'Inapakia data za elimu...', duration = 1200) => {
     setLoadingMessage(msg);
@@ -599,6 +639,7 @@ export default function App() {
         onOpenSearch={() => setIsSearchOpen(true)}
         onOpenFeedback={() => setIsFeedbackOpen(true)}
         onOpenLogin={() => setIsLoginPageOpen(true)}
+        isLoggedIn={isLoggedIn}
         isDarkMode={isDarkMode}
         onToggleDarkMode={() => setIsDarkMode(prev => !prev)}
         onOpenQuickAction={(mode) => {
@@ -677,6 +718,8 @@ export default function App() {
             user={currentUser}
             posts={posts}
             questions={questions}
+            isLoggedIn={isLoggedIn}
+            onLogout={handleLogout}
             onOpenLeaderboard={() => setIsLeaderboardOpen(true)}
             onUpdateProfile={(updated) => {
               setCurrentUser(prev => ({ ...prev, ...updated }));
@@ -952,20 +995,25 @@ export default function App() {
             // Refresh notifications state from storage so new welcome notifications show up immediately
             const freshNotifs = getInitialState('edukan_notifications', INITIAL_NOTIFICATIONS);
             setNotifications(freshNotifs);
+            setIsLoggedIn(true);
+            saveState('edukan_is_registered', true);
             if (role) {
               setCurrentRole(role);
               saveState('edukan_active_role', role);
               if (role === 'admin') {
                 setActiveTab('admin');
+              } else {
+                setActiveTab('profile');
               }
+            } else {
+              setActiveTab('profile');
             }
-            saveState('edukan_is_registered', true);
             setIsLoginPageOpen(false);
             triggerAnimatedLoader(
               role === 'admin'
                 ? `Karibu Msimamizi Mkuu ${loggedInUser.name}! Inafungua Paneli ya Admin...`
-                : `Karibu ${loggedInUser.name}! Inasasisha wasifu...`,
-              1000
+                : `Karibu ${loggedInUser.name}! Usajili umekamilika, taarifa na ujumbe vimefika kwenye akaunti yako...`,
+              1200
             );
           }}
           onGuestContinue={() => setIsLoginPageOpen(false)}

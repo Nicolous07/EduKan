@@ -47,14 +47,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({
   const [loading, setLoading] = useState(false);
 
   // Login form state
-  const [identifier, setIdentifier] = useState('S.0112/0045/2024');
-  const [password, setPassword] = useState('edukan123');
+  const [identifier, setIdentifier] = useState('');
+  const [password, setPassword] = useState('');
 
   // Register form state
   const [regName, setRegName] = useState('');
   const [regLevel, setRegLevel] = useState('Kidato cha V - VI (A-Level)');
-  const [regTitle, setRegTitle] = useState('Kiranja wa Masomo (Academic Prefect)');
-  const [regSchool, setRegSchool] = useState('Malampaka Secondary School');
+  const [regTitle, setRegTitle] = useState('Mwanafunzi');
+  const [regSchool, setRegSchool] = useState('');
   const [regCombination, setRegCombination] = useState('PCB (Physics, Chemistry, Biology)');
   const [regEmail, setRegEmail] = useState('');
   const [regPhone, setRegPhone] = useState('');
