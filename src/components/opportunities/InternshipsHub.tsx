@@ -159,7 +159,7 @@ ${certifications}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Career Path Selector */}
           <div className="lg:col-span-4 space-y-3">
-            <h3 className="font-heading font-bold text-sm text-gray-900">
+            <h3 className="font-heading font-bold text-sm text-gray-900 dark:text-white">
               Chagua Fani ya Kazi (Career Tracks)
             </h3>
 
@@ -175,30 +175,30 @@ ${certifications}
                     onClick={() => setSelectedRoadmapId(rm.id)}
                     className={`w-full p-4 rounded-2xl border text-left transition-all cursor-pointer space-y-2 ${
                       isSelected
-                        ? 'bg-teal-50/70 border-teal-600 shadow-2xs'
-                        : 'bg-white border-gray-200 hover:border-gray-300'
+                        ? 'bg-teal-50/70 dark:bg-teal-950/50 border-teal-600 dark:border-teal-500 shadow-2xs'
+                        : 'bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-800 hover:border-gray-300 dark:hover:border-slate-700'
                     }`}
                   >
                     <div className="flex items-start justify-between">
-                      <h4 className="font-bold text-xs sm:text-sm text-gray-900 leading-snug">
+                      <h4 className="font-bold text-xs sm:text-sm text-gray-900 dark:text-white leading-snug">
                         {rm.careerTitle}
                       </h4>
-                      <span className="text-[10px] bg-rose-50 text-rose-700 font-bold px-2 py-0.5 rounded">
+                      <span className="text-[10px] bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 font-bold px-2 py-0.5 rounded">
                         {rm.demandLevel}
                       </span>
                     </div>
 
-                    <div className="text-[11px] text-gray-500">
+                    <div className="text-[11px] text-gray-500 dark:text-slate-400">
                       Muda: <strong>{rm.duration}</strong> • {rm.milestones.length} Hatua Kuu
                     </div>
 
                     {/* Mini progress bar */}
                     <div>
-                      <div className="flex justify-between text-[10px] text-gray-500 mb-1">
+                      <div className="flex justify-between text-[10px] text-gray-500 dark:text-slate-400 mb-1">
                         <span>Maendeleo Yako:</span>
-                        <strong className="text-teal-800">{pct}%</strong>
+                        <strong className="text-teal-800 dark:text-teal-400">{pct}%</strong>
                       </div>
-                      <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                      <div className="w-full h-1.5 bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden">
                         <div
                           className="h-full bg-teal-600 rounded-full transition-all duration-300"
                           style={{ width: `${pct}%` }}
@@ -210,9 +210,9 @@ ${certifications}
               })}
             </div>
 
-            <div className="bg-amber-50 p-4 rounded-2xl border border-amber-200 text-xs text-amber-900 space-y-1.5">
-              <div className="font-bold flex items-center gap-1.5 text-amber-950">
-                <Sparkles className="w-3.5 h-3.5 text-amber-700" />
+            <div className="bg-amber-50 dark:bg-amber-950/30 p-4 rounded-2xl border border-amber-200 dark:border-amber-900/40 text-xs text-amber-900 dark:text-amber-200 space-y-1.5">
+              <div className="font-bold flex items-center gap-1.5 text-amber-950 dark:text-amber-300">
+                <Sparkles className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400" />
                 <span>Nafasi za Field & Kazi Tanzania:</span>
               </div>
               <p className="leading-relaxed text-[11px]">
@@ -222,20 +222,20 @@ ${certifications}
           </div>
 
           {/* Milestones Timeline */}
-          <div className="lg:col-span-8 bg-white rounded-2xl p-6 border border-gray-200 shadow-2xs space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-100 pb-4">
+          <div className="lg:col-span-8 bg-white dark:bg-slate-900 rounded-2xl p-6 border border-gray-200 dark:border-slate-800 shadow-2xs space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-100 dark:border-slate-800 pb-4">
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-teal-700 bg-teal-50 px-2 py-0.5 rounded">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-teal-700 dark:text-teal-300 bg-teal-50 dark:bg-teal-950/50 px-2 py-0.5 rounded">
                   Ramani ya Ujuzi
                 </span>
-                <h3 className="font-heading font-bold text-base text-gray-900 mt-1">
+                <h3 className="font-heading font-bold text-base text-gray-900 dark:text-white mt-1">
                   {currentRoadmap.careerTitle}
                 </h3>
-                <p className="text-xs text-gray-600 mt-0.5">{currentRoadmap.description}</p>
+                <p className="text-xs text-gray-600 dark:text-slate-300 mt-0.5">{currentRoadmap.description}</p>
               </div>
 
               <div className="text-right shrink-0">
-                <div className="text-xs font-bold text-teal-900 bg-teal-50 px-3 py-1.5 rounded-xl border border-teal-200">
+                <div className="text-xs font-bold text-teal-900 dark:text-teal-200 bg-teal-50 dark:bg-teal-950/50 px-3 py-1.5 rounded-xl border border-teal-200 dark:border-teal-800">
                   {completedMilestonesCount} / {currentRoadmap.milestones.length} Hatua Zimekamilika ({progressPercent}%)
                 </div>
               </div>
@@ -249,40 +249,40 @@ ${certifications}
                     key={m.id}
                     className={`p-4 rounded-2xl border transition-all space-y-2 ${
                       m.isCompleted
-                        ? 'bg-emerald-50/40 border-emerald-300'
-                        : 'bg-gray-50/50 border-gray-200 hover:border-gray-300'
+                        ? 'bg-emerald-50/40 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-800'
+                        : 'bg-gray-50/50 dark:bg-slate-800/60 border-gray-200 dark:border-slate-700 hover:border-gray-300 dark:hover:border-slate-600'
                     }`}
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-start gap-3">
                         <button
                           onClick={() => handleToggleMilestone(currentRoadmap.id, m.id)}
-                          className="mt-0.5 cursor-pointer text-teal-700 hover:scale-110 transition-transform"
+                          className="mt-0.5 cursor-pointer text-teal-700 dark:text-teal-400 hover:scale-110 transition-transform"
                         >
                           {m.isCompleted ? (
                             <CheckCircle className="w-5 h-5 fill-emerald-600 text-white" />
                           ) : (
-                            <Circle className="w-5 h-5 text-gray-400" />
+                            <Circle className="w-5 h-5 text-gray-400 dark:text-slate-500" />
                           )}
                         </button>
 
                         <div>
                           <h4
                             className={`text-xs sm:text-sm font-bold ${
-                              m.isCompleted ? 'line-through text-gray-500' : 'text-gray-900'
+                              m.isCompleted ? 'line-through text-gray-500 dark:text-slate-500' : 'text-gray-900 dark:text-white'
                             }`}
                           >
                             {m.title}
                           </h4>
-                          <p className="text-xs text-gray-600 mt-0.5 leading-relaxed">{m.desc}</p>
+                          <p className="text-xs text-gray-600 dark:text-slate-300 mt-0.5 leading-relaxed">{m.desc}</p>
                         </div>
                       </div>
 
                       <span
                         className={`text-[10px] font-bold px-2 py-0.5 rounded whitespace-nowrap shrink-0 ${
                           m.isCompleted
-                            ? 'bg-emerald-100 text-emerald-800'
-                            : 'bg-gray-200 text-gray-600'
+                            ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300'
+                            : 'bg-gray-200 dark:bg-slate-700 text-gray-600 dark:text-slate-300'
                         }`}
                       >
                         {m.isCompleted ? 'Imekamilika (+10 pts)' : 'Inasubiri'}
@@ -293,7 +293,7 @@ ${certifications}
                       {m.skills.map((s, sIdx) => (
                         <span
                           key={sIdx}
-                          className="text-[10px] bg-white border border-gray-200 text-gray-700 font-mono px-2 py-0.5 rounded"
+                          className="text-[10px] bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 font-mono px-2 py-0.5 rounded"
                         >
                           {s}
                         </span>
@@ -311,134 +311,134 @@ ${certifications}
       {activeTab === 'portfolio' && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Portfolio Form */}
-          <div className="lg:col-span-5 bg-white rounded-2xl p-5 border border-gray-200 shadow-2xs space-y-4 text-xs">
-            <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-              <h3 className="font-heading font-bold text-sm text-gray-900 flex items-center gap-2">
-                <FileCheck className="w-4 h-4 text-teal-600" />
+          <div className="lg:col-span-5 bg-white dark:bg-slate-900 rounded-2xl p-5 border border-gray-200 dark:border-slate-800 shadow-2xs space-y-4 text-xs text-gray-900 dark:text-white">
+            <div className="flex items-center justify-between border-b border-gray-100 dark:border-slate-800 pb-3">
+              <h3 className="font-heading font-bold text-sm text-gray-900 dark:text-white flex items-center gap-2">
+                <FileCheck className="w-4 h-4 text-teal-600 dark:text-teal-400" />
                 <span>Jaza Wasifu Wako (Portfolio Builder)</span>
               </h3>
-              <span className="text-[10px] font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded">
+              <span className="text-[10px] font-bold text-teal-700 dark:text-teal-300 bg-teal-50 dark:bg-teal-950/50 px-2 py-0.5 rounded">
                 Tayari kwa Field
               </span>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block font-bold text-gray-700 mb-1">Jina Kamili</label>
+                <label className="block font-bold text-gray-700 dark:text-slate-300 mb-1">Jina Kamili</label>
                 <input
                   type="text"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white"
+                  className="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:bg-white dark:focus:bg-slate-900"
                 />
               </div>
 
               <div>
-                <label className="block font-bold text-gray-700 mb-1">Cheo / Fani ya Kazi</label>
+                <label className="block font-bold text-gray-700 dark:text-slate-300 mb-1">Cheo / Fani ya Kazi</label>
                 <input
                   type="text"
                   value={professionalTitle}
                   onChange={(e) => setProfessionalTitle(e.target.value)}
-                  className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white"
+                  className="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:bg-white dark:focus:bg-slate-900"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block font-bold text-gray-700 mb-1">Kiwango cha Elimu & Shule/Chuo</label>
+              <label className="block font-bold text-gray-700 dark:text-slate-300 mb-1">Kiwango cha Elimu & Shule/Chuo</label>
               <input
                 type="text"
                 value={education}
                 onChange={(e) => setEducation(e.target.value)}
-                className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white"
+                className="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:bg-white dark:focus:bg-slate-900"
               />
             </div>
 
             <div>
-              <label className="block font-bold text-gray-700 mb-1">Muhtasari wa Kitaalamu (Bio / Summary)</label>
+              <label className="block font-bold text-gray-700 dark:text-slate-300 mb-1">Muhtasari wa Kitaalamu (Bio / Summary)</label>
               <textarea
                 rows={3}
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
-                className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white"
+                className="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:bg-white dark:focus:bg-slate-900"
               />
             </div>
 
             <div>
-              <label className="block font-bold text-gray-700 mb-1">Ujuzi wa Msingi (Core Skills)</label>
+              <label className="block font-bold text-gray-700 dark:text-slate-300 mb-1">Ujuzi wa Msingi (Core Skills)</label>
               <input
                 type="text"
                 value={skillsList}
                 onChange={(e) => setSkillsList(e.target.value)}
-                className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white"
+                className="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:bg-white dark:focus:bg-slate-900"
               />
             </div>
 
             <div>
-              <label className="block font-bold text-gray-700 mb-1">Miradi Yako Muhimu (Projects Built)</label>
+              <label className="block font-bold text-gray-700 dark:text-slate-300 mb-1">Miradi Yako Muhimu (Projects Built)</label>
               <textarea
                 rows={3}
                 value={keyProjects}
                 onChange={(e) => setKeyProjects(e.target.value)}
-                className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white"
+                className="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:bg-white dark:focus:bg-slate-900"
               />
             </div>
 
             <div>
-              <label className="block font-bold text-gray-700 mb-1">Vyeti & Mafunzo (Certifications)</label>
+              <label className="block font-bold text-gray-700 dark:text-slate-300 mb-1">Vyeti & Mafunzo (Certifications)</label>
               <input
                 type="text"
                 value={certifications}
                 onChange={(e) => setCertifications(e.target.value)}
-                className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white"
+                className="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:bg-white dark:focus:bg-slate-900"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block font-bold text-gray-700 mb-1">Namba ya Simu</label>
+                <label className="block font-bold text-gray-700 dark:text-slate-300 mb-1">Namba ya Simu</label>
                 <input
                   type="text"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white"
+                  className="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:bg-white dark:focus:bg-slate-900"
                 />
               </div>
 
               <div>
-                <label className="block font-bold text-gray-700 mb-1">Barua Pepe</label>
+                <label className="block font-bold text-gray-700 dark:text-slate-300 mb-1">Barua Pepe</label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white"
+                  className="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:bg-white dark:focus:bg-slate-900"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block font-bold text-gray-700 mb-1">Link ya GitHub / LinkedIn</label>
+              <label className="block font-bold text-gray-700 dark:text-slate-300 mb-1">Link ya GitHub / LinkedIn</label>
               <input
                 type="url"
                 value={github}
                 onChange={(e) => setGithub(e.target.value)}
-                className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white"
+                className="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:bg-white dark:focus:bg-slate-900"
               />
             </div>
           </div>
 
           {/* Live CV & Portfolio Preview */}
-          <div className="lg:col-span-7 bg-white rounded-2xl p-6 border border-gray-200 shadow-2xs flex flex-col justify-between space-y-6">
+          <div className="lg:col-span-7 bg-white dark:bg-slate-900 rounded-2xl p-6 border border-gray-200 dark:border-slate-800 shadow-2xs flex flex-col justify-between space-y-6">
             <div>
-              <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-                <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+              <div className="flex items-center justify-between border-b border-gray-100 dark:border-slate-800 pb-3">
+                <span className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">
                   Uhakiki wa Wasifu wa Moja kwa Moja (Live Preview)
                 </span>
 
                 <div className="flex items-center gap-2">
                   <button
                     onClick={handleCopyPortfolio}
-                    className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-xs font-bold flex items-center gap-1 cursor-pointer"
+                    className="px-3 py-1.5 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-300 rounded-xl text-xs font-bold flex items-center gap-1 cursor-pointer"
                   >
                     <Copy className="w-3.5 h-3.5" />
                     <span>{portfolioCopied ? 'Imenakiliwa!' : 'Nakili Maandishi'}</span>
@@ -454,11 +454,11 @@ ${certifications}
               </div>
 
               {/* Printable CV Card format */}
-              <div className="mt-4 p-6 bg-gray-50/70 border border-gray-200 rounded-2xl space-y-5">
-                <div className="border-b border-gray-200 pb-4">
-                  <h2 className="text-xl font-bold font-heading text-gray-900">{fullName}</h2>
-                  <div className="text-xs font-semibold text-teal-700 mt-0.5">{professionalTitle}</div>
-                  <div className="text-[11px] text-gray-500 mt-1 flex flex-wrap gap-3">
+              <div className="mt-4 p-6 bg-gray-50/70 dark:bg-slate-800/60 border border-gray-200 dark:border-slate-700 rounded-2xl space-y-5">
+                <div className="border-b border-gray-200 dark:border-slate-700 pb-4">
+                  <h2 className="text-xl font-bold font-heading text-gray-900 dark:text-white">{fullName}</h2>
+                  <div className="text-xs font-semibold text-teal-700 dark:text-teal-400 mt-0.5">{professionalTitle}</div>
+                  <div className="text-[11px] text-gray-500 dark:text-slate-400 mt-1 flex flex-wrap gap-3">
                     <span>📍 {education}</span>
                     <span>✉️ {email}</span>
                     <span>📞 {phone}</span>
@@ -467,14 +467,14 @@ ${certifications}
                 </div>
 
                 <div>
-                  <h4 className="text-xs font-bold text-gray-900 uppercase tracking-wider mb-1.5 text-teal-800">
+                  <h4 className="text-xs font-bold uppercase tracking-wider mb-1.5 text-teal-800 dark:text-teal-400">
                     Kuhusu Mimi (Summary)
                   </h4>
-                  <p className="text-xs text-gray-700 leading-relaxed">{bio}</p>
+                  <p className="text-xs text-gray-700 dark:text-slate-300 leading-relaxed">{bio}</p>
                 </div>
 
                 <div>
-                  <h4 className="text-xs font-bold text-gray-900 uppercase tracking-wider mb-1.5 text-teal-800">
+                  <h4 className="text-xs font-bold uppercase tracking-wider mb-1.5 text-teal-800 dark:text-teal-400">
                     Ujuzi wa Kiteknolojia (Core Skills)
                   </h4>
                   <div className="flex flex-wrap gap-1.5">
@@ -485,7 +485,7 @@ ${certifications}
                       .map((skill, idx) => (
                         <span
                           key={idx}
-                          className="text-[11px] bg-white border border-gray-300 text-gray-800 px-2.5 py-0.5 rounded-md font-medium"
+                          className="text-[11px] bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 text-gray-800 dark:text-slate-200 px-2.5 py-0.5 rounded-md font-medium"
                         >
                           {skill}
                         </span>
@@ -494,26 +494,26 @@ ${certifications}
                 </div>
 
                 <div>
-                  <h4 className="text-xs font-bold text-gray-900 uppercase tracking-wider mb-1.5 text-teal-800">
+                  <h4 className="text-xs font-bold uppercase tracking-wider mb-1.5 text-teal-800 dark:text-teal-400">
                     Miradi Yangu (Projects)
                   </h4>
-                  <pre className="text-xs text-gray-700 font-sans whitespace-pre-wrap leading-relaxed">
+                  <pre className="text-xs text-gray-700 dark:text-slate-300 font-sans whitespace-pre-wrap leading-relaxed">
                     {keyProjects}
                   </pre>
                 </div>
 
                 {certifications && (
                   <div>
-                    <h4 className="text-xs font-bold text-gray-900 uppercase tracking-wider mb-1.5 text-teal-800">
+                    <h4 className="text-xs font-bold uppercase tracking-wider mb-1.5 text-teal-800 dark:text-teal-400">
                       Vyeti & Mafunzo Maalum
                     </h4>
-                    <p className="text-xs text-gray-700">{certifications}</p>
+                    <p className="text-xs text-gray-700 dark:text-slate-300">{certifications}</p>
                   </div>
                 )}
               </div>
             </div>
 
-            <div className="text-center text-[11px] text-gray-400">
+            <div className="text-center text-[11px] text-gray-400 dark:text-slate-500">
               Inatengenezwa kiotomatiki na Mfumo wa EduKan Tanzania • Tayari kwa Field & Internship
             </div>
           </div>

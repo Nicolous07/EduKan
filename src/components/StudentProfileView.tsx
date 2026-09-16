@@ -16,10 +16,16 @@ import {
   ShieldCheck,
   Camera,
   Check,
-  LogIn
+  LogIn,
+  LogOut,
+  Activity,
+  ZoomIn,
+  MessageSquare,
+  BookOpen
 } from 'lucide-react';
-import { UserProfile, Post, QuestionItem } from '../types';
+import { UserProfile, Post, QuestionItem, UserActivityItem } from '../types';
 import { EditProfileModal } from './EditProfileModal';
+import { ImageViewerModal, ImageViewerData } from './common/ImageViewerModal';
 
 interface Props {
   user: UserProfile;
@@ -28,6 +34,8 @@ interface Props {
   onOpenLeaderboard?: () => void;
   onUpdateProfile?: (updated: Partial<UserProfile>) => void;
   onOpenLogin?: () => void;
+  isLoggedIn?: boolean;
+  onLogout?: () => void;
 }
 
 export const StudentProfileView: React.FC<Props> = ({
@@ -36,11 +44,14 @@ export const StudentProfileView: React.FC<Props> = ({
   questions,
   onOpenLeaderboard,
   onUpdateProfile,
-  onOpenLogin
+  onOpenLogin,
+  isLoggedIn = false,
+  onLogout
 }) => {
-  const [activeTab, setActiveTab] = useState<'posts' | 'achievements' | 'questions'>('posts');
+  const [activeTab, setActiveTab] = useState<'posts' | 'activities' | 'achievements' | 'questions'>('posts');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [showToast, setShowToast] = useState(false);
+  const [fullImageModal, setFullImageModal] = useState<ImageViewerData | null>(null);
 
   const handleSaveProfile = (updated: Partial<UserProfile>) => {
     if (onUpdateProfile) {
@@ -79,18 +90,39 @@ export const StudentProfileView: React.FC<Props> = ({
       {/* Profile Header Card */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 overflow-hidden shadow-2xs">
         {/* Cover Photo */}
-        <div className="h-44 sm:h-56 relative bg-emerald-900 group">
+        <div className="h-44 sm:h-56 relative bg-emerald-900 group overflow-hidden">
           <img
             src={user.coverPhoto}
             alt="Cover"
-            className="w-full h-full object-cover"
+            onClick={() => setFullImageModal({
+              url: user.coverPhoto || 'https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?w=1200&auto=format&fit=crop&q=80',
+              title: `Jalada la Wasifu - ${user.name}`,
+              authorName: user.name,
+              caption: 'Jalada la wasifu wa mwanafunzi. Bofya na kuvuta ili kuzoom kila pembe.'
+            })}
+            className="w-full h-full object-cover cursor-pointer hover:scale-102 transition-transform duration-300"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
           
+          {/* Quick Corner Zoom Cover Button */}
+          <button
+            onClick={() => setFullImageModal({
+              url: user.coverPhoto || 'https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?w=1200&auto=format&fit=crop&q=80',
+              title: `Jalada la Wasifu - ${user.name}`,
+              authorName: user.name,
+              caption: 'Jalada la wasifu wa mwanafunzi. Bofya na kuvuta ili kuzoom kila pembe.'
+            })}
+            className="opacity-0 group-hover:opacity-100 transition-opacity absolute top-3 left-3 bg-black/60 hover:bg-black/80 text-white text-xs font-semibold px-3 py-1.5 rounded-xl backdrop-blur-xs flex items-center gap-1.5 cursor-pointer shadow-md"
+            title="Zoom Jalada Pembe Zote"
+          >
+            <ZoomIn className="w-3.5 h-3.5 text-emerald-300" />
+            <span>Angalia & Zoom</span>
+          </button>
+
           {/* Quick Edit Cover Button */}
           <button
             onClick={() => setIsEditModalOpen(true)}
-            className="opacity-0 group-hover:opacity-100 transition-opacity absolute top-3 right-3 bg-black/50 hover:bg-black/70 text-white text-xs font-semibold px-3 py-1.5 rounded-xl backdrop-blur-xs flex items-center gap-1.5 cursor-pointer"
+            className="opacity-0 group-hover:opacity-100 transition-opacity absolute top-3 right-3 bg-black/60 hover:bg-black/80 text-white text-xs font-semibold px-3 py-1.5 rounded-xl backdrop-blur-xs flex items-center gap-1.5 cursor-pointer shadow-md"
           >
             <Camera className="w-3.5 h-3.5" />
             <span>Badilisha Jalada</span>
@@ -104,19 +136,30 @@ export const StudentProfileView: React.FC<Props> = ({
               <img
                 src={user.avatar}
                 alt={user.name}
-                className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl object-cover ring-4 ring-white dark:ring-slate-800 shadow-md bg-white dark:bg-slate-800 shrink-0"
+                onClick={() => setFullImageModal({
+                  url: user.avatar,
+                  title: `Picha ya Wasifu - ${user.name}`,
+                  authorName: user.name,
+                  caption: `Wasifu wa ${user.title || 'Mwanafunzi'} - ${user.schoolName}`
+                })}
+                className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl object-cover ring-4 ring-white dark:ring-slate-800 shadow-md bg-white dark:bg-slate-800 shrink-0 cursor-pointer hover:opacity-95 transition-opacity"
               />
               <span className="absolute bottom-1 right-1 w-4 h-4 sm:w-5 sm:h-5 bg-emerald-500 rounded-full ring-2 ring-white dark:ring-slate-800" />
               
-              {/* Quick Avatar Edit Badge */}
+              {/* Quick View Full Avatar Pill */}
               <button
                 type="button"
-                onClick={() => setIsEditModalOpen(true)}
-                className="absolute inset-0 bg-black/40 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-[10px] font-bold cursor-pointer"
-                title="Badilisha picha ya wasifu"
+                onClick={() => setFullImageModal({
+                  url: user.avatar,
+                  title: `Picha ya Wasifu - ${user.name}`,
+                  authorName: user.name,
+                  caption: `Wasifu wa ${user.title || 'Mwanafunzi'} - ${user.schoolName}`
+                })}
+                className="absolute inset-0 bg-black/45 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-[10px] font-bold cursor-pointer backdrop-blur-2xs"
+                title="Bofya kuangalia picha kamili na kuzoom pembe zote"
               >
-                <Camera className="w-5 h-5 mb-0.5" />
-                <span>Badili Picha</span>
+                <ZoomIn className="w-5 h-5 mb-0.5 text-emerald-300" />
+                <span>Zoom Picha</span>
               </button>
             </div>
 
@@ -147,17 +190,36 @@ export const StudentProfileView: React.FC<Props> = ({
                 <Share2 className="w-3.5 h-3.5" />
                 <span>Shiriki</span>
               </button>
-              {onOpenLogin && (
+
+              {/* Log Out Button inside Profile - visible when user is logged in */}
+              {isLoggedIn && onLogout ? (
                 <button
                   type="button"
-                  id="profile-switch-account-btn"
-                  onClick={onOpenLogin}
-                  className="bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 active:bg-gray-300 text-gray-700 dark:text-slate-300 text-xs font-semibold px-3 py-2 rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer"
-                  title="Badili akaunti au ingia kwenye EduKan"
+                  id="profile-logout-btn"
+                  onClick={() => {
+                    if (window.confirm('Je, una uhakika unataka kuondoka (Log Out) kwenye akaunti yako ya EduKan?')) {
+                      onLogout();
+                    }
+                  }}
+                  className="bg-rose-50 dark:bg-rose-950/60 hover:bg-rose-100 dark:hover:bg-rose-900/80 active:scale-95 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800 text-xs font-bold px-3.5 py-2 rounded-xl flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer"
+                  title="Ondoka kwenye akaunti (Log Out)"
                 >
-                  <LogIn className="w-3.5 h-3.5 text-gray-600 dark:text-slate-400" />
-                  <span>Ingia / Badili</span>
+                  <LogOut className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
+                  <span>Ondoka (Log Out)</span>
                 </button>
+              ) : (
+                onOpenLogin && (
+                  <button
+                    type="button"
+                    id="profile-signin-btn"
+                    onClick={onOpenLogin}
+                    className="bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-xs transition-all cursor-pointer"
+                    title="Ingia kwenye akaunti yako ya EduKan"
+                  >
+                    <LogIn className="w-3.5 h-3.5" />
+                    <span>Ingia (Sign In)</span>
+                  </button>
+                )
               )}
             </div>
           </div>
@@ -328,6 +390,7 @@ export const StudentProfileView: React.FC<Props> = ({
         <div className="flex items-center border-t border-gray-200 dark:border-slate-800 px-6 overflow-x-auto text-xs font-semibold">
           {[
             { id: 'posts', label: `Machapisho (${myPosts.length})` },
+            { id: 'activities', label: `Shughuli (Activities)` },
             { id: 'achievements', label: `Mataji & Beji (${user.achievements.length})` },
             { id: 'questions', label: `Maswali ya Masomo (${myQuestions.length})` }
           ].map((tab) => (
@@ -359,11 +422,203 @@ export const StudentProfileView: React.FC<Props> = ({
                 <div className="text-xs text-gray-400 dark:text-slate-500 mb-1">{p.createdAt}</div>
                 <p className="text-xs sm:text-sm text-gray-800 dark:text-slate-200 leading-relaxed">{p.content}</p>
                 {p.mediaUrl && (
-                  <img src={p.mediaUrl} alt="Post" className="mt-3 rounded-xl max-h-72 object-cover" />
+                  <div className="relative group/postimg mt-3 inline-block">
+                    <img
+                      src={p.mediaUrl}
+                      alt="Post"
+                      onClick={() => setFullImageModal({
+                        url: p.mediaUrl!,
+                        title: `Picha ya Chapisho`,
+                        authorName: user.name,
+                        caption: p.content.slice(0, 100)
+                      })}
+                      className="rounded-xl max-h-72 object-cover cursor-pointer hover:opacity-95 transition-opacity"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setFullImageModal({
+                        url: p.mediaUrl!,
+                        title: `Picha ya Chapisho`,
+                        authorName: user.name,
+                        caption: p.content.slice(0, 100)
+                      })}
+                      className="opacity-0 group-hover/postimg:opacity-100 transition-opacity absolute bottom-3 right-3 bg-black/70 hover:bg-black/90 text-white text-xs px-2.5 py-1 rounded-lg backdrop-blur-xs flex items-center gap-1.5 cursor-pointer shadow-md"
+                    >
+                      <ZoomIn className="w-3.5 h-3.5 text-emerald-300" />
+                      <span>Zoom Pembe Zote</span>
+                    </button>
+                  </div>
                 )}
               </div>
             ))
           )}
+        </div>
+      )}
+
+      {activeTab === 'activities' && (
+        <div className="space-y-3">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-gray-200 dark:border-slate-800 shadow-2xs">
+            <div className="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-slate-800 mb-4">
+              <div className="flex items-center gap-2">
+                <Activity className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                <h3 className="text-xs sm:text-sm font-bold text-gray-900 dark:text-slate-100">
+                  Mlolongo wa Shughuli za Mwanafunzi (Activity Timeline)
+                </h3>
+              </div>
+              <span className="text-[11px] font-mono text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-200 dark:border-emerald-800">
+                Akaunti Hai
+              </span>
+            </div>
+
+            <div className="space-y-4 relative before:absolute before:left-4 before:top-2 before:bottom-2 before:w-0.5 before:bg-emerald-100 dark:before:bg-slate-800">
+              {/* Dynamic User Activities */}
+              {user.activities && user.activities.length > 0 ? (
+                user.activities.map((act) => (
+                  <div key={act.id} className="flex items-start gap-3 relative">
+                    <div className="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center text-sm shadow-md shrink-0 ring-4 ring-white dark:ring-slate-900">
+                      {act.icon || '📌'}
+                    </div>
+                    <div className="flex-1 bg-gray-50 dark:bg-slate-800/60 p-3 rounded-xl border border-gray-200 dark:border-slate-700">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-xs font-bold text-gray-900 dark:text-slate-100">
+                          {act.title}
+                        </span>
+                        <div className="flex items-center gap-1.5">
+                          {act.pointsEarned ? (
+                            <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-950 px-1.5 py-0.5 rounded">
+                              +{act.pointsEarned} pts
+                            </span>
+                          ) : null}
+                          <span className="text-[10px] text-gray-400 dark:text-slate-500 font-mono">
+                            {act.timestamp}
+                          </span>
+                        </div>
+                      </div>
+                      <p className="text-xs text-gray-600 dark:text-slate-300 mt-1">
+                        {act.description}
+                      </p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                /* Fallback if user doesn't have custom activities array yet */
+                <>
+                  {/* Foundation Welcome Activity */}
+                  <div className="flex items-start gap-3 relative">
+                    <div className="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center text-sm shadow-md shrink-0 ring-4 ring-white dark:ring-slate-900">
+                      🎉
+                    </div>
+                    <div className="flex-1 bg-emerald-50/50 dark:bg-slate-800/60 p-3 rounded-xl border border-emerald-200/70 dark:border-slate-700">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-xs font-bold text-gray-900 dark:text-slate-100">
+                          Usajili wa Akaunti ya EduKan
+                        </span>
+                        <span className="text-[10px] text-gray-400 dark:text-slate-500 font-mono">Imethibitishwa</span>
+                      </div>
+                      <p className="text-xs text-gray-600 dark:text-slate-300 mt-1">
+                        Umejiunga rasmi kama <strong className="text-emerald-800 dark:text-emerald-300">{user.name}</strong> kutoka <strong className="text-gray-900 dark:text-slate-100">{user.schoolName}</strong> ({user.level} {user.combination ? `• ${user.combination}` : ''}).
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Welcome Bonus Points */}
+                  <div className="flex items-start gap-3 relative">
+                    <div className="w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center text-sm shadow-md shrink-0 ring-4 ring-white dark:ring-slate-900">
+                      ⭐
+                    </div>
+                    <div className="flex-1 bg-amber-50/50 dark:bg-slate-800/60 p-3 rounded-xl border border-amber-200/70 dark:border-slate-700">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-xs font-bold text-gray-900 dark:text-slate-100">
+                          Pointi za Mwanzo za Ukaribisho
+                        </span>
+                        <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-950 px-1.5 py-0.5 rounded">
+                          +{user.points || 50} pts
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-600 dark:text-slate-300 mt-1">
+                        Umetunukiwa pointi za mwanzo kuanzia safari yako ya ufaulu na kupanda cheo cha kitaifa.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* School Community Joined */}
+                  <div className="flex items-start gap-3 relative">
+                    <div className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm shadow-md shrink-0 ring-4 ring-white dark:ring-slate-900">
+                      🏫
+                    </div>
+                    <div className="flex-1 bg-blue-50/40 dark:bg-slate-800/60 p-3 rounded-xl border border-blue-200/70 dark:border-slate-700">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-xs font-bold text-gray-900 dark:text-slate-100">
+                          Umeunganishwa na Jumuiya ya Shule
+                        </span>
+                        <span className="text-[10px] text-blue-700 dark:text-blue-300 font-medium">Jumuiya Hai</span>
+                      </div>
+                      <p className="text-xs text-gray-600 dark:text-slate-300 mt-1">
+                        Uko huru kushiriki machapisho, notisi za masomo na mijadala ya darasa la {user.level}.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Mentor Welcome Message */}
+                  <div className="flex items-start gap-3 relative">
+                    <div className="w-8 h-8 rounded-full bg-teal-500 text-white flex items-center justify-center text-sm shadow-md shrink-0 ring-4 ring-white dark:ring-slate-900">
+                      💬
+                    </div>
+                    <div className="flex-1 bg-teal-50/40 dark:bg-slate-800/60 p-3 rounded-xl border border-teal-200/70 dark:border-slate-700">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-xs font-bold text-gray-900 dark:text-slate-100">
+                          Ujumbe wa Ushauri wa Kitaaluma
+                        </span>
+                        <span className="text-[10px] text-teal-700 dark:text-teal-300 font-medium">EduKan Support</span>
+                      </div>
+                      <p className="text-xs text-gray-600 dark:text-slate-300 mt-1">
+                        Umepokea muongozo wa kuanza, vitabu vya bure na jinsi ya kuuliza maswali kwenye chumba cha maongezi.
+                      </p>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* Custom posts / questions activities */}
+              {myPosts.map(p => (
+                <div key={p.id} className="flex items-start gap-3 relative">
+                  <div className="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs shadow-md shrink-0 ring-4 ring-white dark:ring-slate-900">
+                    📝
+                  </div>
+                  <div className="flex-1 bg-gray-50 dark:bg-slate-800/60 p-3 rounded-xl border border-gray-200 dark:border-slate-700">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-xs font-bold text-gray-900 dark:text-slate-100 truncate">
+                        Ulichapisha: {p.category}
+                      </span>
+                      <span className="text-[10px] text-gray-400 dark:text-slate-500">{p.createdAt}</span>
+                    </div>
+                    <p className="text-xs text-gray-600 dark:text-slate-300 mt-1 line-clamp-2">
+                      {p.content}
+                    </p>
+                  </div>
+                </div>
+              ))}
+
+              {myQuestions.map(q => (
+                <div key={q.id} className="flex items-start gap-3 relative">
+                  <div className="w-8 h-8 rounded-full bg-purple-600 text-white flex items-center justify-center text-xs shadow-md shrink-0 ring-4 ring-white dark:ring-slate-900">
+                    ❓
+                  </div>
+                  <div className="flex-1 bg-gray-50 dark:bg-slate-800/60 p-3 rounded-xl border border-gray-200 dark:border-slate-700">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-xs font-bold text-gray-900 dark:text-slate-100 truncate">
+                        Swali la {q.subject}: {q.title}
+                      </span>
+                      <span className="text-[10px] text-gray-400 dark:text-slate-500">{q.createdAt}</span>
+                    </div>
+                    <p className="text-xs text-gray-600 dark:text-slate-300 mt-1 line-clamp-2">
+                      {q.content}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       )}
 
@@ -411,6 +666,13 @@ export const StudentProfileView: React.FC<Props> = ({
         onClose={() => setIsEditModalOpen(false)}
         user={user}
         onSave={handleSaveProfile}
+      />
+
+      {/* Corner-Zoom Image Viewer Modal */}
+      <ImageViewerModal
+        isOpen={Boolean(fullImageModal)}
+        onClose={() => setFullImageModal(null)}
+        imageData={fullImageModal}
       />
     </div>
   );

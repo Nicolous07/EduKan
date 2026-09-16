@@ -211,7 +211,7 @@ export const HackathonsHub: React.FC<Props> = ({ currentUser, onAwardPoints }) =
       {/* TAB 1: TEAM FINDER / MATCHMAKING */}
       {activeTab === 'matchmaking' && (
         <div className="space-y-6">
-          <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-gray-200 dark:border-slate-800 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center gap-3 flex-1">
               <div className="relative flex-1 max-w-sm">
                 <Search className="w-4 h-4 absolute left-3 top-2.5 text-gray-400" />
@@ -220,14 +220,14 @@ export const HackathonsHub: React.FC<Props> = ({ currentUser, onAwardPoints }) =
                   placeholder="Tafuta timu, fani au shindano..."
                   value={teamSearch}
                   onChange={(e) => setTeamSearch(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:bg-white"
+                  className="w-full pl-9 pr-3 py-2 text-xs bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:bg-white dark:focus:bg-slate-900"
                 />
               </div>
 
               <select
                 value={teamRoleFilter}
                 onChange={(e) => setTeamRoleFilter(e.target.value)}
-                className="p-2 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:bg-white"
+                className="p-2 text-xs bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:bg-white dark:focus:bg-slate-900"
               >
                 <option value="All">Fani Zote Zinazotafutwa</option>
                 <option value="Frontend">Frontend / Web</option>
@@ -254,7 +254,7 @@ export const HackathonsHub: React.FC<Props> = ({ currentUser, onAwardPoints }) =
               return (
                 <div
                   key={team.id}
-                  className="bg-white rounded-2xl p-5 border border-gray-200 shadow-2xs flex flex-col justify-between space-y-4 hover:border-blue-300 transition-all"
+                  className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-gray-200 dark:border-slate-800 shadow-2xs flex flex-col justify-between space-y-4 hover:border-blue-300 dark:hover:border-blue-700 transition-all text-gray-900 dark:text-white"
                 >
                   <div className="space-y-3">
                     <div className="flex items-start justify-between">
@@ -337,14 +337,14 @@ export const HackathonsHub: React.FC<Props> = ({ currentUser, onAwardPoints }) =
           {/* Modal for creating a team */}
           {isCreateTeamOpen && (
             <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
-              <div className="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 shadow-xl border border-gray-100">
-                <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-                  <h3 className="font-heading font-bold text-base text-gray-900">
+              <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full p-6 space-y-4 shadow-xl border border-gray-100 dark:border-slate-800 text-gray-900 dark:text-white">
+                <div className="flex items-center justify-between border-b border-gray-100 dark:border-slate-800 pb-3">
+                  <h3 className="font-heading font-bold text-base text-gray-900 dark:text-white">
                     Tangaza Timu Yako ya Hackathon
                   </h3>
                   <button
                     onClick={() => setIsCreateTeamOpen(false)}
-                    className="text-gray-400 hover:text-gray-600 font-bold"
+                    className="text-gray-400 hover:text-gray-600 dark:hover:text-slate-300 font-bold"
                   >
                     ✕
                   </button>
@@ -352,42 +352,42 @@ export const HackathonsHub: React.FC<Props> = ({ currentUser, onAwardPoints }) =
 
                 <form onSubmit={handleCreateTeam} className="space-y-3 text-xs">
                   <div>
-                    <label className="block font-bold text-gray-700 mb-1">Jina la Timu</label>
+                    <label className="block font-bold text-gray-700 dark:text-slate-300 mb-1">Jina la Timu</label>
                     <input
                       type="text"
                       required
                       placeholder="Mf: BuniAI Innovators au KilimoPulse"
                       value={newTeamName}
                       onChange={(e) => setNewTeamName(e.target.value)}
-                      className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white"
+                      className="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:bg-white dark:focus:bg-slate-900"
                     />
                   </div>
 
                   <div>
-                    <label className="block font-bold text-gray-700 mb-1">Shindano la Hackathon</label>
+                    <label className="block font-bold text-gray-700 dark:text-slate-300 mb-1">Shindano la Hackathon</label>
                     <input
                       type="text"
                       required
                       value={newHackathonName}
                       onChange={(e) => setNewHackathonName(e.target.value)}
-                      className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white"
+                      className="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:bg-white dark:focus:bg-slate-900"
                     />
                   </div>
 
                   <div>
-                    <label className="block font-bold text-gray-700 mb-1">Muhtasari wa Wazo la Mradi</label>
+                    <label className="block font-bold text-gray-700 dark:text-slate-300 mb-1">Muhtasari wa Wazo la Mradi</label>
                     <textarea
                       rows={3}
                       required
                       placeholder="Eleza changamoto mnayotatua na teknolojia mtakayotumia..."
                       value={newIdeaSummary}
                       onChange={(e) => setNewIdeaSummary(e.target.value)}
-                      className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white"
+                      className="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:bg-white dark:focus:bg-slate-900"
                     />
                   </div>
 
                   <div>
-                    <label className="block font-bold text-gray-700 mb-1">
+                    <label className="block font-bold text-gray-700 dark:text-slate-300 mb-1">
                       Fani Zinazotafutwa (Tenganisha kwa koma)
                     </label>
                     <input
@@ -395,7 +395,7 @@ export const HackathonsHub: React.FC<Props> = ({ currentUser, onAwardPoints }) =
                       placeholder="UI/UX Designer, React Developer, Data Lead"
                       value={newRolesNeeded}
                       onChange={(e) => setNewRolesNeeded(e.target.value)}
-                      className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white"
+                      className="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:bg-white dark:focus:bg-slate-900"
                     />
                   </div>
 
@@ -403,7 +403,7 @@ export const HackathonsHub: React.FC<Props> = ({ currentUser, onAwardPoints }) =
                     <button
                       type="button"
                       onClick={() => setIsCreateTeamOpen(false)}
-                      className="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-700 font-bold"
+                      className="flex-1 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 font-bold"
                     >
                       Ghairi
                     </button>
@@ -424,7 +424,7 @@ export const HackathonsHub: React.FC<Props> = ({ currentUser, onAwardPoints }) =
       {/* TAB 2: PROJECT SHOWCASE & COMMUNITY VOTING */}
       {activeTab === 'showcase' && (
         <div className="space-y-6">
-          <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-gray-200 dark:border-slate-800 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="relative flex-1 max-w-md">
               <Search className="w-4 h-4 absolute left-3 top-2.5 text-gray-400" />
               <input
@@ -432,7 +432,7 @@ export const HackathonsHub: React.FC<Props> = ({ currentUser, onAwardPoints }) =
                 placeholder="Tafuta miradi ya wanafunzi..."
                 value={projectSearch}
                 onChange={(e) => setProjectSearch(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:bg-white"
+                className="w-full pl-9 pr-3 py-2 text-xs bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:bg-white dark:focus:bg-slate-900"
               />
             </div>
 
@@ -449,7 +449,7 @@ export const HackathonsHub: React.FC<Props> = ({ currentUser, onAwardPoints }) =
             {filteredProjects.map((proj) => (
               <div
                 key={proj.id}
-                className="bg-white rounded-2xl border border-gray-200 shadow-2xs overflow-hidden flex flex-col justify-between hover:border-blue-300 transition-all"
+                className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-2xs overflow-hidden flex flex-col justify-between hover:border-blue-300 dark:hover:border-blue-700 transition-all text-gray-900 dark:text-white"
               >
                 <div>
                   <div className="h-44 overflow-hidden relative">
@@ -527,14 +527,14 @@ export const HackathonsHub: React.FC<Props> = ({ currentUser, onAwardPoints }) =
           {/* Submit Project Modal */}
           {isSubmitProjectOpen && (
             <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
-              <div className="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 shadow-xl border border-gray-100">
-                <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-                  <h3 className="font-heading font-bold text-base text-gray-900">
+              <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full p-6 space-y-4 shadow-xl border border-gray-100 dark:border-slate-800 text-gray-900 dark:text-white">
+                <div className="flex items-center justify-between border-b border-gray-100 dark:border-slate-800 pb-3">
+                  <h3 className="font-heading font-bold text-base text-gray-900 dark:text-white">
                     Weka Mradi Wako Kwenye Showcase
                   </h3>
                   <button
                     onClick={() => setIsSubmitProjectOpen(false)}
-                    className="text-gray-400 hover:text-gray-600 font-bold"
+                    className="text-gray-400 hover:text-gray-600 dark:hover:text-slate-300 font-bold"
                   >
                     ✕
                   </button>
@@ -542,65 +542,65 @@ export const HackathonsHub: React.FC<Props> = ({ currentUser, onAwardPoints }) =
 
                 <form onSubmit={handleSubmitProject} className="space-y-3 text-xs">
                   <div>
-                    <label className="block font-bold text-gray-700 mb-1">Jina la Mradi / App</label>
+                    <label className="block font-bold text-gray-700 dark:text-slate-300 mb-1">Jina la Mradi / App</label>
                     <input
                       type="text"
                       required
                       placeholder="Mf: AfyaMama SMS au ShuleMesh"
                       value={newProjTitle}
                       onChange={(e) => setNewProjTitle(e.target.value)}
-                      className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white"
+                      className="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:bg-white dark:focus:bg-slate-900"
                     />
                   </div>
 
                   <div>
-                    <label className="block font-bold text-gray-700 mb-1">Shindano Lililotengenezewa</label>
+                    <label className="block font-bold text-gray-700 dark:text-slate-300 mb-1">Shindano Lililotengenezewa</label>
                     <input
                       type="text"
                       required
                       value={newProjHackathon}
                       onChange={(e) => setNewProjHackathon(e.target.value)}
-                      className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white"
+                      className="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:bg-white dark:focus:bg-slate-900"
                     />
                   </div>
 
                   <div>
-                    <label className="block font-bold text-gray-700 mb-1">Maelezo Mafupi (Problem & Solution)</label>
+                    <label className="block font-bold text-gray-700 dark:text-slate-300 mb-1">Maelezo Mafupi (Problem & Solution)</label>
                     <textarea
                       rows={3}
                       required
                       placeholder="Eleza tatizo mradi unalotatua nchini Tanzania..."
                       value={newProjSummary}
                       onChange={(e) => setNewProjSummary(e.target.value)}
-                      className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white"
+                      className="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:bg-white dark:focus:bg-slate-900"
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <label className="block font-bold text-gray-700 mb-1">Link ya Live Demo</label>
+                      <label className="block font-bold text-gray-700 dark:text-slate-300 mb-1">Link ya Live Demo</label>
                       <input
                         type="url"
                         placeholder="https://..."
                         value={newProjDemo}
                         onChange={(e) => setNewProjDemo(e.target.value)}
-                        className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white"
+                        className="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:bg-white dark:focus:bg-slate-900"
                       />
                     </div>
                     <div>
-                      <label className="block font-bold text-gray-700 mb-1">Link ya GitHub</label>
+                      <label className="block font-bold text-gray-700 dark:text-slate-300 mb-1">Link ya GitHub</label>
                       <input
                         type="url"
                         placeholder="https://github.com/..."
                         value={newProjGithub}
                         onChange={(e) => setNewProjGithub(e.target.value)}
-                        className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white"
+                        className="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:bg-white dark:focus:bg-slate-900"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block font-bold text-gray-700 mb-1">
+                    <label className="block font-bold text-gray-700 dark:text-slate-300 mb-1">
                       Teknolojia Zilizotumika (Tenganisha kwa koma)
                     </label>
                     <input
@@ -608,7 +608,7 @@ export const HackathonsHub: React.FC<Props> = ({ currentUser, onAwardPoints }) =
                       placeholder="React, Python, FastApi, PostgreSQL"
                       value={newProjTech}
                       onChange={(e) => setNewProjTech(e.target.value)}
-                      className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white"
+                      className="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:bg-white dark:focus:bg-slate-900"
                     />
                   </div>
 
@@ -616,7 +616,7 @@ export const HackathonsHub: React.FC<Props> = ({ currentUser, onAwardPoints }) =
                     <button
                       type="button"
                       onClick={() => setIsSubmitProjectOpen(false)}
-                      className="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-700 font-bold"
+                      className="flex-1 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 font-bold"
                     >
                       Ghairi
                     </button>

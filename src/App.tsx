@@ -949,6 +949,9 @@ export default function App() {
           onLoginSuccess={(loggedInUser, role) => {
             setCurrentUser(loggedInUser);
             saveState('edukan_user', loggedInUser);
+            // Refresh notifications state from storage so new welcome notifications show up immediately
+            const freshNotifs = getInitialState('edukan_notifications', INITIAL_NOTIFICATIONS);
+            setNotifications(freshNotifs);
             if (role) {
               setCurrentRole(role);
               saveState('edukan_active_role', role);

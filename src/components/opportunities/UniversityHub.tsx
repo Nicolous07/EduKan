@@ -202,7 +202,7 @@ export const UniversityHub: React.FC<Props> = ({ currentUser, onAwardPoints }) =
               <select
                 value={selectedUniId}
                 onChange={(e) => setSelectedUniId(e.target.value)}
-                className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white text-xs font-medium"
+                className="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:bg-white dark:focus:bg-slate-900 text-xs font-medium"
               >
                 {universities.map((u) => (
                   <option key={u.id} value={u.id}>
@@ -522,7 +522,7 @@ export const UniversityHub: React.FC<Props> = ({ currentUser, onAwardPoints }) =
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') handleSendMessage();
                 }}
-                className="flex-1 p-2.5 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:bg-white"
+                className="flex-1 p-2.5 text-xs bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:bg-white dark:focus:bg-slate-900"
               />
               <button
                 onClick={() => handleSendMessage()}

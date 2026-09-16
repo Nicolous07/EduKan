@@ -167,11 +167,11 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
       onClick={onClose}
     >
       <div
-        className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl border border-emerald-100 overflow-hidden flex flex-col max-h-[92vh] animate-in zoom-in-95 duration-200"
+        className="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-2xl shadow-2xl border border-emerald-100 dark:border-slate-800 overflow-hidden flex flex-col max-h-[92vh] animate-in zoom-in-95 duration-200 text-gray-900 dark:text-white"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
-        <div className="px-5 sm:px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-emerald-800 to-teal-800 text-white">
+        <div className="px-5 sm:px-6 py-4 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between bg-gradient-to-r from-emerald-800 to-teal-800 text-white">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center border border-white/20">
               <User className="w-5 h-5 text-emerald-200" />
@@ -194,14 +194,14 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
         </div>
 
         {/* Form Navigation Tabs */}
-        <div className="flex items-center border-b border-gray-200 bg-gray-50/80 px-4 sm:px-6 text-xs font-semibold">
+        <div className="flex items-center border-b border-gray-200 dark:border-slate-800 bg-gray-50/80 dark:bg-slate-800/80 px-4 sm:px-6 text-xs font-semibold">
           <button
             type="button"
             onClick={() => setActiveTab('info')}
             className={`py-3 px-3.5 border-b-2 transition-all flex items-center gap-1.5 cursor-pointer ${
               activeTab === 'info'
-                ? 'border-emerald-600 text-emerald-800 font-bold bg-white'
-                : 'border-transparent text-gray-500 hover:text-gray-900'
+                ? 'border-emerald-600 text-emerald-800 dark:text-emerald-400 font-bold bg-white dark:bg-slate-900'
+                : 'border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-200'
             }`}
           >
             <User className="w-3.5 h-3.5" />
@@ -212,8 +212,8 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
             onClick={() => setActiveTab('photos')}
             className={`py-3 px-3.5 border-b-2 transition-all flex items-center gap-1.5 cursor-pointer ${
               activeTab === 'photos'
-                ? 'border-emerald-600 text-emerald-800 font-bold bg-white'
-                : 'border-transparent text-gray-500 hover:text-gray-900'
+                ? 'border-emerald-600 text-emerald-800 dark:text-emerald-400 font-bold bg-white dark:bg-slate-900'
+                : 'border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-200'
             }`}
           >
             <Camera className="w-3.5 h-3.5" />
@@ -224,8 +224,8 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
             onClick={() => setActiveTab('academic')}
             className={`py-3 px-3.5 border-b-2 transition-all flex items-center gap-1.5 cursor-pointer ${
               activeTab === 'academic'
-                ? 'border-emerald-600 text-emerald-800 font-bold bg-white'
-                : 'border-transparent text-gray-500 hover:text-gray-900'
+                ? 'border-emerald-600 text-emerald-800 dark:text-emerald-400 font-bold bg-white dark:bg-slate-900'
+                : 'border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-200'
             }`}
           >
             <School className="w-3.5 h-3.5" />
@@ -239,18 +239,18 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
           {activeTab === 'info' && (
             <div className="space-y-4 animate-in fade-in duration-150">
               {/* Profile Preview Card */}
-              <div className="p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-200/80 flex items-center gap-3">
+              <div className="p-3.5 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-800/40 flex items-center gap-3">
                 <img
                   src={avatar}
                   alt={name}
-                  className="w-14 h-14 rounded-2xl object-cover ring-2 ring-emerald-400 shrink-0 bg-white"
+                  className="w-14 h-14 rounded-2xl object-cover ring-2 ring-emerald-400 shrink-0 bg-white dark:bg-slate-800"
                 />
                 <div className="min-w-0">
-                  <div className="font-bold text-gray-900 text-sm truncate">{name || 'Jina Lako'}</div>
-                  <div className="text-xs text-emerald-700 font-mono">@{handle || 'handle'}</div>
+                  <div className="font-bold text-gray-900 dark:text-white text-sm truncate">{name || 'Jina Lako'}</div>
+                  <div className="text-xs text-emerald-700 dark:text-emerald-400 font-mono">@{handle || 'handle'}</div>
                   <div className="mt-1 flex items-center gap-1.5">
-                    <span className="text-[11px] bg-amber-100 text-amber-900 font-bold px-2 py-0.5 rounded-md border border-amber-300 inline-flex items-center gap-1">
-                      <ShieldCheck className="w-3 h-3 text-amber-700" />
+                    <span className="text-[11px] bg-amber-100 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300 font-bold px-2 py-0.5 rounded-md border border-amber-300 dark:border-amber-700/60 inline-flex items-center gap-1">
+                      <ShieldCheck className="w-3 h-3 text-amber-700 dark:text-amber-400" />
                       {title || 'Mwanafunzi'}
                     </span>
                   </div>
@@ -259,7 +259,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
 
               {/* Jina Kamili */}
               <div>
-                <label className="block text-xs font-bold text-gray-800 mb-1.5">
+                <label className="block text-xs font-bold text-gray-800 dark:text-slate-200 mb-1.5">
                   Jina Kamili (Full Name) <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -268,15 +268,15 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Mfano: Nicolous Amini Munisi"
                   required
-                  className="w-full text-xs sm:text-sm px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all"
+                  className="w-full text-xs sm:text-sm px-3.5 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all"
                 />
               </div>
 
               {/* Wadhifu / Cheo / Nafasi */}
               <div>
-                <label className="block text-xs font-bold text-gray-800 mb-1.5 flex items-center justify-between">
+                <label className="block text-xs font-bold text-gray-800 dark:text-slate-200 mb-1.5 flex items-center justify-between">
                   <span className="flex items-center gap-1">
-                    <ShieldCheck className="w-3.5 h-3.5 text-amber-600" />
+                    <ShieldCheck className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                     <span>Wadhifu / Cheo / Nafasi Yako</span>
                   </span>
                   <span className="text-[10px] text-gray-400 font-normal">Itaonekana kwenye wasifu wako</span>
@@ -286,12 +286,12 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="Mfano: Kiranja wa Masomo (Sayansi) au Mwanafunzi"
-                  className="w-full text-xs sm:text-sm px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all"
+                  className="w-full text-xs sm:text-sm px-3.5 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all"
                 />
 
                 {/* Quick Presets for Wadhifu */}
                 <div className="mt-2">
-                  <div className="text-[11px] text-gray-500 font-medium mb-1.5">
+                  <div className="text-[11px] text-gray-500 dark:text-slate-400 font-medium mb-1.5">
                     Chagua wadhifu wa haraka:
                   </div>
                   <div className="flex flex-wrap gap-1.5">
@@ -302,8 +302,8 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                         onClick={() => setTitle(preset)}
                         className={`text-[11px] px-2.5 py-1 rounded-lg transition-all border cursor-pointer ${
                           title === preset
-                            ? 'bg-amber-100 text-amber-900 border-amber-400 font-bold shadow-2xs'
-                            : 'bg-gray-100 hover:bg-gray-200 text-gray-700 border-gray-200'
+                            ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300 border-amber-400 dark:border-amber-700/60 font-bold shadow-2xs'
+                            : 'bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-300 border-gray-200 dark:border-slate-700'
                         }`}
                       >
                         {preset}
@@ -315,7 +315,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
 
               {/* Username / Handle */}
               <div>
-                <label className="block text-xs font-bold text-gray-800 mb-1.5">
+                <label className="block text-xs font-bold text-gray-800 dark:text-slate-200 mb-1.5">
                   Jina la Mtumiaji (Handle / Username)
                 </label>
                 <div className="relative">
@@ -325,14 +325,14 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                     value={handle}
                     onChange={(e) => setHandle(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
                     placeholder="municryptrix"
-                    className="w-full text-xs sm:text-sm pl-8 pr-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none font-mono"
+                    className="w-full text-xs sm:text-sm pl-8 pr-3.5 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none font-mono"
                   />
                 </div>
               </div>
 
               {/* Wasifu Mafupi (Bio) */}
               <div>
-                <label className="block text-xs font-bold text-gray-800 mb-1.5">
+                <label className="block text-xs font-bold text-gray-800 dark:text-slate-200 mb-1.5">
                   Wasifu / Maelezo Mafupi (Bio)
                 </label>
                 <textarea
@@ -340,7 +340,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
                   placeholder="Eleza kwa ufupi ndoto zako za kimasomo, shauku yako au malengo..."
-                  className="w-full text-xs sm:text-sm p-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none leading-relaxed"
+                  className="w-full text-xs sm:text-sm p-3 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none leading-relaxed"
                 />
               </div>
             </div>
@@ -351,17 +351,17 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
             <div className="space-y-5 animate-in fade-in duration-150">
               {/* Profile Avatar Selection */}
               <div>
-                <label className="block text-xs font-bold text-gray-800 mb-2">
+                <label className="block text-xs font-bold text-gray-800 dark:text-slate-200 mb-2">
                   Picha ya Wasifu (Profile Picture)
                 </label>
 
                 {/* Avatar Preview & Actions */}
-                <div className="flex flex-col sm:flex-row items-center gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-200">
+                <div className="flex flex-col sm:flex-row items-center gap-4 p-4 bg-gray-50 dark:bg-slate-800/60 rounded-2xl border border-gray-200 dark:border-slate-700">
                   <div className="relative">
                     <img
                       src={avatar}
                       alt="Preview"
-                      className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover ring-4 ring-emerald-500 shadow-md bg-white shrink-0"
+                      className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover ring-4 ring-emerald-500 shadow-md bg-white dark:bg-slate-800 shrink-0"
                     />
                     <button
                       type="button"
@@ -391,7 +391,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                         <span>Pakia Picha Kutoka Kwenye Kifaa</span>
                       </button>
                     </div>
-                    <p className="text-[11px] text-gray-500">
+                    <p className="text-[11px] text-gray-500 dark:text-slate-400">
                       Unaweza kupakia picha yoyote (JPG au PNG) kutoka kwenye simu yako au kuchagua hapa chini.
                     </p>
                   </div>
@@ -399,7 +399,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
 
                 {/* Preset Avatars */}
                 <div className="mt-4">
-                  <div className="text-xs font-bold text-gray-700 mb-2">
+                  <div className="text-xs font-bold text-gray-700 dark:text-slate-300 mb-2">
                     Au chagua Avatar iliyo tayari:
                   </div>
                   <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
@@ -411,7 +411,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                         className={`relative rounded-xl overflow-hidden border-2 transition-all p-1 group cursor-pointer ${
                           avatar === item.url
                             ? 'border-emerald-600 ring-2 ring-emerald-300 scale-105 shadow-sm'
-                            : 'border-gray-200 hover:border-emerald-400'
+                            : 'border-gray-200 dark:border-slate-700 hover:border-emerald-400'
                         }`}
                         title={item.label}
                       >
@@ -425,7 +425,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                             <Check className="w-3 h-3" />
                           </div>
                         )}
-                        <span className="text-[9px] text-gray-600 line-clamp-1 mt-1 block text-center font-medium">
+                        <span className="text-[9px] text-gray-600 dark:text-slate-400 line-clamp-1 mt-1 block text-center font-medium">
                           {item.label.split(' ')[0]}
                         </span>
                       </button>
@@ -435,7 +435,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
 
                 {/* Custom URL Input */}
                 <div className="mt-3">
-                  <label className="block text-[11px] font-semibold text-gray-600 mb-1">
+                  <label className="block text-[11px] font-semibold text-gray-600 dark:text-slate-400 mb-1">
                     Au ingiza kiungo (URL) ya picha moja kwa moja:
                   </label>
                   <div className="flex gap-2">
@@ -444,7 +444,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                       value={customAvatarUrl}
                       onChange={(e) => setCustomAvatarUrl(e.target.value)}
                       placeholder="https://..."
-                      className="flex-1 text-xs px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none"
+                      className="flex-1 text-xs px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:bg-white dark:focus:bg-slate-900 focus:outline-none"
                     />
                     <button
                       type="button"
@@ -454,7 +454,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                           setCustomAvatarUrl('');
                         }
                       }}
-                      className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold px-3 py-2 rounded-xl transition-colors cursor-pointer"
+                      className="bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-300 text-xs font-semibold px-3 py-2 rounded-xl transition-colors cursor-pointer"
                     >
                       Tumia
                     </button>
@@ -463,11 +463,11 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
               </div>
 
               {/* Cover Photo */}
-              <div className="pt-4 border-t border-gray-100">
-                <label className="block text-xs font-bold text-gray-800 mb-2">
+              <div className="pt-4 border-t border-gray-100 dark:border-slate-800">
+                <label className="block text-xs font-bold text-gray-800 dark:text-slate-200 mb-2">
                   Picha ya Jalada (Cover Banner)
                 </label>
-                <div className="relative h-28 sm:h-32 rounded-2xl overflow-hidden border border-gray-200 mb-2">
+                <div className="relative h-28 sm:h-32 rounded-2xl overflow-hidden border border-gray-200 dark:border-slate-700 mb-2">
                   <img
                     src={coverPhoto}
                     alt="Cover Preview"
@@ -499,7 +499,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                       key={i}
                       onClick={() => setCoverPhoto(cov)}
                       className={`h-12 rounded-xl overflow-hidden border-2 transition-all cursor-pointer ${
-                        coverPhoto === cov ? 'border-emerald-600 ring-2 ring-emerald-300' : 'border-gray-200'
+                        coverPhoto === cov ? 'border-emerald-600 ring-2 ring-emerald-300' : 'border-gray-200 dark:border-slate-700'
                       }`}
                     >
                       <img src={cov} alt="Preset Cover" className="w-full h-full object-cover" />
@@ -515,7 +515,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
             <div className="space-y-4 animate-in fade-in duration-150">
               {/* Shule */}
               <div>
-                <label className="block text-xs font-bold text-gray-800 mb-1.5">
+                <label className="block text-xs font-bold text-gray-800 dark:text-slate-200 mb-1.5">
                   Jina la Shule (School Community)
                 </label>
                 <div className="relative">
@@ -525,7 +525,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                     value={schoolName}
                     onChange={(e) => setSchoolName(e.target.value)}
                     placeholder="Mfano: Malampaka Secondary School"
-                    className="w-full text-xs sm:text-sm pl-10 pr-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                    className="w-full text-xs sm:text-sm pl-10 pr-3.5 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                   />
                 </div>
               </div>
@@ -533,13 +533,13 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
               {/* Kidato / Level */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-gray-800 mb-1.5">
+                  <label className="block text-xs font-bold text-gray-800 dark:text-slate-200 mb-1.5">
                     Kidato / Ngazi (Level)
                   </label>
                   <select
                     value={level}
                     onChange={(e) => setLevel(e.target.value)}
-                    className="w-full text-xs sm:text-sm px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                    className="w-full text-xs sm:text-sm px-3.5 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                   >
                     <option value="Form I">Kidato cha Kwanza (Form I)</option>
                     <option value="Form II">Kidato cha Pili (Form II)</option>
@@ -553,7 +553,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-800 mb-1.5">
+                  <label className="block text-xs font-bold text-gray-800 dark:text-slate-200 mb-1.5">
                     Mchepuo (Combination / Stream)
                   </label>
                   <input
@@ -561,7 +561,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                     value={combination}
                     onChange={(e) => setCombination(e.target.value)}
                     placeholder="Mfano: PCB (Physics, Chemistry, Biology)"
-                    className="w-full text-xs sm:text-sm px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                    className="w-full text-xs sm:text-sm px-3.5 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                   />
                 </div>
               </div>
@@ -569,7 +569,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
               {/* Mkoa & Wilaya */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-gray-800 mb-1.5">
+                  <label className="block text-xs font-bold text-gray-800 dark:text-slate-200 mb-1.5">
                     Mkoa (Region)
                   </label>
                   <div className="relative">
@@ -579,13 +579,13 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                       value={schoolRegion}
                       onChange={(e) => setSchoolRegion(e.target.value)}
                       placeholder="Shinyanga, Dar es Salaam, Arusha..."
-                      className="w-full text-xs sm:text-sm pl-8 pr-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                      className="w-full text-xs sm:text-sm pl-8 pr-3 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-800 mb-1.5">
+                  <label className="block text-xs font-bold text-gray-800 dark:text-slate-200 mb-1.5">
                     Wilaya (District)
                   </label>
                   <input
@@ -593,7 +593,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                     value={schoolDistrict}
                     onChange={(e) => setSchoolDistrict(e.target.value)}
                     placeholder="Kishapu, Ilala, Arusha Mjini..."
-                    className="w-full text-xs sm:text-sm px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                    className="w-full text-xs sm:text-sm px-3.5 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                   />
                 </div>
               </div>
@@ -602,18 +602,18 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
 
           {/* Success Banner */}
           {isSaved && (
-            <div className="p-3 bg-emerald-100 text-emerald-900 rounded-xl text-xs font-bold flex items-center gap-2 animate-in fade-in">
-              <Check className="w-4 h-4 text-emerald-700 shrink-0" />
+            <div className="p-3 bg-emerald-100 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-200 rounded-xl text-xs font-bold flex items-center gap-2 animate-in fade-in">
+              <Check className="w-4 h-4 text-emerald-700 dark:text-emerald-400 shrink-0" />
               <span>Wasifu wako umesasishwa na kuhifadhiwa kikamilifu!</span>
             </div>
           )}
 
           {/* Modal Footer Buttons */}
-          <div className="pt-4 border-t border-gray-200 flex items-center justify-end gap-2.5">
+          <div className="pt-4 border-t border-gray-200 dark:border-slate-800 flex items-center justify-end gap-2.5">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold text-xs rounded-xl transition-colors cursor-pointer"
+              className="px-4 py-2 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-300 font-semibold text-xs rounded-xl transition-colors cursor-pointer"
             >
               Ghairi
             </button>

@@ -22,6 +22,17 @@ export interface UserProfile {
   achievements: Achievement[];
   studentRegNo?: string;
   status?: 'active' | 'suspended' | 'banned';
+  activities?: UserActivityItem[];
+}
+
+export interface UserActivityItem {
+  id: string;
+  type: 'register' | 'points' | 'post' | 'question' | 'school' | 'library' | 'chat' | 'badge';
+  title: string;
+  description: string;
+  timestamp: string;
+  pointsEarned?: number;
+  icon?: string;
 }
 
 export interface Achievement {

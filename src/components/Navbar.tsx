@@ -43,6 +43,7 @@ interface NavbarProps {
   onOpenQuickAction?: (mode?: 'post' | 'question') => void;
   onOpenFeedback?: () => void;
   onOpenLogin?: () => void;
+  isLoggedIn?: boolean;
   isOnline?: boolean;
   onToggleOffline?: () => void;
   dbStatus?: { online: boolean; tableReady: boolean; message: string };
@@ -64,6 +65,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenQuickAction,
   onOpenFeedback,
   onOpenLogin,
+  isLoggedIn = false,
   isOnline = true,
   onToggleOffline,
   dbStatus,
@@ -538,13 +540,13 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </button>
               )}
 
-              {/* Login / Auth Button Desktop */}
-              {onOpenLogin && (
+              {/* Login / Auth Button Desktop - only shown when user is not logged in */}
+              {!isLoggedIn && onOpenLogin && (
                 <button
                   id="desktop-header-login-btn"
                   onClick={onOpenLogin}
                   className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-emerald-900 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/70 hover:bg-emerald-100 dark:hover:bg-emerald-900/70 rounded-xl transition-all border border-emerald-200 dark:border-emerald-800/80 cursor-pointer shadow-2xs"
-                  title="Sign in or switch account"
+                  title="Sign in to your account"
                 >
                   <User className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400" />
                   <span>Sign In</span>
@@ -1123,8 +1125,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                         </button>
                       )}
 
-                      {/* Login Page */}
-                      {onOpenLogin && (
+                      {/* Login Page - only shown if user is not logged in */}
+                      {!isLoggedIn && onOpenLogin && (
                         <button
                           id="more-nav-login-btn"
                           onClick={() => {
@@ -1138,7 +1140,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                               <LogIn className="w-4 h-4" />
                             </div>
                             <div>
-                              <div className="text-xs font-semibold text-gray-800 dark:text-slate-100">Sign In / Switch Account</div>
+                              <div className="text-xs font-semibold text-gray-800 dark:text-slate-100">Sign In</div>
                               <div className="text-[10px] text-gray-500 dark:text-slate-400">Log in or create a student profile</div>
                             </div>
                           </div>

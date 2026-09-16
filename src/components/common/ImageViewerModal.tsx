@@ -78,7 +78,7 @@ export const ImageViewerModal: React.FC<ImageViewerModalProps> = ({
   }, [isOpen, scale]);
 
   const zoomIn = () => {
-    setScale((prev) => Math.min(5, Number((prev + 0.5).toFixed(1))));
+    setScale((prev) => Math.min(8, Number((prev + 0.5).toFixed(1))));
   };
 
   const zoomOut = () => {
@@ -103,7 +103,7 @@ export const ImageViewerModal: React.FC<ImageViewerModalProps> = ({
 
   // Jump to specific corners so user can inspect every corner to the very edge
   const jumpToCorner = (corner: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center') => {
-    const currentScale = Math.max(2, scale);
+    const currentScale = Math.max(2.5, scale);
     setScale(currentScale);
 
     if (corner === 'center') {
@@ -113,10 +113,13 @@ export const ImageViewerModal: React.FC<ImageViewerModalProps> = ({
 
     const containerWidth = containerRef.current?.clientWidth || window.innerWidth;
     const containerHeight = containerRef.current?.clientHeight || window.innerHeight;
+    const imgEl = imgRef.current;
+    const baseW = imgEl?.clientWidth || (containerWidth * 0.85);
+    const baseH = imgEl?.clientHeight || (containerHeight * 0.75);
 
     // Calculate maximum pan offset for the corner at current scale
-    const panOffsetLimitX = (containerWidth * (currentScale - 1)) / 2;
-    const panOffsetLimitY = (containerHeight * (currentScale - 1)) / 2;
+    const panOffsetLimitX = Math.max((containerWidth * (currentScale - 1)) / 2, (baseW * (currentScale - 1)) / 2 + 40);
+    const panOffsetLimitY = Math.max((containerHeight * (currentScale - 1)) / 2, (baseH * (currentScale - 1)) / 2 + 40);
 
     switch (corner) {
       case 'top-left':
@@ -134,11 +137,20 @@ export const ImageViewerModal: React.FC<ImageViewerModalProps> = ({
     }
   };
 
+  // Nudge position incrementally in any direction
+  const nudge = (dx: number, dy: number) => {
+    if (scale <= 1) setScale(2);
+    setPosition((prev) => ({
+      x: prev.x + dx,
+      y: prev.y + dy
+    }));
+  };
+
   // Mouse wheel zoom
   const handleWheel = (e: React.WheelEvent) => {
     e.preventDefault();
     if (e.deltaY < 0) {
-      setScale((prev) => Math.min(5, Number((prev + 0.25).toFixed(2))));
+      setScale((prev) => Math.min(8, Number((prev + 0.25).toFixed(2))));
     } else {
       setScale((prev) => {
         const next = Math.max(1, Number((prev - 0.25).toFixed(2)));

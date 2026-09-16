@@ -263,25 +263,25 @@ export const ScholarshipHub: React.FC<Props> = ({ currentUser, onAwardPoints }) 
       {activeSubTab === 'essay' && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Controls form */}
-          <div className="lg:col-span-5 bg-white rounded-2xl p-5 border border-gray-200 shadow-2xs space-y-4">
-            <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-              <h3 className="font-heading font-bold text-sm text-gray-900 flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-emerald-600" />
+          <div className="lg:col-span-5 bg-white dark:bg-slate-900 rounded-2xl p-5 border border-gray-200 dark:border-slate-800 shadow-2xs space-y-4">
+            <div className="flex items-center justify-between border-b border-gray-100 dark:border-slate-800 pb-3">
+              <h3 className="font-heading font-bold text-sm text-gray-900 dark:text-white flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                 <span>Sanidi Barua Yako (AI Prompt Inputs)</span>
               </h3>
-              <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">
+              <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded-md">
                 +15 EduPoints
               </span>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-gray-700 mb-1">
+              <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">
                 Chagua Aina ya Ufadhili (Target Scholarship)
               </label>
               <select
                 value={scholarshipTarget}
                 onChange={(e) => setScholarshipTarget(e.target.value)}
-                className="w-full p-2.5 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:bg-white"
+                className="w-full p-2.5 text-xs bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:bg-white dark:focus:bg-slate-900"
               >
                 {SCHOLARSHIP_PRESETS.map((s) => (
                   <option key={s.id} value={s.id}>
@@ -293,30 +293,30 @@ export const ScholarshipHub: React.FC<Props> = ({ currentUser, onAwardPoints }) 
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1">Kiwango cha Elimu</label>
+                <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">Kiwango cha Elimu</label>
                 <input
                   type="text"
                   value={applicantLevel}
                   onChange={(e) => setApplicantLevel(e.target.value)}
                   placeholder="Mf: Form VI au Shahada"
-                  className="w-full p-2.5 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:bg-white"
+                  className="w-full p-2.5 text-xs bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:bg-white dark:focus:bg-slate-900"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1">Mchepuo / Kozi</label>
+                <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">Mchepuo / Kozi</label>
                 <input
                   type="text"
                   value={fieldOfStudy}
                   onChange={(e) => setFieldOfStudy(e.target.value)}
                   placeholder="Mf: PCB, PCM, Computer Science"
-                  className="w-full p-2.5 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:bg-white"
+                  className="w-full p-2.5 text-xs bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:bg-white dark:focus:bg-slate-900"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-gray-700 mb-1">
+              <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">
                 Mafanikio Yako Makuu (Key Achievements)
               </label>
               <textarea
@@ -324,12 +324,12 @@ export const ScholarshipHub: React.FC<Props> = ({ currentUser, onAwardPoints }) 
                 value={keyAchievements}
                 onChange={(e) => setKeyAchievements(e.target.value)}
                 placeholder="Eleza alama zako za juu, uongozi, au miradi ya shule..."
-                className="w-full p-2.5 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:bg-white"
+                className="w-full p-2.5 text-xs bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:bg-white dark:focus:bg-slate-900"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-gray-700 mb-1">
+              <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">
                 Uhitaji wa Kifedha & Asili ya Familia (Financial Need Story)
               </label>
               <textarea
@@ -337,12 +337,12 @@ export const ScholarshipHub: React.FC<Props> = ({ currentUser, onAwardPoints }) 
                 value={financialNeedStory}
                 onChange={(e) => setFinancialNeedStory(e.target.value)}
                 placeholder="Kwanini unahitaji ufadhili huu kufanikisha ndoto zako..."
-                className="w-full p-2.5 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:bg-white"
+                className="w-full p-2.5 text-xs bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:bg-white dark:focus:bg-slate-900"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-gray-700 mb-1">
+              <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">
                 Malengo ya Baadaye kwa Tanzania (Future Impact)
               </label>
               <textarea
@@ -350,12 +350,12 @@ export const ScholarshipHub: React.FC<Props> = ({ currentUser, onAwardPoints }) 
                 value={careerAspiration}
                 onChange={(e) => setCareerAspiration(e.target.value)}
                 placeholder="Utaleta mabadiliko gani kiuchumi, kiafya au kiteknolojia..."
-                className="w-full p-2.5 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:bg-white"
+                className="w-full p-2.5 text-xs bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:bg-white dark:focus:bg-slate-900"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-gray-700 mb-1">
+              <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">
                 Mtindo wa Uandishi (Tone of Voice)
               </label>
               <div className="grid grid-cols-3 gap-2">
@@ -364,8 +364,8 @@ export const ScholarshipHub: React.FC<Props> = ({ currentUser, onAwardPoints }) 
                   onClick={() => setTone('passionate')}
                   className={`p-2 rounded-xl text-[11px] font-semibold border text-center cursor-pointer ${
                     tone === 'passionate'
-                      ? 'bg-emerald-50 border-emerald-600 text-emerald-800'
-                      : 'border-gray-200 text-gray-600'
+                      ? 'bg-emerald-50 dark:bg-emerald-950/50 border-emerald-600 text-emerald-800 dark:text-emerald-300'
+                      : 'border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-300'
                   }`}
                 >
                   🔥 Wenye Shauku (Passionate)
@@ -375,8 +375,8 @@ export const ScholarshipHub: React.FC<Props> = ({ currentUser, onAwardPoints }) 
                   onClick={() => setTone('academic')}
                   className={`p-2 rounded-xl text-[11px] font-semibold border text-center cursor-pointer ${
                     tone === 'academic'
-                      ? 'bg-emerald-50 border-emerald-600 text-emerald-800'
-                      : 'border-gray-200 text-gray-600'
+                      ? 'bg-emerald-50 dark:bg-emerald-950/50 border-emerald-600 text-emerald-800 dark:text-emerald-300'
+                      : 'border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-300'
                   }`}
                 >
                   🎓 Wa Kitaaluma (Academic)
@@ -386,8 +386,8 @@ export const ScholarshipHub: React.FC<Props> = ({ currentUser, onAwardPoints }) 
                   onClick={() => setTone('humble')}
                   className={`p-2 rounded-xl text-[11px] font-semibold border text-center cursor-pointer ${
                     tone === 'humble'
-                      ? 'bg-emerald-50 border-emerald-600 text-emerald-800'
-                      : 'border-gray-200 text-gray-600'
+                      ? 'bg-emerald-50 dark:bg-emerald-950/50 border-emerald-600 text-emerald-800 dark:text-emerald-300'
+                      : 'border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-300'
                   }`}
                 >
                   🌱 Wa Unyenyekevu (Humble)
@@ -415,12 +415,12 @@ export const ScholarshipHub: React.FC<Props> = ({ currentUser, onAwardPoints }) 
           </div>
 
           {/* Generated Output Preview */}
-          <div className="lg:col-span-7 bg-white rounded-2xl p-5 border border-gray-200 shadow-2xs flex flex-col justify-between space-y-4">
+          <div className="lg:col-span-7 bg-white dark:bg-slate-900 rounded-2xl p-5 border border-gray-200 dark:border-slate-800 shadow-2xs flex flex-col justify-between space-y-4">
             <div>
-              <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+              <div className="flex items-center justify-between border-b border-gray-100 dark:border-slate-800 pb-3">
                 <div className="flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-emerald-600" />
-                  <h3 className="font-heading font-bold text-sm text-gray-900">
+                  <FileText className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  <h3 className="font-heading font-bold text-sm text-gray-900 dark:text-white">
                     Rasimu Yako ya Motivation Letter
                   </h3>
                 </div>
@@ -433,7 +433,7 @@ export const ScholarshipHub: React.FC<Props> = ({ currentUser, onAwardPoints }) 
                         setCopied(true);
                         setTimeout(() => setCopied(false), 2000);
                       }}
-                      className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-100 hover:bg-gray-200 text-gray-700 flex items-center gap-1 cursor-pointer"
+                      className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-200 flex items-center gap-1 cursor-pointer"
                     >
                       <Copy className="w-3.5 h-3.5" />
                       <span>{copied ? 'Imenakiliwa!' : 'Nakili'}</span>
@@ -447,7 +447,7 @@ export const ScholarshipHub: React.FC<Props> = ({ currentUser, onAwardPoints }) 
                         document.body.appendChild(element);
                         element.click();
                       }}
-                      className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-50 hover:bg-emerald-100 text-emerald-800 flex items-center gap-1 cursor-pointer"
+                      className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 text-emerald-800 dark:text-emerald-300 flex items-center gap-1 cursor-pointer"
                     >
                       <Download className="w-3.5 h-3.5" />
                       <span>Pakua TXT</span>
@@ -458,9 +458,9 @@ export const ScholarshipHub: React.FC<Props> = ({ currentUser, onAwardPoints }) 
 
               {generatedEssay ? (
                 <div className="mt-4">
-                  <div className="flex items-center justify-between text-[11px] text-gray-500 mb-2">
+                  <div className="flex items-center justify-between text-[11px] text-gray-500 dark:text-slate-400 mb-2">
                     <span>Maneno: {generatedEssay.split(/\s+/).length} | Herufi: {generatedEssay.length}</span>
-                    <span className="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded">
+                    <span className="text-emerald-700 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded">
                       Ubora wa Ushindani: 96% (Tayari Kutuma)
                     </span>
                   </div>
@@ -468,17 +468,17 @@ export const ScholarshipHub: React.FC<Props> = ({ currentUser, onAwardPoints }) 
                     rows={16}
                     value={generatedEssay}
                     onChange={(e) => setGeneratedEssay(e.target.value)}
-                    className="w-full p-4 bg-gray-50/70 border border-gray-200 rounded-xl text-xs font-mono leading-relaxed text-gray-800 focus:bg-white"
+                    className="w-full p-4 bg-gray-50/70 dark:bg-slate-800/70 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-mono leading-relaxed text-gray-800 dark:text-slate-200 focus:bg-white dark:focus:bg-slate-900"
                   />
                 </div>
               ) : (
-                <div className="py-16 text-center text-gray-400 space-y-3">
-                  <div className="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto">
+                <div className="py-16 text-center text-gray-400 dark:text-slate-500 space-y-3">
+                  <div className="w-12 h-12 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto">
                     <FileText className="w-6 h-6" />
                   </div>
                   <div className="max-w-md mx-auto">
-                    <h4 className="text-sm font-bold text-gray-700">Hujatengeneza rasimu bado</h4>
-                    <p className="text-xs text-gray-500 mt-1">
+                    <h4 className="text-sm font-bold text-gray-700 dark:text-slate-300">Hujatengeneza rasimu bado</h4>
+                    <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">
                       Jaza maelezo yako upande wa kushoto na ubofye "Tengeneza Rasimu ya Motivation Letter". AI itatengeneza barua iliyopangwa kitaalamu tayari kwa kuomba Samia Scholarship au mikopo.
                     </p>
                   </div>
@@ -487,8 +487,8 @@ export const ScholarshipHub: React.FC<Props> = ({ currentUser, onAwardPoints }) 
             </div>
 
             {/* Quick tips */}
-            <div className="bg-amber-50/60 p-3.5 rounded-xl border border-amber-200/70 text-xs text-amber-900 flex items-start gap-2.5">
-              <Sparkles className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+            <div className="bg-amber-50/60 dark:bg-amber-950/30 p-3.5 rounded-xl border border-amber-200/70 dark:border-amber-900/40 text-xs text-amber-900 dark:text-amber-200 flex items-start gap-2.5">
+              <Sparkles className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
               <p>
                 <strong>Kidokezo cha Ushindi:</strong> Kamati za ufadhili hutafuta hadithi halisi ya mwanafunzi (authenticity) na mchango wake kwa jamii badala ya maneno ya jumla. Hariri rasimu yako kuongeza majina ya vijiji vyenu au shule yako.
               </p>
@@ -500,14 +500,14 @@ export const ScholarshipHub: React.FC<Props> = ({ currentUser, onAwardPoints }) 
       {/* SUBTAB 2: ELIGIBILITY CHECKER */}
       {activeSubTab === 'checker' && (
         <div className="space-y-6">
-          <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-2xs space-y-4">
-            <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-gray-200 dark:border-slate-800 shadow-2xs space-y-4">
+            <div className="flex items-center justify-between border-b border-gray-100 dark:border-slate-800 pb-3">
               <div>
-                <h3 className="font-heading font-bold text-sm text-gray-900 flex items-center gap-2">
-                  <Award className="w-4 h-4 text-emerald-600" />
+                <h3 className="font-heading font-bold text-sm text-gray-900 dark:text-white flex items-center gap-2">
+                  <Award className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                   <span>Kikaguzi cha Vigezo vya Ufadhili (Eligibility Checker)</span>
                 </h3>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-500 dark:text-slate-400">
                   Weka matokeo yako kuona ufadhili unaokidhi vigezo vyake mara moja.
                 </p>
               </div>
@@ -523,11 +523,11 @@ export const ScholarshipHub: React.FC<Props> = ({ currentUser, onAwardPoints }) 
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
               <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1">Kiwango cha Elimu</label>
+                <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">Kiwango cha Elimu</label>
                 <select
                   value={checkLevel}
                   onChange={(e) => setCheckLevel(e.target.value)}
-                  className="w-full p-2.5 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:bg-white"
+                  className="w-full p-2.5 text-xs bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:bg-white dark:focus:bg-slate-900"
                 >
                   <option value="Form VI">Kidato cha Sita (A-Level)</option>
                   <option value="Form IV">Kidato cha Nne (O-Level)</option>
@@ -537,11 +537,11 @@ export const ScholarshipHub: React.FC<Props> = ({ currentUser, onAwardPoints }) 
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1">Daraja / Division</label>
+                <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">Daraja / Division</label>
                 <select
                   value={checkDivision}
                   onChange={(e) => setCheckDivision(e.target.value)}
-                  className="w-full p-2.5 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:bg-white"
+                  className="w-full p-2.5 text-xs bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:bg-white dark:focus:bg-slate-900"
                 >
                   <option value="I.7">Division I.7 (Ufaulu wa Juu Zaidi)</option>
                   <option value="I.9">Division I.8 - I.9</option>
@@ -552,7 +552,7 @@ export const ScholarshipHub: React.FC<Props> = ({ currentUser, onAwardPoints }) 
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1">GPA ya Sasa (Kama Upo Chuo)</label>
+                <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">GPA ya Sasa (Kama Upo Chuo)</label>
                 <input
                   type="number"
                   step="0.1"
@@ -560,16 +560,16 @@ export const ScholarshipHub: React.FC<Props> = ({ currentUser, onAwardPoints }) 
                   max="5.0"
                   value={checkGpa}
                   onChange={(e) => setCheckGpa(e.target.value)}
-                  className="w-full p-2.5 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:bg-white"
+                  className="w-full p-2.5 text-xs bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:bg-white dark:focus:bg-slate-900"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1">Mchepuo (Combination / Fani)</label>
+                <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">Mchepuo (Combination / Fani)</label>
                 <select
                   value={checkCombination}
                   onChange={(e) => setCheckCombination(e.target.value)}
-                  className="w-full p-2.5 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:bg-white"
+                  className="w-full p-2.5 text-xs bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:bg-white dark:focus:bg-slate-900"
                 >
                   <option value="PCB">PCB (Physics, Chem, Bio)</option>
                   <option value="PCM">PCM (Physics, Chem, Math)</option>
@@ -584,12 +584,12 @@ export const ScholarshipHub: React.FC<Props> = ({ currentUser, onAwardPoints }) 
               </div>
 
               <div className="flex items-center pt-5">
-                <label className="flex items-center gap-2 text-xs text-gray-700 cursor-pointer">
+                <label className="flex items-center gap-2 text-xs text-gray-700 dark:text-slate-300 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={checkSpecialNeeds}
                     onChange={(e) => setCheckSpecialNeeds(e.target.checked)}
-                    className="w-4 h-4 text-emerald-600 rounded border-gray-300"
+                    className="w-4 h-4 text-emerald-600 rounded border-gray-300 dark:border-slate-600"
                   />
                   <span>Hali Maalum (Yatima / Kaya Duni)</span>
                 </label>
@@ -600,7 +600,7 @@ export const ScholarshipHub: React.FC<Props> = ({ currentUser, onAwardPoints }) 
           {/* Results Grid */}
           {checkedResults ? (
             <div className="space-y-4">
-              <h4 className="font-heading font-bold text-sm text-gray-900">
+              <h4 className="font-heading font-bold text-sm text-gray-900 dark:text-white">
                 Matokeo ya Upimaji wa Vigezo vya Ufadhili ({checkedResults.length} Zimechambuliwa)
               </h4>
 
@@ -608,14 +608,14 @@ export const ScholarshipHub: React.FC<Props> = ({ currentUser, onAwardPoints }) 
                 {checkedResults.map(({ scholarship, eligibleScore, status, feedback }) => (
                   <div
                     key={scholarship.id}
-                    className="bg-white rounded-2xl p-5 border border-gray-200 shadow-2xs space-y-3 hover:border-emerald-300 transition-all"
+                    className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-gray-200 dark:border-slate-800 shadow-2xs space-y-3 hover:border-emerald-300 dark:hover:border-emerald-700 transition-all"
                   >
                     <div className="flex items-start justify-between">
                       <div>
-                        <span className="text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded">
+                        <span className="text-[10px] font-bold uppercase tracking-wider bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded">
                           {scholarship.provider}
                         </span>
-                        <h4 className="font-heading font-bold text-sm text-gray-900 mt-1">
+                        <h4 className="font-heading font-bold text-sm text-gray-900 dark:text-white mt-1">
                           {scholarship.name}
                         </h4>
                       </div>

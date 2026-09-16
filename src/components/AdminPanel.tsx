@@ -2440,12 +2440,12 @@ export const AdminPanel: React.FC<Props> = ({
                       placeholder="https://... logo image url"
                       value={newSchoolLogo}
                       onChange={(e) => setNewSchoolLogo(e.target.value)}
-                      className="flex-1 p-2 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:bg-white text-xs text-gray-900 dark:text-white font-mono"
+                      className="flex-1 p-2 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-900 text-xs text-gray-900 dark:text-white font-mono"
                     />
                     <img
                       src={newSchoolLogo}
                       alt="Logo Preview"
-                      className="w-8 h-8 rounded-lg object-cover ring-1 ring-emerald-300 shrink-0 bg-white"
+                      className="w-8 h-8 rounded-lg object-cover ring-1 ring-emerald-300 shrink-0 bg-white dark:bg-slate-800"
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=160&auto=format&fit=crop&q=80';
                       }}
@@ -2476,12 +2476,12 @@ export const AdminPanel: React.FC<Props> = ({
                       placeholder="https://... school campus cover url"
                       value={newSchoolCover}
                       onChange={(e) => setNewSchoolCover(e.target.value)}
-                      className="flex-1 p-2 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:bg-white text-xs text-gray-900 dark:text-white font-mono"
+                      className="flex-1 p-2 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-900 text-xs text-gray-900 dark:text-white font-mono"
                     />
                     <img
                       src={newSchoolCover}
                       alt="Cover Preview"
-                      className="w-12 h-7 rounded-lg object-cover ring-1 ring-emerald-300 shrink-0 bg-white"
+                      className="w-12 h-7 rounded-lg object-cover ring-1 ring-emerald-300 shrink-0 bg-white dark:bg-slate-800"
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=1000&auto=format&fit=crop&q=80';
                       }}
@@ -2570,7 +2570,7 @@ export const AdminPanel: React.FC<Props> = ({
                   <img
                     src={editSchoolLogo}
                     alt="Logo preview"
-                    className="w-16 h-16 rounded-2xl object-cover ring-3 ring-white dark:ring-slate-900 shadow-md bg-white shrink-0"
+                    className="w-16 h-16 rounded-2xl object-cover ring-3 ring-white dark:ring-slate-900 shadow-md bg-white dark:bg-slate-800 shrink-0"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=160&auto=format&fit=crop&q=80';
                     }}
@@ -2598,7 +2598,7 @@ export const AdminPanel: React.FC<Props> = ({
                     value={editSchoolLogo}
                     onChange={(e) => setEditSchoolLogo(e.target.value)}
                     placeholder="Enter school logo URL..."
-                    className="w-full p-2.5 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:bg-white text-xs font-mono text-gray-900 dark:text-white"
+                    className="w-full p-2.5 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-900 text-xs font-mono text-gray-900 dark:text-white"
                   />
                   <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
                     <span className="text-[10px] text-gray-500 dark:text-slate-400">Choose Preset:</span>
@@ -2624,7 +2624,7 @@ export const AdminPanel: React.FC<Props> = ({
                     value={editSchoolCover}
                     onChange={(e) => setEditSchoolCover(e.target.value)}
                     placeholder="Enter campus cover URL..."
-                    className="w-full p-2.5 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:bg-white text-xs font-mono text-gray-900 dark:text-white"
+                    className="w-full p-2.5 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-900 text-xs font-mono text-gray-900 dark:text-white"
                   />
                   <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
                     <span className="text-[10px] text-gray-500 dark:text-slate-400">Choose Preset:</span>

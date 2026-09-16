@@ -16,10 +16,12 @@ import {
   FileBadge,
   X
 } from 'lucide-react';
-import { UserProfile, UserRole } from '../types';
-import { INITIAL_USER } from '../data/mockData';
+import { UserProfile, UserRole, UserActivityItem, AppNotification, SchoolChatChannel, ChatMessage } from '../types';
+import { INITIAL_USER, INITIAL_NOTIFICATIONS } from '../data/mockData';
+import { INITIAL_CHAT_CHANNELS, INITIAL_CHAT_MESSAGES } from '../data/mockChatData';
 import { supabase } from '../lib/supabase';
 import { saveUserProfileToDb } from '../lib/supabaseService';
+import { getInitialState } from '../lib/store';
 
 interface LoginPageProps {
   isOpen: boolean;
@@ -239,46 +241,45 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         }
       }
 
-      // 2. Resolve persona / credentials for local & demo users (Always 'student' for non-admin)
-      const isUniversity = identifier.toLowerCase().includes('kelvin') || identifier.toLowerCase().includes('udsm');
-      
-      let loggedUser: UserProfile;
-      if (isUniversity) {
-        loggedUser = {
-          ...INITIAL_USER,
-          id: 'usr-kelvin-udsm',
-          name: 'Kelvin Komba',
-          handle: 'kelvin_tech',
-          email: identifier.includes('@') ? identifier.trim() : 'kelvin@udsm.ac.tz',
-          role: 'student',
-          studentRegNo: '2022-04-08912',
-          level: 'Chuo Kikuu (Higher Ed)',
-          combination: 'Sayansi ya Kompyuta & IT',
-          title: 'Mwanafunzi wa Shahada / Diploma',
-          schoolName: 'University of Dar es Salaam (UDSM)',
-          bio: 'Mwanafunzi wa Shahada ya Sayansi ya Kompyuta UDSM. Napenda maendeleo ya AI na programu.',
-        };
-      } else {
-        loggedUser = {
-          ...INITIAL_USER,
-          id: 'user-student-1',
-          name: 'Nicolous Munisi (Mwanafunzi)',
-          handle: 'nicolous_student',
-          email: identifier.includes('@') ? identifier.trim() : 'mwanafunzi@edukan.tz',
-          role: 'student',
-          studentRegNo: identifier.startsWith('S.') ? identifier.trim() : 'S.0112/0045/2024',
-          level: 'Kidato cha V - VI (A-Level)',
-          combination: 'PCB (Physics, Chemistry, Biology)',
-          title: 'Kiranja wa Masomo (Academic Prefect)',
-          schoolName: 'Malampaka Secondary School',
-        };
+      // 2. Resolve credentials against locally registered student accounts
+      const registeredAccountsRaw = localStorage.getItem('edukan_registered_accounts');
+      const registeredAccounts: Array<{
+        id: string;
+        email: string;
+        studentRegNo?: string;
+        name: string;
+        password?: string;
+        profile: UserProfile;
+      }> = registeredAccountsRaw ? JSON.parse(registeredAccountsRaw) : [];
+
+      const matchedAccount = registeredAccounts.find(acc => {
+        const matchesId =
+          acc.email?.toLowerCase() === idTrimmed ||
+          acc.studentRegNo?.toLowerCase() === idTrimmed ||
+          acc.name?.toLowerCase() === idTrimmed;
+        return matchesId && (!acc.password || acc.password === passTrimmed);
+      });
+
+      if (matchedAccount && matchedAccount.profile) {
+        await saveUserProfileToDb(matchedAccount.profile);
+        setLoading(false);
+        onLoginSuccess(matchedAccount.profile, matchedAccount.profile.role || 'student');
+        onClose();
+        return;
       }
 
-      // Sync user profile to database and local cache
-      await saveUserProfileToDb(loggedUser);
+      // 3. Check current saved user if matching
+      const savedUser = getInitialState<UserProfile | null>('edukan_user', null);
+      if (savedUser && (savedUser.email?.toLowerCase() === idTrimmed || savedUser.studentRegNo?.toLowerCase() === idTrimmed || savedUser.name?.toLowerCase() === idTrimmed)) {
+        setLoading(false);
+        onLoginSuccess(savedUser, savedUser.role || 'student');
+        onClose();
+        return;
+      }
+
+      // If no valid registered account matches
       setLoading(false);
-      onLoginSuccess(loggedUser, 'student');
-      onClose();
+      setErrorMsg('Akaunti haijapatikana au nenosiri si sahihi. Tafadhali hakikisha taarifa zako au bofya "Unda Akaunti Mpya" kujiunga na EduKan.');
     } catch (err: any) {
       setLoading(false);
       setErrorMsg(err?.message || 'Hitilafu ya kuingia. Tafadhali jaribu tena.');
@@ -347,6 +348,62 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         console.warn('Supabase Auth signup notice (proceeding with local & table sync):', authErr);
       }
 
+      const foundationActivities: UserActivityItem[] = [
+        {
+          id: `act-reg-${Date.now()}-1`,
+          type: 'register',
+          title: 'Usajili wa Akaunti ya EduKan',
+          description: `Umejiunga rasmi kama ${chosenTitle} kutoka ${regSchool} (${regLevel}${regCombination ? ` • ${regCombination}` : ''}).`,
+          timestamp: 'Sasa hivi',
+          pointsEarned: finalRole === 'admin' ? 5000 : 50,
+          icon: '🎉'
+        },
+        {
+          id: `act-bonus-${Date.now()}-2`,
+          type: 'points',
+          title: 'Pointi za Mwanzo za Ukaribisho',
+          description: 'Umetunukiwa pointi za mwanzo kuanzia safari yako ya elimu mtandaoni na kujiunga na kundi la vinara.',
+          timestamp: 'Sasa hivi',
+          pointsEarned: finalRole === 'admin' ? 5000 : 50,
+          icon: '⭐'
+        },
+        {
+          id: `act-school-${Date.now()}-3`,
+          type: 'school',
+          title: `Jumuiya ya ${regSchool}`,
+          description: `Umeunganishwa na jumuiya na wanafunzi wa darasa la ${regLevel} hapo ${regSchool}.`,
+          timestamp: 'Sasa hivi',
+          pointsEarned: 20,
+          icon: '🏫'
+        },
+        {
+          id: `act-msg-${Date.now()}-4`,
+          type: 'chat',
+          title: 'Ujumbe wa Mwanzo wa Ushauri',
+          description: 'EduKan Academic Support amekutumia ujumbe wa kwanza wa mwongozo kwenye soga inbox.',
+          timestamp: 'Sasa hivi',
+          icon: '💬'
+        },
+        {
+          id: `act-lib-${Date.now()}-5`,
+          type: 'library',
+          title: 'Maktaba & Past Papers za NECTA',
+          description: `Umepewa ufikiaji wa vitabu vyote vya kiada, syllabus na past papers za ${regLevel}.`,
+          timestamp: 'Sasa hivi',
+          pointsEarned: 10,
+          icon: '📚'
+        },
+        {
+          id: `act-opp-${Date.now()}-6`,
+          type: 'badge',
+          title: 'Fursa za Masomo & Ufadhili',
+          description: 'Umeunganishwa na kitovu cha fursa za scholarships, bootcamps na mashindano ya kitaifa.',
+          timestamp: 'Sasa hivi',
+          pointsEarned: 15,
+          icon: '🚀'
+        }
+      ];
+
       const newUser: UserProfile = {
         id: generatedAuthId,
         name: regName.trim(),
@@ -362,16 +419,155 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         combination: regCombination,
         title: chosenTitle,
         bio: `${chosenTitle} katika ${regSchool}. Najiandaa na maendeleo ya kitaaluma kupitia mtandao wa EduKan Tanzania.`,
-        points: finalRole === 'admin' ? 5000 : 200,
+        points: finalRole === 'admin' ? 5000 : 50,
         followersCount: 0,
         followingCount: 3,
-        achievements: [],
-        studentRegNo: finalRole === 'admin' ? 'ADMIN-TZ-001' : `S.${Math.floor(1000 + Math.random() * 9000)}/2025`
+        achievements: [
+          {
+            id: `ach-welcome-${Date.now()}`,
+            title: 'Mwanzo wa Safari - Karibu EduKan',
+            description: 'Umekamilisha usajili wa akaunti yako ya kitaaluma kwenye mfumo wa EduKan Tanzania.',
+            icon: '🌟',
+            unlockedAt: new Date().toISOString().split('T')[0]
+          }
+        ],
+        activities: foundationActivities,
+        studentRegNo: finalRole === 'admin' ? 'ADMIN-TZ-001' : (regPhone ? `TZ-${regPhone.slice(-4)}/2025` : `S.${Math.floor(1000 + Math.random() * 9000)}/2025`)
       };
 
-      // Persist to Supabase and cache
+      // Persist to Supabase and local cache
       await saveUserProfileToDb(newUser);
       localStorage.setItem('edukan_is_registered', 'true');
+
+      // Record in local persistent account registry so user can login anytime
+      try {
+        const existingAccountsRaw = localStorage.getItem('edukan_registered_accounts');
+        const existingAccounts = existingAccountsRaw ? JSON.parse(existingAccountsRaw) : [];
+        existingAccounts.push({
+          id: newUser.id,
+          email: newUser.email.toLowerCase(),
+          studentRegNo: newUser.studentRegNo?.toLowerCase(),
+          name: newUser.name,
+          password: regPassword.trim(),
+          profile: newUser
+        });
+        localStorage.setItem('edukan_registered_accounts', JSON.stringify(existingAccounts));
+      } catch (storageErr) {
+        console.warn('Could not cache registered account locally:', storageErr);
+      }
+
+      // Generate immediate welcome notifications for the newly registered account
+      try {
+        const existingNotifsRaw = localStorage.getItem('edukan_notifications');
+        const existingNotifs: AppNotification[] = existingNotifsRaw ? JSON.parse(existingNotifsRaw) : INITIAL_NOTIFICATIONS;
+        const newWelcomeNotifs: AppNotification[] = [
+          {
+            id: `notif-welcome-${Date.now()}-1`,
+            title: `Karibu EduKan Tanzania, ${regName.trim()}! 🎉`,
+            message: `Akaunti yako ya ${chosenTitle} imethibitishwa. Umetunukiwa pointi ${finalRole === 'admin' ? '5,000' : '50'} za mwanzo kuanzia safari yako ya kitaaluma.`,
+            category: 'announcement',
+            timestamp: 'Sasa hivi',
+            read: false,
+            actionTab: 'feed'
+          },
+          {
+            id: `notif-msg-${Date.now()}-2`,
+            title: 'Ujumbe Mpya kutoka kwa Mshauri wa Elimu 💬',
+            message: `EduKan Academic Support amekutumia ujumbe wa ukaribisho na miongozo ya mitihani kwenye chumba cha maongezi.`,
+            category: 'community',
+            timestamp: 'Sasa hivi',
+            read: false,
+            actionTab: 'community'
+          },
+          {
+            id: `notif-school-${Date.now()}-3`,
+            title: `Jumuiya ya ${regSchool} 🏫`,
+            message: `Umeunganishwa rasmi na wanafunzi na mijadala ya darasa la ${regLevel} hapo ${regSchool}.`,
+            category: 'community',
+            timestamp: 'Sasa hivi',
+            read: false,
+            actionTab: 'community'
+          },
+          {
+            id: `notif-lib-${Date.now()}-4`,
+            title: `Maktaba & Past Papers Zimefunguliwa 📚`,
+            message: `Pata vitabu vya kiada, muhtasari (syllabus) na mitihani ya NECTA kwa ajili ya ngazi yako ya masomo.`,
+            category: 'points',
+            timestamp: 'Sasa hivi',
+            read: false,
+            actionTab: 'library'
+          }
+        ];
+        const combinedNotifs = [...newWelcomeNotifs, ...existingNotifs];
+        localStorage.setItem('edukan_notifications', JSON.stringify(combinedNotifs));
+      } catch (notifErr) {
+        console.warn('Could not save registration notifications:', notifErr);
+      }
+
+      // Generate immediate chat welcome message & channel
+      try {
+        const existingChannelsRaw = localStorage.getItem('edukan_chat_channels');
+        const existingChannels: SchoolChatChannel[] = existingChannelsRaw ? JSON.parse(existingChannelsRaw) : INITIAL_CHAT_CHANNELS;
+
+        const advisorChannelId = 'channel-dm-advisor';
+        const advisorChannelExists = existingChannels.some(c => c.id === advisorChannelId);
+
+        const advisorChannel: SchoolChatChannel = {
+          id: advisorChannelId,
+          type: 'private_direct',
+          schoolName: 'EduKan Tanzania Headquarters',
+          name: 'Mshauri wa Elimu (EduKan Academic Advisor)',
+          description: 'Ushauri wa masomo, maandalizi ya NECTA, uteuzi wa machaguo (TCU/NACTE/HESLB) na fursa za masomo.',
+          memberCount: 2,
+          unreadCount: 1,
+          pinned: true,
+          lastMessage: {
+            content: `Habari ${regName.trim()}! Karibu sana kwenye mtandao wa EduKan Tanzania. Hapa tuko kwa ajili ya kukusaidia katika masomo yako ya ${regLevel}.`,
+            senderName: 'Mshauri wa Elimu',
+            timestamp: 'Sasa hivi'
+          },
+          participant: {
+            id: 'usr-edukan-advisor',
+            name: 'Mshauri wa Elimu (EduKan Advisor)',
+            handle: 'edukan_advisor',
+            avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&auto=format&fit=crop&q=80',
+            schoolName: 'EduKan Academic Support Center',
+            level: 'Afisa Ushauri wa Elimu',
+            status: 'online'
+          }
+        };
+
+        const updatedChannels = advisorChannelExists
+          ? existingChannels.map(c => c.id === advisorChannelId ? advisorChannel : c)
+          : [advisorChannel, ...existingChannels];
+
+        localStorage.setItem('edukan_chat_channels', JSON.stringify(updatedChannels));
+
+        // Save welcome chat messages into messagesMap
+        const existingMessagesRaw = localStorage.getItem('edukan_chat_messages');
+        const existingMessages: Record<string, ChatMessage[]> = existingMessagesRaw ? JSON.parse(existingMessagesRaw) : INITIAL_CHAT_MESSAGES;
+
+        const advisorMessages: ChatMessage[] = [
+          {
+            id: `msg-adv-welcome-${Date.now()}-1`,
+            channelId: advisorChannelId,
+            senderId: 'usr-edukan-advisor',
+            senderName: 'Mshauri wa Elimu (EduKan Advisor)',
+            senderAvatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&auto=format&fit=crop&q=80',
+            senderRole: 'admin',
+            senderLevel: 'Afisa Ushauri wa Elimu',
+            schoolName: 'EduKan Academic Support',
+            content: `Habari ${regName.trim()}! Karibu sana kwenye mtandao wa EduKan Tanzania.\n\nTunakutakia safari njema ya kitaaluma hapa ${regSchool}. Akaunti yako ya ${chosenTitle} imethibitishwa na umeanza na pointi za ukaribisho.\n\nNdani ya EduKan unaweza:\n1. Kusoma na kupakua vitabu na NECTA past papers kwenye Maktaba\n2. Kuuliza maswali magumu ya masomo na kupata majibu kutoka kwa walimu na wanafunzi hodari\n3. Kujiunga na mijadala ya darasa la ${regLevel}\n4. Kupata ufadhili (scholarships) na fursa za elimu.\n\nKama una swali lolote la kimasomo au ushauri wa maisha ya shule, nijibu hapa moja kwa moja!`,
+            createdAt: 'Sasa hivi',
+            status: 'read'
+          }
+        ];
+
+        existingMessages[advisorChannelId] = advisorMessages;
+        localStorage.setItem('edukan_chat_messages', JSON.stringify(existingMessages));
+      } catch (chatErr) {
+        console.warn('Could not seed chat welcome messages:', chatErr);
+      }
 
       setLoading(false);
       onLoginSuccess(newUser, finalRole);
@@ -382,22 +578,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({
     }
   };
 
-  const handleQuickDemo = (role: 'student' | 'university' | 'guest') => {
-    if (role === 'guest') {
-      if (onGuestContinue) {
-        onGuestContinue();
-      } else {
-        onClose();
-      }
-      return;
-    }
-
-    if (role === 'university') {
-      setIdentifier('kelvin@udsm.ac.tz');
-      setPassword('edukan123');
+  const handleGuestContinue = () => {
+    if (onGuestContinue) {
+      onGuestContinue();
     } else {
-      setIdentifier('S.0112/0045/2024');
-      setPassword('edukan123');
+      onClose();
     }
   };
 
@@ -486,40 +671,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({
           {authMode === 'login' ? (
             /* Login Form */
             <form onSubmit={handleLoginSubmit} className="space-y-4">
-              {/* Quick Demo Pre-fill Pills */}
-              <div className="bg-emerald-50/70 dark:bg-slate-800/70 p-3 rounded-2xl border border-emerald-200/80 dark:border-slate-700">
-                <div className="text-[11px] font-bold text-emerald-900 dark:text-emerald-300 mb-1.5 flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-                  <span>Akaunti za Majaribio (Bofya kuingia haraka):</span>
-                </div>
-                <div className="flex flex-wrap items-center gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() => handleQuickDemo('student')}
-                    className="text-[11px] font-semibold bg-white dark:bg-slate-800 border border-emerald-300 dark:border-slate-600 text-emerald-800 dark:text-emerald-300 hover:bg-emerald-100 px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
-                  >
-                    👨‍🎓 Mwanafunzi wa Sekondari (Malampaka)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleQuickDemo('university')}
-                    className="text-[11px] font-semibold bg-white dark:bg-slate-800 border border-blue-300 dark:border-slate-600 text-blue-800 dark:text-blue-300 hover:bg-blue-100 px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
-                  >
-                    🎓 Mwanafunzi wa Chuo Kikuu (UDSM)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIdentifier('nicolousmunisi07@gmail.com');
-                      setPassword('@EduKan#26admin');
-                    }}
-                    className="text-[11px] font-semibold bg-purple-50 dark:bg-purple-950/60 border border-purple-300 dark:border-purple-800 text-purple-900 dark:text-purple-300 hover:bg-purple-100 px-2.5 py-1 rounded-lg transition-colors cursor-pointer flex items-center gap-1"
-                  >
-                    🛡️ Msimamizi Mkuu (Admin)
-                  </button>
-                </div>
-              </div>
-
               {/* Identifier Input */}
               <div>
                 <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1.5">
@@ -547,9 +698,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                   <label className="block text-xs font-bold text-gray-700 dark:text-slate-300">
                     Nenosiri (Password):
                   </label>
-                  <span className="text-[11px] text-emerald-700 dark:text-emerald-400 font-medium">
-                    (Demo: <strong className="text-emerald-800 dark:text-emerald-300 font-mono">edukan123</strong>)
-                  </span>
                 </div>
                 <div className="relative">
                   <Lock className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -558,7 +706,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password"
+                    placeholder="Weka nenosiri lako"
                     className="w-full text-xs sm:text-sm pl-10 pr-10 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all text-gray-900 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500"
                   />
                   <button
@@ -595,7 +743,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
               <div className="pt-2 text-center">
                 <button
                   type="button"
-                  onClick={() => handleQuickDemo('guest')}
+                  onClick={handleGuestContinue}
                   className="text-xs text-gray-500 dark:text-slate-400 hover:text-emerald-800 dark:hover:text-emerald-400 font-semibold transition-colors cursor-pointer"
                 >
                   Continue as Guest (Browse without account)
