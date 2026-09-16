@@ -84,6 +84,9 @@ export const QuickActionModal: React.FC<Props> = ({
   const [questionImageName, setQuestionImageName] = useState<string | null>(null);
   const questionFileInputRef = useRef<HTMLInputElement>(null);
 
+  // Form Validation State
+  const [validationError, setValidationError] = useState<string | null>(null);
+
   const handlePostFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -240,7 +243,20 @@ export const QuickActionModal: React.FC<Props> = ({
 
   const handlePostSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!postContent.trim()) return;
+    setValidationError(null);
+
+    if (!postContent.trim() || postContent.trim().length < 5) {
+      setValidationError('Tafadhali andika maudhui ya chapisho (angalau herufi 5).');
+      return;
+    }
+
+    if (postType === 'poll') {
+      const validOptions = pollOptions.filter(o => o.trim());
+      if (validOptions.length < 2) {
+        setValidationError('Kura ya maoni (poll) inahitaji angalau machaguo mawili yaliyojazwa.');
+        return;
+      }
+    }
 
     const filteredPoll = postType === 'poll'
       ? pollOptions.filter(o => o.trim()).map((text, i) => ({ id: `opt-${Date.now()}-${i}`, text, votes: 0 }))
@@ -265,13 +281,29 @@ export const QuickActionModal: React.FC<Props> = ({
       setPostMediaUrl(null);
       setPostMediaType(null);
       setPostMediaName(null);
+      setValidationError(null);
       onClose();
     }, 1200);
   };
 
   const handleQuestionSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!questionTitle.trim() || !questionContent.trim()) return;
+    setValidationError(null);
+
+    if (!questionTitle.trim() || questionTitle.trim().length < 5) {
+      setValidationError('Tafadhali andika kichwa cha swali kinachoeleweka (angalau herufi 5).');
+      return;
+    }
+
+    if (!questionSubject.trim()) {
+      setValidationError('Tafadhali chagua somo linalohusika na swali hili.');
+      return;
+    }
+
+    if (!questionContent.trim() || questionContent.trim().length < 8) {
+      setValidationError('Tafadhali andika maelezo ya kina ya swali (angalau herufi 8) ili uweze kusaidiwa vizuri.');
+      return;
+    }
 
     const formattedContent = questionImageUrl && !questionContent.includes('Kiambatisho')
       ? `${questionContent.trim()}\n\n📎 Mchoro/Picha ya Swali: ${questionImageName || 'Picha ya Swali'}`
@@ -293,6 +325,7 @@ export const QuickActionModal: React.FC<Props> = ({
       setQuestionContent('');
       setQuestionImageUrl(null);
       setQuestionImageName(null);
+      setValidationError(null);
       onClose();
       onNavigateTab('study');
     }, 1200);
@@ -332,7 +365,10 @@ export const QuickActionModal: React.FC<Props> = ({
         <div className="px-6 pt-3 pb-1 border-b border-gray-100 dark:border-slate-800 flex items-center gap-2 bg-white dark:bg-slate-900">
           <button
             type="button"
-            onClick={() => setActiveMode('post')}
+            onClick={() => {
+              setActiveMode('post');
+              setValidationError(null);
+            }}
             className={`flex-1 py-2 text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer ${
               activeMode === 'post'
                 ? 'bg-emerald-600 text-white shadow-xs'
@@ -344,7 +380,10 @@ export const QuickActionModal: React.FC<Props> = ({
           </button>
           <button
             type="button"
-            onClick={() => setActiveMode('question')}
+            onClick={() => {
+              setActiveMode('question');
+              setValidationError(null);
+            }}
             className={`flex-1 py-2 text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer ${
               activeMode === 'question'
                 ? 'bg-emerald-600 text-white shadow-xs'
@@ -358,6 +397,13 @@ export const QuickActionModal: React.FC<Props> = ({
 
         {/* Body Form */}
         <div className="p-6 overflow-y-auto custom-scrollbar flex-1 bg-white dark:bg-slate-900">
+          {validationError && (
+            <div className="mb-4 p-3 bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900 rounded-xl text-xs text-rose-800 dark:text-rose-300 font-semibold flex items-center gap-2 animate-in fade-in">
+              <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" />
+              <span>{validationError}</span>
+            </div>
+          )}
+
           {submittedMessage ? (
             <div className="py-12 text-center space-y-3">
               <div className="w-14 h-14 bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 rounded-full flex items-center justify-center mx-auto animate-bounce">

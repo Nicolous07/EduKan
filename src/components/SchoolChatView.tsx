@@ -146,6 +146,7 @@ export const SchoolChatView: React.FC<Props> = ({
   };
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   // Sync to localStorage
   useEffect(() => {
@@ -156,10 +157,41 @@ export const SchoolChatView: React.FC<Props> = ({
     saveState('edukan_chat_messages', messagesMap);
   }, [messagesMap]);
 
-  // Scroll to bottom of message list on new message or channel change
+  // Auto-scroll directly to bottom of message list on opening a chat room
   useEffect(() => {
+    const scrollToLatestMessage = (smooth: boolean = false) => {
+      if (messagesContainerRef.current) {
+        messagesContainerRef.current.scrollTo({
+          top: messagesContainerRef.current.scrollHeight,
+          behavior: smooth ? 'smooth' : 'auto'
+        });
+      }
+      if (messagesEndRef.current) {
+        messagesEndRef.current.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto' });
+      }
+    };
+
+    // Immediate jump when opening a channel
+    scrollToLatestMessage(false);
+    const timer1 = setTimeout(() => scrollToLatestMessage(false), 60);
+    const timer2 = setTimeout(() => scrollToLatestMessage(true), 250);
+
+    return () => {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+    };
+  }, [activeChannelId, isMobileChatOpen]);
+
+  // Smooth scroll to bottom when new messages are added
+  useEffect(() => {
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTo({
+        top: messagesContainerRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [activeChannelId, messagesMap]);
+  }, [messagesMap]);
 
   // If initialChannelId or initialSchoolId props change, update activeChannelId
   useEffect(() => {
@@ -793,7 +825,11 @@ export const SchoolChatView: React.FC<Props> = ({
           )}
 
           {/* Messages Stream Container */}
-          <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 custom-scrollbar">
+          <div
+            id="school-chat-messages-container"
+            ref={messagesContainerRef}
+            className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 custom-scrollbar"
+          >
             {activeMessages.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center p-6 text-gray-400">
                 <MessageSquare className="w-12 h-12 text-gray-300 mb-2" />

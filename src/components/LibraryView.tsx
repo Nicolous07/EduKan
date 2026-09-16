@@ -25,6 +25,7 @@ import {
   ZoomIn
 } from 'lucide-react';
 import { LibraryItem, LibraryLevel, LibraryCategory, UserProfile, UserRole } from '../types';
+import { OfflineIndicator } from './OfflineIndicator';
 
 export type DisciplineCategory =
   | 'all'
@@ -433,6 +434,12 @@ export const LibraryView: React.FC<Props> = ({
         {/* Ambient decorative element */}
         <div className="absolute -right-8 -bottom-8 w-60 h-60 bg-emerald-600/10 rounded-full blur-2xl pointer-events-none" />
       </div>
+
+      {/* Offline Status Warning & Cache Awareness */}
+      <OfflineIndicator
+        viewName="Maktaba (Library)"
+        contextHint="Vitabu na nyenzo zilizohifadhiwa awali zinaweza kusomwa na kupakuliwa hata ukiwa nje ya mtandao."
+      />
 
       {/* Dedicated View Mode Tabs: Maktaba Yote vs My Saved Resources */}
       <div className="flex items-center justify-between border-b border-gray-200 dark:border-slate-800 pb-2">

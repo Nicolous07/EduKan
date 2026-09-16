@@ -29,6 +29,7 @@ import { UserProfile, Post, QuestionItem, UserActivityItem } from '../types';
 import { EditProfileModal } from './EditProfileModal';
 import { ImageViewerModal, ImageViewerData } from './common/ImageViewerModal';
 import { NotificationSettingsSection } from './NotificationSettingsSection';
+import { StudyRemindersSection } from './StudyRemindersSection';
 
 interface Props {
   user: UserProfile;
@@ -51,7 +52,7 @@ export const StudentProfileView: React.FC<Props> = ({
   isLoggedIn = false,
   onLogout
 }) => {
-  const [activeTab, setActiveTab] = useState<'posts' | 'activities' | 'achievements' | 'questions' | 'notifications'>('posts');
+  const [activeTab, setActiveTab] = useState<'posts' | 'study_reminders' | 'activities' | 'achievements' | 'questions' | 'notifications'>('posts');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [fullImageModal, setFullImageModal] = useState<ImageViewerData | null>(null);
@@ -408,6 +409,7 @@ export const StudentProfileView: React.FC<Props> = ({
         <div className="flex items-center border-t border-gray-200 dark:border-slate-800 px-6 overflow-x-auto text-xs font-semibold">
           {[
             { id: 'posts', label: `Machapisho (${myPosts.length})` },
+            { id: 'study_reminders', label: 'Kikumbusho cha Masomo (Reminders)' },
             { id: 'activities', label: `Shughuli (Activities)` },
             { id: 'achievements', label: `Mataji & Beji (${user.achievements.length})` },
             { id: 'questions', label: `Maswali ya Masomo (${myQuestions.length})` },
@@ -423,6 +425,7 @@ export const StudentProfileView: React.FC<Props> = ({
               }`}
             >
               {tab.id === 'notifications' && <Bell className="w-3.5 h-3.5" />}
+              {tab.id === 'study_reminders' && <Calendar className="w-3.5 h-3.5" />}
               <span>{tab.label}</span>
             </button>
           ))}
@@ -430,6 +433,11 @@ export const StudentProfileView: React.FC<Props> = ({
       </div>
 
       {/* Tab Content */}
+      {activeTab === 'study_reminders' && (
+        <StudyRemindersSection
+          currentUser={user}
+        />
+      )}
       {activeTab === 'notifications' && (
         <NotificationSettingsSection
           user={user}

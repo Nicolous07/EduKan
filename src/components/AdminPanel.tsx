@@ -70,6 +70,8 @@ import { AdminTeacherVerificationTab } from './admin/AdminTeacherVerificationTab
 import { AdminFinanceTab } from './admin/AdminFinanceTab';
 import { AdminAnalyticsTab } from './admin/AdminAnalyticsTab';
 import { AdminFeedbackTab } from './admin/AdminFeedbackTab';
+import { AdminRegistrationsTab } from './admin/AdminRegistrationsTab';
+import { exportStudentsToCSV, exportPostsToCSV } from '../services/adminRegistrationService';
 import { FeedbackModal } from './FeedbackModal';
 
 interface Props {
@@ -151,7 +153,7 @@ export const AdminPanel: React.FC<Props> = ({
 }) => {
   // Navigation Tabs
   const [adminTab, setAdminTab] = useState<
-    'overview' | 'content' | 'studyrooms' | 'feedback' | 'reports' | 'teachers' | 'finance' | 'analytics' | 'library' | 'schools' | 'students' | 'opportunities' | 'broadcasts' | 'resources' | 'settings' | 'audit'
+    'overview' | 'content' | 'studyrooms' | 'feedback' | 'reports' | 'teachers' | 'finance' | 'analytics' | 'library' | 'schools' | 'students' | 'opportunities' | 'broadcasts' | 'resources' | 'settings' | 'audit' | 'registrations'
   >('overview');
   const [isLocalFeedbackOpen, setIsLocalFeedbackOpen] = useState(false);
 
@@ -291,7 +293,16 @@ export const AdminPanel: React.FC<Props> = ({
   };
 
   // Student management state
-  const [students, setStudents] = useState<ManagedStudent[]>(managedStudents || INITIAL_MANAGED_STUDENTS);
+  const [students, setStudents] = useState<ManagedStudent[]>(() => {
+    try {
+      const raw = localStorage.getItem('edukan_managed_students');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return managedStudents || INITIAL_MANAGED_STUDENTS;
+  });
   const [studentSearch, setStudentSearch] = useState('');
   const [studentFilter, setStudentFilter] = useState<'all' | 'active' | 'banned' | 'admin'>('all');
   const [selectedStudentForPoints, setSelectedStudentForPoints] = useState<ManagedStudent | null>(null);
@@ -840,6 +851,22 @@ export const AdminPanel: React.FC<Props> = ({
         </button>
 
         <button
+          id="admin-registrations-tab-btn"
+          onClick={() => setAdminTab('registrations')}
+          className={`px-3.5 py-2 rounded-xl transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
+            adminTab === 'registrations'
+              ? 'bg-emerald-700 text-white shadow-xs font-bold'
+              : 'text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800'
+          }`}
+        >
+          <Mail className="w-3.5 h-3.5 text-emerald-400" />
+          <span>Usajili & Emails ({students.length})</span>
+          <span className="bg-emerald-500 text-white text-[10px] px-1.5 py-0.2 rounded-full font-bold">
+            nicolousmunisi07
+          </span>
+        </button>
+
+        <button
           onClick={() => setAdminTab('content')}
           className={`px-3.5 py-2 rounded-xl transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
             adminTab === 'content'
@@ -1246,16 +1273,32 @@ export const AdminPanel: React.FC<Props> = ({
               </p>
             </div>
 
-            {/* Content Search Input */}
-            <div className="relative">
-              <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-gray-400 dark:text-slate-400" />
-              <input
-                type="text"
-                placeholder="Tafuta kwa mada au mwandishi..."
-                value={contentSearch}
-                onChange={(e) => setContentSearch(e.target.value)}
-                className="pl-8 pr-3 py-1.5 text-xs bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-900 text-gray-900 dark:text-white"
-              />
+            <div className="flex items-center gap-2">
+              <button
+                id="export-posts-csv-btn"
+                type="button"
+                onClick={() => {
+                  exportPostsToCSV(posts);
+                  triggerFeedback('Machapisho yote yamepakuliwa kwenye faili la CSV!');
+                }}
+                className="bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs font-bold px-3 py-1.5 rounded-xl transition-all shadow-xs flex items-center gap-1.5 cursor-pointer shrink-0"
+                title="Pakua machapisho yote katika muundo wa CSV"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Pakua CSV</span>
+              </button>
+
+              {/* Content Search Input */}
+              <div className="relative">
+                <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-gray-400 dark:text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Tafuta kwa mada au mwandishi..."
+                  value={contentSearch}
+                  onChange={(e) => setContentSearch(e.target.value)}
+                  className="pl-8 pr-3 py-1.5 text-xs bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-900 text-gray-900 dark:text-white"
+                />
+              </div>
             </div>
           </div>
 
@@ -1797,15 +1840,31 @@ export const AdminPanel: React.FC<Props> = ({
               </p>
             </div>
 
-            <div className="relative">
-              <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-gray-400 dark:text-slate-400" />
-              <input
-                type="text"
-                placeholder="Tafuta mwanafunzi au shule..."
-                value={studentSearch}
-                onChange={(e) => setStudentSearch(e.target.value)}
-                className="pl-8 pr-3 py-1.5 text-xs bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-900 text-gray-900 dark:text-white"
-              />
+            <div className="flex items-center gap-2">
+              <button
+                id="export-students-csv-btn"
+                type="button"
+                onClick={() => {
+                  exportStudentsToCSV(students);
+                  triggerFeedback('Orodha ya wanafunzi imepakuliwa kwenye faili la CSV!');
+                }}
+                className="bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs font-bold px-3 py-1.5 rounded-xl transition-all shadow-xs flex items-center gap-1.5 cursor-pointer shrink-0"
+                title="Pakua orodha ya wanafunzi katika muundo wa CSV"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Pakua Orodha (CSV)</span>
+              </button>
+
+              <div className="relative">
+                <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-gray-400 dark:text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Tafuta mwanafunzi au shule..."
+                  value={studentSearch}
+                  onChange={(e) => setStudentSearch(e.target.value)}
+                  className="pl-8 pr-3 py-1.5 text-xs bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-900 text-gray-900 dark:text-white"
+                />
+              </div>
             </div>
           </div>
 
@@ -2325,6 +2384,18 @@ export const AdminPanel: React.FC<Props> = ({
       {/* ========================================================= */}
       {adminTab === 'analytics' && (
         <AdminAnalyticsTab />
+      )}
+
+      {/* ========================================================= */}
+      {/* 15. ADMIN REGISTRATIONS & EMAIL DISPATCH TAB */}
+      {/* ========================================================= */}
+      {adminTab === 'registrations' && (
+        <AdminRegistrationsTab
+          students={students}
+          currentUser={currentUser}
+          onNavigateTab={onNavigateTab}
+          onTriggerFeedback={triggerFeedback}
+        />
       )}
 
       {/* ========================================================= */}

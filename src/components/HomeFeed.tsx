@@ -44,6 +44,7 @@ import { getEduPointsInfo } from '../lib/edupoints';
 import { FeedSkeleton } from './common/FeedSkeleton';
 import { ImageViewerModal } from './common/ImageViewerModal';
 import { isPostRecommendedForUser } from '../lib/recommendations';
+import { OfflineIndicator } from './OfflineIndicator';
 
 interface Props {
   posts: Post[];
@@ -506,28 +507,11 @@ export const HomeFeed: React.FC<Props> = ({
           </div>
         </div>
 
-        {/* Offline Cache Status Banner if not connected */}
-        {!isOnline && (
-          <div
-            id="feed-offline-notice-banner"
-            className="p-3.5 bg-amber-50/95 dark:bg-amber-950/80 border border-amber-300/80 dark:border-amber-700/80 rounded-xl text-xs text-amber-950 dark:text-amber-100 flex items-center justify-between gap-3 shadow-2xs animate-in fade-in"
-          >
-            <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-lg bg-amber-200/80 dark:bg-amber-900/60 flex items-center justify-center shrink-0">
-                <WifiOff className="w-4 h-4 text-amber-800 dark:text-amber-300" />
-              </div>
-              <div>
-                <strong className="font-bold text-amber-900 dark:text-amber-200">Hali ya Nje ya Mtandao (Offline Feed):</strong>
-                <p className="text-[11px] text-amber-800 dark:text-amber-300/90 mt-0.5">
-                  Machapisho yaliyohifadhiwa kwenye kumbukumbu ya kifaa (localStorage) yanaonyeshwa. Unaweza kusoma maudhui bila mtandao.
-                </p>
-              </div>
-            </div>
-            <span className="text-[10px] bg-amber-200 dark:bg-amber-900/80 text-amber-900 dark:text-amber-200 font-mono font-bold px-2 py-1 rounded-lg shrink-0">
-              {posts.length} machapisho
-            </span>
-          </div>
-        )}
+        {/* Offline Cache Status Banner */}
+        <OfflineIndicator
+          viewName="Ukurasa Mkuu (Feed)"
+          contextHint="Machapisho yaliyohifadhiwa kwenye kumbukumbu ya kifaa (cached data) yanaonyeshwa. Unaweza kusoma na kutoa maoni hata bila mtandao."
+        />
 
         {/* Create Post Card */}
         <div className="bg-white dark:bg-slate-900 rounded-xl p-4 sm:p-5 border border-emerald-100 dark:border-slate-800 shadow-xs">

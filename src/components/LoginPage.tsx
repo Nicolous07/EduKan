@@ -14,6 +14,7 @@ import {
   ArrowRight,
   Phone,
   FileBadge,
+  AlertCircle,
   X
 } from 'lucide-react';
 import { UserProfile, UserRole, UserActivityItem, AppNotification, SchoolChatChannel, ChatMessage } from '../types';
@@ -23,6 +24,7 @@ import { supabase } from '../lib/supabase';
 import { saveUserProfileToDb } from '../lib/supabaseService';
 import { getInitialState } from '../lib/store';
 import { sendRegistrationEmails } from '../services/emailService';
+import { registerUserInAdminStore } from '../services/adminRegistrationService';
 
 interface LoginPageProps {
   isOpen: boolean;
@@ -133,7 +135,20 @@ export const LoginPage: React.FC<LoginPageProps> = ({
     setErrorMsg(null);
 
     if (!identifier.trim() || !password.trim()) {
-      setErrorMsg('Tafadhali jaza kitambulisho na nenosiri lako.');
+      setErrorMsg('Tafadhali jaza barua pepe / kitambulisho na nenosiri lako.');
+      return;
+    }
+
+    if (identifier.includes('@')) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(identifier.trim())) {
+        setErrorMsg('Muundo wa barua pepe si sahihi. Mfano sahihi: mwanafunzi@shule.ac.tz au mfano@gmail.com.');
+        return;
+      }
+    }
+
+    if (password.trim().length < 4) {
+      setErrorMsg('Nenosiri linapaswa kuwa na angalau herufi nne (4).');
       return;
     }
 
@@ -291,21 +306,56 @@ export const LoginPage: React.FC<LoginPageProps> = ({
     e.preventDefault();
     setErrorMsg(null);
 
-    if (!regName.trim() || !regPassword.trim()) {
-      setErrorMsg('Tafadhali jaza jina kamili na nenosiri.');
+    const trimmedName = regName.trim();
+    const trimmedEmail = regEmail.trim();
+    const trimmedPassword = regPassword.trim();
+    const trimmedSchool = regSchool.trim();
+    const trimmedPhone = regPhone.trim();
+
+    // 1. Validate Name
+    if (!trimmedName || trimmedName.length < 3) {
+      setErrorMsg('Tafadhali andika jina lako kamili (angalau herufi 3).');
       return;
     }
 
-    if (regPassword.length < 6) {
-      setErrorMsg('Nenosiri linapaswa kuwa na herufi zisizopungua sita (6).');
+    // 2. Validate Email
+    if (!trimmedEmail) {
+      setErrorMsg('Barua pepe (Email) inahitajika ili upokee uthibitisho wa usajili na arifa za kitaaluma.');
       return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedEmail)) {
+      setErrorMsg('Muundo wa barua pepe si sahihi. Mfano sahihi: mwanafunzi@shule.ac.tz au mfano@gmail.com.');
+      return;
+    }
+
+    // 3. Validate School
+    if (!trimmedSchool) {
+      setErrorMsg('Tafadhali chagua au andika jina la shule au chuo chako.');
+      return;
+    }
+
+    // 4. Validate Password
+    if (!trimmedPassword || trimmedPassword.length < 6) {
+      setErrorMsg('Nenosiri linapaswa kuwa na herufi zisizopungua sita (6) kwa ajili ya usalama wa akaunti yako.');
+      return;
+    }
+
+    // 5. Validate Phone (if provided)
+    if (trimmedPhone) {
+      const cleanPhone = trimmedPhone.replace(/[\s-]/g, '');
+      if (!/^(\+?255|0)[67]\d{8}$/.test(cleanPhone)) {
+        setErrorMsg('Namba ya simu ya Tanzania si sahihi. Mfano: 0712345678 au +255712345678.');
+        return;
+      }
     }
 
     setLoading(true);
 
     try {
       let finalRole: UserRole = 'student';
-      const targetEmail = regEmail.trim() || `${regName.toLowerCase().replace(/\s+/g, '')}${Math.floor(100 + Math.random() * 900)}@shule.tz`;
+      const targetEmail = trimmedEmail;
 
       // Strictly verify admin registration
       if (regRole === 'admin') {
@@ -579,6 +629,71 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         localStorage.setItem('edukan_chat_messages', JSON.stringify(existingMessages));
       } catch (chatErr) {
         console.warn('Could not seed chat welcome messages:', chatErr);
+      }
+
+      // Record in Admin Store (alerts, inbox messages, notifications, and managed students)
+      try {
+        registerUserInAdminStore(newUser, regPassword);
+      } catch (adminStoreErr) {
+        console.warn('Could not record user in admin store:', adminStoreErr);
+      }
+
+      // Also create direct chat channel between this registered student and Admin (Nicolous Munisi)
+      try {
+        const rawChannels = localStorage.getItem('edukan_chat_channels');
+        const currentChannels: SchoolChatChannel[] = rawChannels ? JSON.parse(rawChannels) : [];
+        const adminChatId = `channel-dm-admin-${newUser.id}`;
+        
+        const adminDmChannel: SchoolChatChannel = {
+          id: adminChatId,
+          type: 'private_direct',
+          schoolName: 'EduKan Tanzania Administration',
+          name: 'Msimamizi Mkuu (Nicolous Munisi)',
+          description: 'Mawasiliano rasmi na Msimamizi Mkuu wa EduKan Tanzania.',
+          memberCount: 2,
+          unreadCount: 1,
+          pinned: true,
+          lastMessage: {
+            content: `Habari ${newUser.name}! Naitwa Nicolous Munisi (Msimamizi Mkuu). Karibu sana EduKan Tanzania. Kama una swali lolote la kiutawala au msaada wa masomo, nijulishe hapa.`,
+            senderName: 'Nicolous Munisi (Admin)',
+            timestamp: 'Sasa hivi'
+          },
+          participant: {
+            id: 'usr-nicolous',
+            name: 'Nicolous Amini Munisi',
+            handle: 'municryptrix',
+            avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80',
+            schoolName: 'EduKan Tanzania HQ',
+            level: 'Msimamizi Mkuu (Super Admin)',
+            status: 'online'
+          }
+        };
+
+        const hasAdminDm = currentChannels.some(c => c.id === adminChatId);
+        const updatedWithAdminDm = hasAdminDm ? currentChannels : [adminDmChannel, ...currentChannels];
+        localStorage.setItem('edukan_chat_channels', JSON.stringify(updatedWithAdminDm));
+
+        // Save welcome message from admin
+        const rawChatMsgs = localStorage.getItem('edukan_chat_messages');
+        const allChatMsgs: Record<string, ChatMessage[]> = rawChatMsgs ? JSON.parse(rawChatMsgs) : {};
+        allChatMsgs[adminChatId] = [
+          {
+            id: `msg-admin-welcome-${Date.now()}`,
+            channelId: adminChatId,
+            senderId: 'usr-nicolous',
+            senderName: 'Nicolous Amini Munisi (Msimamizi Mkuu)',
+            senderAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80',
+            senderRole: 'admin',
+            senderLevel: 'Super Admin',
+            schoolName: 'EduKan Tanzania HQ',
+            content: `Habari ${newUser.name}!\n\nNaitwa Nicolous Munisi, Msimamizi Mkuu wa EduKan Tanzania. Nimepokea taarifa za usajili wako kutoka ${newUser.schoolName} (${newUser.level}).\n\nNimekutumia pia barua pepe ya uthibitisho kwa anwani yako: ${newUser.email}.\n\nKama kuna changamoto yoyote unayokutana nayo au unahitaji ushauri wa masomo na mitihani, nipo hapa kukusaidia moja kwa moja. Karibu sana!`,
+            createdAt: 'Sasa hivi',
+            status: 'read'
+          }
+        ];
+        localStorage.setItem('edukan_chat_messages', JSON.stringify(allChatMsgs));
+      } catch (dmErr) {
+        console.warn('Could not seed admin DM channel:', dmErr);
       }
 
       // Dispatch real email alert to Admin (nicolousmunisi07@gmail.com) and confirmation to newly registered user
@@ -880,43 +995,85 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                 </div>
               </div>
 
-              {/* Email / Phone & Password */}
+              {/* Email & Phone */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">
-                    Email or Phone:
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="amina@shule.tz or +255..."
-                    value={regEmail}
-                    onChange={(e) => setRegEmail(e.target.value)}
-                    className="w-full text-xs sm:text-sm px-3.5 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all text-gray-900 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">
-                    Set Password:
+                  <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1 flex items-center justify-between">
+                    <span>Barua Pepe (Email) <span className="text-red-500">*</span>:</span>
+                    {regEmail.trim() && (
+                      <span className={`text-[10px] font-normal ${
+                        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(regEmail.trim())
+                          ? 'text-emerald-600 font-semibold'
+                          : 'text-rose-500'
+                      }`}>
+                        {/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(regEmail.trim()) ? '✓ Muundo sahihi' : '✗ Muundo si sahihi'}
+                      </span>
+                    )}
                   </label>
                   <div className="relative">
-                    <Lock className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <Mail className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                     <input
-                      type={showRegPassword ? 'text' : 'password'}
+                      type="email"
                       required
-                      placeholder="At least 6 characters"
-                      value={regPassword}
-                      onChange={(e) => setRegPassword(e.target.value)}
-                      className="w-full text-xs sm:text-sm pl-10 pr-10 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all text-gray-900 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500"
+                      placeholder="mfano@shule.ac.tz au gmail.com"
+                      value={regEmail}
+                      onChange={(e) => setRegEmail(e.target.value)}
+                      className={`w-full text-xs sm:text-sm pl-10 pr-3.5 py-2.5 bg-gray-50 dark:bg-slate-800 border rounded-xl focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:outline-none transition-all text-gray-900 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500 ${
+                        regEmail.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(regEmail.trim())
+                          ? 'border-rose-400 focus:ring-rose-500'
+                          : 'border-gray-200 dark:border-slate-700 focus:ring-emerald-500'
+                      }`}
                     />
-                    <button
-                      type="button"
-                      onClick={() => setShowRegPassword(!showRegPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-slate-200 p-1 cursor-pointer"
-                      aria-label="Toggle password visibility"
-                    >
-                      {showRegPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
                   </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">
+                    Namba ya Simu (Phone):
+                  </label>
+                  <div className="relative">
+                    <Phone className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="tel"
+                      placeholder="07XXXXXXXX au +255..."
+                      value={regPhone}
+                      onChange={(e) => setRegPhone(e.target.value)}
+                      className="w-full text-xs sm:text-sm pl-10 pr-3.5 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all text-gray-900 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Password */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-bold text-gray-700 dark:text-slate-300">
+                    Weka Nenosiri (Password) <span className="text-red-500">*</span>:
+                  </label>
+                  {regPassword.length > 0 && (
+                    <span className={`text-[10px] ${regPassword.length >= 6 ? 'text-emerald-600 font-semibold' : 'text-amber-600'}`}>
+                      {regPassword.length >= 6 ? '✓ Herufi za kutosha' : `Inahitaji angalau herufi 6 (${regPassword.length}/6)`}
+                    </span>
+                  )}
+                </div>
+                <div className="relative">
+                  <Lock className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type={showRegPassword ? 'text' : 'password'}
+                    required
+                    placeholder="Herufi 6 au zaidi"
+                    value={regPassword}
+                    onChange={(e) => setRegPassword(e.target.value)}
+                    className="w-full text-xs sm:text-sm pl-10 pr-10 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all text-gray-900 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowRegPassword(!showRegPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-slate-200 p-1 cursor-pointer"
+                    aria-label="Toggle password visibility"
+                  >
+                    {showRegPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
                 </div>
               </div>
 

@@ -485,3 +485,38 @@ export interface SchoolChatChannel {
   };
 }
 
+export interface StudyReminder {
+  id: string;
+  userId: string;
+  subject: string;
+  topic: string;
+  dayOfWeek: string; // 'Kila Siku' | 'Jumatatu' | 'Jumanne' | 'Jumatano' | 'Alhamisi' | 'Ijumaa' | 'Jumamosi' | 'Jumapili' | 'Siku za Shule' | 'Wikiendi'
+  time: string; // HH:mm format, e.g. "19:30"
+  durationMinutes: number; // e.g. 45, 60, 90
+  color: string; // CSS color or Tailwind class
+  isActive: boolean;
+  notes?: string;
+  createdAt: string;
+  lastTriggeredDate?: string;
+}
+
+export interface AdminRegistrationAlert {
+  id: string;
+  userId: string;
+  studentName: string;
+  studentEmail: string;
+  studentPhone?: string;
+  schoolName: string;
+  schoolRegion?: string;
+  level: string;
+  combination?: string;
+  studentRegNo?: string;
+  registeredAt: string;
+  role: UserRole;
+  status: 'pending_review' | 'approved' | 'contacted';
+  emailDeliveredToAdmin: boolean;
+  emailDeliveredToStudent: boolean;
+  adminEmailRecipient: string;
+  messageSnippet?: string;
+}
+
