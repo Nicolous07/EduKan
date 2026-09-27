@@ -64,6 +64,129 @@ interface Props {
   isOnline?: boolean;
 }
 
+export interface FeedSubjectFilter {
+  id: string;
+  name: string;
+  swName: string;
+  icon: string;
+}
+
+export const HOME_FEED_SUBJECTS: FeedSubjectFilter[] = [
+  { id: 'all', name: 'All Subjects', swName: 'Yote', icon: '📚' },
+  { id: 'Mathematics', name: 'Mathematics', swName: 'Hisabati / BAM', icon: '📐' },
+  { id: 'Biology', name: 'Biology', swName: 'Biolojia', icon: '🧬' },
+  { id: 'General Studies', name: 'General Studies', swName: 'GS & Civics', icon: '🌍' },
+  { id: 'Physics', name: 'Physics', swName: 'Fizikia', icon: '⚡' },
+  { id: 'Chemistry', name: 'Chemistry', swName: 'Kemia', icon: '🧪' },
+  { id: 'Geography', name: 'Geography', swName: 'Jiografia', icon: '🗺️' },
+  { id: 'History', name: 'History', swName: 'Historia', icon: '📜' },
+  { id: 'Kiswahili', name: 'Kiswahili', swName: 'Kiswahili', icon: '📖' },
+  { id: 'English', name: 'English', swName: 'Kiingereza', icon: '🇬🇧' },
+  { id: 'Computer Science', name: 'Computer Science', swName: 'TEHAMA & ICT', icon: '💻' },
+  { id: 'Economics', name: 'Economics & Commerce', swName: 'Uchumi & Biashara', icon: '📊' }
+];
+
+export const isPostMatchingSubject = (p: Post, subjectId: string): boolean => {
+  if (subjectId === 'all') return true;
+  const target = subjectId.toLowerCase();
+  const sub = (p.subject || '').toLowerCase();
+  const content = (p.content || '').toLowerCase();
+
+  if (target === 'mathematics') {
+    return (
+      sub.includes('math') ||
+      sub.includes('hesabu') ||
+      sub.includes('hisabati') ||
+      sub.includes('bam') ||
+      sub.includes('calculus') ||
+      sub.includes('algebra') ||
+      content.includes('mathematics') ||
+      content.includes('integration') ||
+      content.includes('differentiation') ||
+      content.includes('calculus') ||
+      content.includes('algebra') ||
+      content.includes('differential') ||
+      content.includes('liate') ||
+      content.includes('hesabu') ||
+      content.includes('hisabati')
+    );
+  }
+  if (target === 'biology') {
+    return (
+      sub.includes('bio') ||
+      content.includes('biology') ||
+      content.includes('biolojia') ||
+      content.includes('genetics') ||
+      content.includes('blood cells') ||
+      content.includes('pathology') ||
+      content.includes('medicine') ||
+      content.includes('dka')
+    );
+  }
+  if (target === 'general studies') {
+    return (
+      sub.includes('general studies') ||
+      sub.includes('gs') ||
+      sub.includes('civics') ||
+      sub.includes('uraia') ||
+      content.includes('general studies') ||
+      content.includes('philosophy') ||
+      content.includes('falsafa') ||
+      content.includes('katiba') ||
+      content.includes('nyerere') ||
+      content.includes('diplomacy') ||
+      content.includes('civics')
+    );
+  }
+  if (target === 'physics') {
+    return (
+      sub.includes('physic') ||
+      sub.includes('fizikia') ||
+      content.includes('physics') ||
+      content.includes('faraday') ||
+      content.includes('electromagnetism') ||
+      content.includes('lenz')
+    );
+  }
+  if (target === 'chemistry') {
+    return (
+      sub.includes('chem') ||
+      sub.includes('kemia') ||
+      content.includes('chemistry') ||
+      content.includes('reaction') ||
+      content.includes('organic chemistry') ||
+      content.includes('nernst')
+    );
+  }
+  if (target === 'geography') {
+    return sub.includes('geog') || sub.includes('jiografia') || content.includes('geography');
+  }
+  if (target === 'history') {
+    return sub.includes('hist') || content.includes('history') || content.includes('historia');
+  }
+  if (target === 'kiswahili') {
+    return sub.includes('kiswahili') || content.includes('fasihi') || content.includes('sarufi');
+  }
+  if (target === 'english') {
+    return sub.includes('english') || content.includes('literature') || content.includes('grammar');
+  }
+  if (target === 'computer science') {
+    return (
+      sub.includes('computer') ||
+      sub.includes('tech') ||
+      sub.includes('ict') ||
+      sub.includes('tehama') ||
+      content.includes('python') ||
+      content.includes('data science') ||
+      content.includes('code')
+    );
+  }
+  if (target === 'economics') {
+    return sub.includes('econo') || sub.includes('commerce') || sub.includes('uchumi') || content.includes('economics');
+  }
+  return sub.includes(target) || content.includes(target);
+};
+
 export const HomeFeed: React.FC<Props> = ({
   posts,
   currentUser,
@@ -84,6 +207,7 @@ export const HomeFeed: React.FC<Props> = ({
   // Category filter as requested: 'All', 'Masomo', 'Ushauri', 'Burudani'
   const [categoryFilter, setCategoryFilter] = useState<'all' | 'masomo' | 'ushauri' | 'burudani'>('all');
   const [subFilter, setSubFilter] = useState<'all' | 'school' | 'questions' | 'saved'>('all');
+  const [selectedSubject, setSelectedSubject] = useState<string>('all');
   const [recommendationMode, setRecommendationMode] = useState<'recommended' | 'all'>('recommended');
   const [isLoadingFeed, setIsLoadingFeed] = useState<boolean>(false);
 
@@ -153,6 +277,19 @@ export const HomeFeed: React.FC<Props> = ({
     }, 400);
   };
 
+  const handleSelectSubject = (subjId: string) => {
+    if (selectedSubject === subjId) return;
+    setIsLoadingFeed(true);
+    setSelectedSubject(subjId);
+    // When filtering by a subject, make sure we aren't restricted to non-academic categories like 'ushauri' or 'burudani'
+    if (subjId !== 'all' && (categoryFilter === 'ushauri' || categoryFilter === 'burudani')) {
+      setCategoryFilter('all');
+    }
+    setTimeout(() => {
+      setIsLoadingFeed(false);
+    }, 300);
+  };
+
   const handleSelectSubFilter = (sub: 'all' | 'school' | 'questions' | 'saved') => {
     if (subFilter === sub) return;
     setIsLoadingFeed(true);
@@ -175,6 +312,12 @@ export const HomeFeed: React.FC<Props> = ({
   const [pollOpts, setPollOpts] = useState(['', '']);
   const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
   const [showComments, setShowComments] = useState<Record<string, boolean>>({});
+
+  // Publishing feedback state & feed scroll container ref
+  const [isPublishingPost, setIsPublishingPost] = useState<boolean>(false);
+  const [postSuccessMessage, setPostSuccessMessage] = useState<string | null>(null);
+  const [postErrorMessage, setPostErrorMessage] = useState<string | null>(null);
+  const feedContainerRef = useRef<HTMLDivElement>(null);
 
   const edupointsInfo = getEduPointsInfo(currentUser.points);
 
@@ -200,25 +343,77 @@ export const HomeFeed: React.FC<Props> = ({
 
   const handleCreatePost = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!postContent.trim()) return;
+
+    const hasText = Boolean(postContent.trim());
+    const hasMedia = Boolean(attachedMedia);
+    const hasPoll = postType === 'poll' && pollOpts.some(o => o.trim());
+
+    if (!hasText && !hasMedia && !hasPoll) {
+      setPostErrorMessage('Tafadhali andika maudhui, ambatisha picha/faili, au andika machaguo ya kura ili kupakia chapisho.');
+      setTimeout(() => setPostErrorMessage(null), 4000);
+      return;
+    }
+
+    if (postType === 'poll') {
+      const validOptions = pollOpts.filter(o => o.trim());
+      if (validOptions.length < 2) {
+        setPostErrorMessage('Kura ya maoni inahitaji angalau machaguo mawili yaliyojazwa.');
+        setTimeout(() => setPostErrorMessage(null), 4000);
+        return;
+      }
+    }
+
+    setIsPublishingPost(true);
+    setPostErrorMessage(null);
+
+    let contentToSubmit = postContent.trim();
+    if (!contentToSubmit) {
+      if (attachedMediaType === 'image') contentToSubmit = 'Picha na vielelezo vya masomo';
+      else if (attachedMediaType === 'document') contentToSubmit = 'Kiambatisho cha faili ya masomo';
+      else if (postType === 'poll') contentToSubmit = 'Kura ya maoni kwa wanafunzi';
+      else contentToSubmit = 'Chapisho jipya la masomo';
+    }
 
     const newPost: Partial<Post> = {
       type: postType,
       category: postCategory,
-      content: postContent.trim(),
+      content: contentToSubmit,
       mediaUrl: attachedMedia || undefined,
       mediaType: attachedMediaType || undefined,
-      subject: postType === 'question' ? 'Akademia' : (postCategory === 'ushauri' ? 'Ushauri' : postCategory === 'burudani' ? 'Burudani' : 'Masomo'),
-      pollOptions: postType === 'poll' ? pollOpts.filter(o => o.trim()).map((t, i) => ({ id: `opt-${i}`, text: t, votes: 0 })) : undefined
+      subject: postType === 'question' ? 'Akademia' : (postCategory === 'ushauri' ? 'Ushauri' : postCategory === 'burudani' ? 'Campus Life' : 'Masomo'),
+      pollOptions: postType === 'poll' ? pollOpts.filter(o => o.trim()).map((t, i) => ({ id: `opt-${Date.now()}-${i}`, text: t, votes: 0 })) : undefined
     };
 
     onAddPost(newPost);
+
+    // Reset inputs
     setPostContent('');
     setPostType('normal');
     setPollOpts(['', '']);
     setAttachedMedia(null);
     setAttachedMediaType(null);
     setAttachedFileName(null);
+    setIsPublishingPost(false);
+
+    // Automatically switch feed view to 'all' so new post is unconditionally visible!
+    setCategoryFilter('all');
+    setSubFilter('all');
+    setSelectedSubject('all');
+    setRecommendationMode('all');
+
+    // Show celebration banner
+    setPostSuccessMessage('Hongera! Chapisho lako limepandishwa kikamilifu na sasa linaonekana kwa kila mtu.');
+    setTimeout(() => {
+      setPostSuccessMessage(null);
+    }, 6000);
+
+    // Scroll smoothly to top of feed
+    setTimeout(() => {
+      if (feedContainerRef.current) {
+        feedContainerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 50);
   };
 
   // Calculate counts for categories
@@ -230,10 +425,29 @@ export const HomeFeed: React.FC<Props> = ({
     saved: posts.filter(p => p.isSaved).length
   };
 
+  // Calculate dynamic post counts for each academic subject filter
+  const subjectCounts = React.useMemo(() => {
+    const counts: Record<string, number> = {};
+    HOME_FEED_SUBJECTS.forEach((s) => {
+      if (s.id === 'all') {
+        counts.all = posts.length;
+      } else {
+        counts[s.id] = posts.filter((p) => isPostMatchingSubject(p, s.id)).length;
+      }
+    });
+    return counts;
+  }, [posts]);
+
   const filteredPosts = posts.filter(p => {
+    // Current user's own authored posts MUST ALWAYS appear in 'all' view without being blocked
+    const isAuthor = p.author?.id === currentUser.id || p.author?.handle === currentUser.handle;
+    if (isAuthor && categoryFilter === 'all' && subFilter === 'all' && selectedSubject === 'all') {
+      return true;
+    }
+
     // 0. Academic Level & Role Recommendation Filter
     if (recommendationMode === 'recommended') {
-      if (!isPostRecommendedForUser(p, currentUser)) return false;
+      if (!isAuthor && !isPostRecommendedForUser(p, currentUser)) return false;
     }
 
     // 1. Primary Category Filter
@@ -249,16 +463,24 @@ export const HomeFeed: React.FC<Props> = ({
     }
 
     // 2. Secondary Subfilter
-    if (subFilter === 'school') return p.schoolId === currentUser.schoolId || p.schoolName?.includes('Malampaka');
+    if (subFilter === 'school') return p.schoolId === currentUser.schoolId || p.schoolName?.includes('Malampaka') || p.schoolName === currentUser.schoolName;
     if (subFilter === 'questions') return p.type === 'question';
     if (subFilter === 'saved') return Boolean(p.isSaved);
+
+    // 3. Academic Subject Filter (e.g. Mathematics, Biology, General Studies)
+    if (selectedSubject !== 'all') {
+      if (!isPostMatchingSubject(p, selectedSubject)) {
+        return false;
+      }
+    }
+
     return true;
   });
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 min-h-0 lg:h-full lg:overflow-hidden relative">
       {/* Main Feed Column with Dedicated Scroll */}
-      <div className="lg:col-span-8 space-y-4 lg:h-full lg:overflow-y-auto lg:pr-3 lg:custom-scrollbar pb-6 lg:pb-16">
+      <div ref={feedContainerRef} className="lg:col-span-8 space-y-4 lg:h-full lg:overflow-y-auto lg:pr-3 lg:custom-scrollbar pb-6 lg:pb-16">
         {/* Geometric Balance Welcome Hero Banner */}
         <div className="bg-emerald-600 dark:bg-emerald-800 rounded-2xl p-6 text-white relative overflow-hidden shadow-md">
           <div className="relative z-10">
@@ -460,6 +682,64 @@ export const HomeFeed: React.FC<Props> = ({
             </button>
           </div>
 
+          {/* Academic Subject Category Filter Bar: Mathematics, Biology, General Studies, etc. */}
+          <div className="pt-2.5 mt-2.5 border-t border-gray-100 dark:border-slate-800">
+            <div className="flex items-center justify-between gap-2 mb-2 px-1">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-gray-700 dark:text-slate-200 uppercase tracking-wider">
+                <BookOpen className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                <span>Filter by Subject (Chuja kwa Somo):</span>
+              </div>
+              {selectedSubject !== 'all' ? (
+                <button
+                  type="button"
+                  onClick={() => handleSelectSubject('all')}
+                  className="text-[11px] text-emerald-700 dark:text-emerald-400 hover:text-emerald-900 dark:hover:text-emerald-200 font-bold flex items-center gap-1 cursor-pointer bg-emerald-50 dark:bg-emerald-950/80 px-2 py-0.5 rounded-md"
+                  title="Clear Subject Filter"
+                >
+                  <X className="w-3 h-3" />
+                  <span>Clear ({selectedSubject})</span>
+                </button>
+              ) : (
+                <span className="text-[10px] text-gray-400 dark:text-slate-500 font-medium">
+                  Select a subject to view related posts
+                </span>
+              )}
+            </div>
+
+            {/* Scrollable Subject Pills */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 custom-scrollbar">
+              {HOME_FEED_SUBJECTS.map((s) => {
+                const isSelected = selectedSubject === s.id;
+                const count = subjectCounts[s.id] ?? 0;
+                return (
+                  <button
+                    key={s.id}
+                    id={`filter-subject-${s.id.toLowerCase().replace(/[^a-z0-9]/g, '-')}`}
+                    type="button"
+                    onClick={() => handleSelectSubject(s.id)}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                      isSelected
+                        ? 'bg-emerald-700 text-white shadow-xs ring-2 ring-emerald-400 dark:ring-emerald-500'
+                        : 'bg-gray-50 dark:bg-slate-800 hover:bg-emerald-50/70 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-300 border border-gray-100 dark:border-slate-700'
+                    }`}
+                  >
+                    <span>{s.icon}</span>
+                    <span>{s.name}</span>
+                    <span
+                      className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                        isSelected
+                          ? 'bg-white/20 text-white'
+                          : 'bg-emerald-100 dark:bg-slate-700 text-emerald-800 dark:text-slate-300'
+                      }`}
+                    >
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           {/* Secondary Sub-filter Chips */}
           <div className="flex items-center gap-2 pt-2.5 mt-2.5 border-t border-gray-100 dark:border-slate-800 overflow-x-auto text-[11px]">
             <span className="text-gray-400 dark:text-slate-400 font-medium whitespace-nowrap pl-1">View:</span>
@@ -507,6 +787,33 @@ export const HomeFeed: React.FC<Props> = ({
           </div>
         </div>
 
+        {/* Active Subject Filter Banner */}
+        {selectedSubject !== 'all' && (
+          <div className="p-3 bg-emerald-50 dark:bg-emerald-950/70 border border-emerald-300 dark:border-emerald-800 rounded-2xl flex items-center justify-between gap-3 text-xs text-emerald-950 dark:text-emerald-200 animate-in fade-in shadow-2xs">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <span className="text-xl shrink-0">
+                {HOME_FEED_SUBJECTS.find(s => s.id === selectedSubject)?.icon || '📚'}
+              </span>
+              <div className="min-w-0">
+                <p className="font-bold truncate">
+                  Filtered by Subject: <span className="underline decoration-emerald-500">{selectedSubject}</span>
+                </p>
+                <p className="text-[11px] text-emerald-700 dark:text-emerald-400 mt-0.5">
+                  Showing {filteredPosts.length} posts matching {selectedSubject}
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => handleSelectSubject('all')}
+              className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shrink-0 shadow-2xs transition-all cursor-pointer flex items-center gap-1"
+            >
+              <X className="w-3.5 h-3.5" />
+              <span>Show All Subjects</span>
+            </button>
+          </div>
+        )}
+
         {/* Offline Cache Status Banner */}
         <OfflineIndicator
           viewName="Ukurasa Mkuu (Feed)"
@@ -515,6 +822,40 @@ export const HomeFeed: React.FC<Props> = ({
 
         {/* Create Post Card */}
         <div className="bg-white dark:bg-slate-900 rounded-xl p-4 sm:p-5 border border-emerald-100 dark:border-slate-800 shadow-xs">
+          {/* Post Success Celebration Banner */}
+          {postSuccessMessage && (
+            <div className="mb-3.5 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-300 dark:border-emerald-700 flex items-center justify-between text-xs text-emerald-900 dark:text-emerald-200 animate-fadeIn">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                <span className="font-semibold">{postSuccessMessage}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPostSuccessMessage(null)}
+                className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-900 dark:hover:text-emerald-100 p-1 cursor-pointer"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+
+          {/* Post Error Banner */}
+          {postErrorMessage && (
+            <div className="mb-3.5 p-3 rounded-xl bg-amber-50 dark:bg-amber-950/80 border border-amber-300 dark:border-amber-700 flex items-center justify-between text-xs text-amber-900 dark:text-amber-200 animate-fadeIn">
+              <div className="flex items-center gap-2">
+                <HelpCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                <span className="font-semibold">{postErrorMessage}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPostErrorMessage(null)}
+                className="text-amber-600 dark:text-amber-400 hover:text-amber-900 dark:hover:text-amber-100 p-1 cursor-pointer"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+
           <div className="flex gap-3">
             <img
               src={currentUser.avatar}
@@ -728,11 +1069,20 @@ export const HomeFeed: React.FC<Props> = ({
                 <button
                   type="button"
                   onClick={handleCreatePost}
-                  disabled={!postContent.trim()}
-                  className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                  disabled={isPublishingPost || (!postContent.trim() && !attachedMedia && !(postType === 'poll' && pollOpts.some(o => o.trim())))}
+                  className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-semibold px-4 py-2 rounded-xl transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
                 >
-                  <span>Publish</span>
-                  <Send className="w-3.5 h-3.5" />
+                  {isPublishingPost ? (
+                    <>
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      <span>Inapakia...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Publish (Chapisha)</span>
+                      <Send className="w-3.5 h-3.5" />
+                    </>
+                  )}
                 </button>
               </div>
             </div>
@@ -744,20 +1094,44 @@ export const HomeFeed: React.FC<Props> = ({
           {isLoadingFeed ? (
             <FeedSkeleton count={3} />
           ) : filteredPosts.length === 0 ? (
-            <div className="bg-white dark:bg-slate-900 rounded-2xl p-10 text-center border border-gray-200 dark:border-slate-800 space-y-3">
-              <div className="w-12 h-12 rounded-full bg-emerald-50 dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto">
-                <BookOpen className="w-6 h-6" />
+            <div className="bg-white dark:bg-slate-900 rounded-2xl p-10 text-center border border-dashed border-emerald-300 dark:border-slate-800 space-y-3">
+              <div className="w-12 h-12 rounded-full bg-emerald-50 dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto text-xl">
+                {selectedSubject !== 'all'
+                  ? (HOME_FEED_SUBJECTS.find(s => s.id === selectedSubject)?.icon || '📚')
+                  : <BookOpen className="w-6 h-6" />}
               </div>
-              <h4 className="font-bold text-gray-900 dark:text-slate-100 text-sm">No posts found in this category yet</h4>
+              <h4 className="font-bold text-gray-900 dark:text-slate-100 text-base">
+                {selectedSubject !== 'all'
+                  ? `Hakuna machapisho ya somo la "${selectedSubject}" kwa sasa`
+                  : 'No posts found in this category yet'}
+              </h4>
               <p className="text-xs text-gray-500 dark:text-slate-400 max-w-sm mx-auto">
-                Be the first to share in {categoryFilter.toUpperCase()} or switch categories.
+                {selectedSubject !== 'all'
+                  ? `Kuwa mwanafunzi wa kwanza kushiriki maswali, muhtasari (notes) au majadiliano ya ${selectedSubject}.`
+                  : `Be the first to share in ${categoryFilter.toUpperCase()} or switch categories.`}
               </p>
-              <button
-                onClick={() => setCategoryFilter('all')}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2 rounded-xl cursor-pointer"
-              >
-                Show All Posts
-              </button>
+              <div className="flex items-center justify-center gap-2 pt-1 flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedSubject('all');
+                    setCategoryFilter('all');
+                  }}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2 rounded-xl cursor-pointer shadow-xs"
+                >
+                  Show All Posts (Masomo Yote)
+                </button>
+                {selectedSubject !== 'all' && onOpenQuickAction && (
+                  <button
+                    type="button"
+                    onClick={() => onOpenQuickAction('post')}
+                    className="bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-800 dark:text-slate-200 text-xs font-semibold px-4 py-2 rounded-xl cursor-pointer flex items-center gap-1.5"
+                  >
+                    <Plus className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Post {selectedSubject} Notes</span>
+                  </button>
+                )}
+              </div>
             </div>
           ) : (
             filteredPosts.map((post) => (

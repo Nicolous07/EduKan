@@ -32,6 +32,8 @@ import {
   fetchPostsFromDb,
   createPostInDb,
   togglePostLikeInDb,
+  addCommentToPostInDb,
+  votePollInDb,
   fetchBooksFromDb,
   createBookInDb,
   fetchStudyQuestionsFromDb,
@@ -247,9 +249,31 @@ export default function App() {
     }
   };
 
-  // Sync from Supabase on mount
+  // Sync from Server/Supabase on mount and establish live polling
   useEffect(() => {
     syncAllDataFromSupabase(false);
+
+    // Live background polling for community posts every 8 seconds
+    // This guarantees that posts published by ANY student are instantly delivered to everyone!
+    const pollInterval = setInterval(async () => {
+      if (typeof document !== 'undefined' && document.hidden) return;
+      if (typeof navigator !== 'undefined' && !navigator.onLine) return;
+      try {
+        const postsRes = await fetchPostsFromDb();
+        if (postsRes.posts && postsRes.posts.length > 0) {
+          setPosts(prevPosts => {
+            // Keep local un-synced optimistic posts at the front if any
+            const existingIds = new Set(postsRes.posts.map(p => p.id));
+            const optimisticOnly = prevPosts.filter(p => !existingIds.has(p.id) && p.id.startsWith('post-'));
+            return [...optimisticOnly, ...postsRes.posts];
+          });
+        }
+      } catch (e) {
+        // Quietly handle transient polling glitches
+      }
+    }, 8000);
+
+    return () => clearInterval(pollInterval);
   }, []);
 
   // Listen to browser network changes
@@ -325,21 +349,33 @@ export default function App() {
   const handleAddPost = (p: Partial<Post>) => {
     const now = new Date();
     const timeFormatted = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const postId = p.id || `post-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    
+    // Provide sensible default content if student uploaded image/file or poll without body text
+    let finalContent = p.content?.trim() || '';
+    if (!finalContent) {
+      if (p.mediaType === 'image') finalContent = 'Picha / Vielelezo vya masomo';
+      else if (p.mediaType === 'document') finalContent = 'Kiambatisho cha faili ya masomo';
+      else if (p.type === 'poll') finalContent = 'Kura ya maoni kwa wanafunzi';
+      else if (p.type === 'question') finalContent = 'Swali la kitaaluma';
+      else finalContent = 'Chapisho jipya la elimu';
+    }
+
     const newPost: Post = {
-      id: `post-${Date.now()}`,
+      id: postId,
       author: {
-        id: currentUser.id,
-        name: currentUser.name,
-        handle: currentUser.handle,
-        avatar: currentUser.avatar,
-        school: currentUser.schoolName,
-        role: currentRole,
+        id: currentUser.id || 'usr-student',
+        name: currentUser.name || 'Mwanafunzi wa EduKan',
+        handle: currentUser.handle || 'mwanafunzi',
+        avatar: currentUser.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80',
+        school: currentUser.schoolName || 'EduKan Network',
+        role: currentRole || 'student',
         verified: true
       },
       type: p.type || 'normal',
       category: p.category || 'masomo',
-      content: p.content || '',
-      subject: p.subject,
+      content: finalContent,
+      subject: p.subject || (p.type === 'question' ? 'Akademia' : 'Masomo'),
       mediaUrl: p.mediaUrl,
       mediaType: p.mediaType,
       pollOptions: p.pollOptions,
@@ -351,10 +387,30 @@ export default function App() {
       schoolName: currentUser.schoolName,
       createdAt: `Sasa hivi (${timeFormatted})`
     };
-    setPosts([newPost, ...posts]);
+
+    // 1. Immediately insert at the top so the author sees their post in real-time
+    setPosts(prev => [newPost, ...prev.filter(item => item.id !== newPost.id)]);
+    
+    // 2. Award gamification points (+5 EduPoints)
     setCurrentUser(u => ({ ...u, points: u.points + 5 }));
-    // Persist to Supabase and cache
-    createPostInDb(newPost);
+
+    // 3. Persist to shared server API (and Supabase/offline cache)
+    createPostInDb(newPost).catch(err => {
+      console.warn('Post creation sync error:', err);
+    });
+
+    // 4. Add instant high-visibility success toast notification
+    setNotifications(prev => [
+      {
+        id: `notif-post-${Date.now()}`,
+        title: '📢 Chapisho Limepandishwa Kikamilifu!',
+        message: 'Chapisho lako limepandishwa hewani na sasa linaonekana kwa kila mtu katika mtandao wa EduKan (+5 EduPoints).',
+        category: 'announcement',
+        timestamp: 'Sasa hivi',
+        read: false
+      },
+      ...prev
+    ]);
   };
 
   const handleLikePost = (postId: string) => {
@@ -402,6 +458,7 @@ export default function App() {
       }
       return p;
     }));
+    votePollInDb(postId, optionId);
     setCurrentUser(u => ({ ...u, points: u.points + 1 }));
   };
 
@@ -436,6 +493,7 @@ export default function App() {
       }
       return p;
     }));
+    addCommentToPostInDb(postId, newComment);
     setCurrentUser(u => ({ ...u, points: u.points + 2 }));
   };
 

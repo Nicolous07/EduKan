@@ -194,6 +194,92 @@ export const INITIAL_SCHOOLS: SchoolCommunity[] = [
 
 export const INITIAL_POSTS: Post[] = [
   {
+    id: 'post-math-1',
+    author: {
+      id: 'usr-daudi-math',
+      name: 'Daudi Mwakipesile',
+      handle: 'daudi_maths',
+      avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200&auto=format&fit=crop&q=80',
+      school: 'Tabora Boys Secondary School',
+      role: 'student',
+      verified: true
+    },
+    type: 'normal',
+    category: 'masomo',
+    content: '📐 Advanced Mathematics & BAM: Mwongozo wa kusuluhisha maswali magumu ya Integration by Parts kwa kutumia kanuni ya LIATE (Logarithmic, Inverse trig, Algebraic, Trigonometric, Exponential). Kumbuka ∫u dv = uv - ∫v du! Pia nimejumuisha mbinu za kutatua First Order Differential Equations kwa kutumia Integrating Factor.',
+    subject: 'Mathematics',
+    mediaUrl: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800&auto=format&fit=crop&q=80',
+    mediaType: 'image',
+    likes: 56,
+    isLiked: false,
+    commentsCount: 3,
+    sharesCount: 14,
+    isSaved: false,
+    comments: [
+      {
+        id: 'comm-math-1',
+        postId: 'post-math-1',
+        author: {
+          id: 'usr-sarah-ilboru',
+          name: 'Sarah Mmbaga',
+          avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200&auto=format&fit=crop&q=80',
+          school: 'Ilboru High School',
+          role: 'student'
+        },
+        content: 'Asante Daudi! LIATE rule inaokoa muda mwingi kwenye paper 1 ya NECTA.',
+        createdAt: 'Dakika 15 zilizopita',
+        likes: 4,
+        isLiked: false
+      }
+    ],
+    schoolId: 'sch-tabora',
+    schoolName: 'Tabora Boys Secondary School',
+    createdAt: 'Dakika 10 zilizopita'
+  },
+  {
+    id: 'post-gs-1',
+    author: {
+      id: 'usr-neema-gs',
+      name: 'Neema Kavishe',
+      handle: 'neema_gs',
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80',
+      school: 'Kibaha Secondary School',
+      role: 'student',
+      verified: true
+    },
+    type: 'resource',
+    category: 'masomo',
+    content: '🌍 General Studies (GS) Form V & VI: Muhtasari wa Mada ya "Philosophy & Religion" na "International Relations and Diplomacy". Maswali ya NECTA yanayorudiwa kuhusu mchango wa Mwalimu J.K. Nyerere katika Umoja wa Afrika (OAU/AU) na falsafa ya Ujamaa na Kujitegemea.',
+    subject: 'General Studies',
+    mediaUrl: 'https://images.unsplash.com/photo-1457369804613-52c61a468e7d?w=800&auto=format&fit=crop&q=80',
+    mediaType: 'image',
+    likes: 73,
+    isLiked: false,
+    commentsCount: 5,
+    sharesCount: 18,
+    isSaved: true,
+    comments: [
+      {
+        id: 'comm-gs-1',
+        postId: 'post-gs-1',
+        author: {
+          id: 'usr-baraka-leader',
+          name: 'Baraka Mwita',
+          avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&auto=format&fit=crop&q=80',
+          school: 'Malampaka Secondary School',
+          role: 'student'
+        },
+        content: 'General Studies ni somo la lazima kwa wote, summary hii ni msaada mkubwa sana kwa maandalizi ya mtihani.',
+        createdAt: 'Dakika 25 zilizopita',
+        likes: 7,
+        isLiked: true
+      }
+    ],
+    schoolId: 'sch-kibaha',
+    schoolName: 'Kibaha Secondary School',
+    createdAt: 'Dakika 20 zilizopita'
+  },
+  {
     id: 'post-1',
     author: {
       id: 'usr-nicolous',

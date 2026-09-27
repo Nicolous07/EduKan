@@ -1,5 +1,6 @@
 import express, { Request, Response } from 'express';
 import path from 'path';
+import fs from 'fs';
 import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI } from '@google/genai';
 import dotenv from 'dotenv';
@@ -7,6 +8,34 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const PORT = 3000;
+const POSTS_FILE_PATH = path.join(process.cwd(), 'posts_store.json');
+
+// Helper to load and save shared community posts
+function loadServerPosts(): any[] {
+  try {
+    if (fs.existsSync(POSTS_FILE_PATH)) {
+      const raw = fs.readFileSync(POSTS_FILE_PATH, 'utf-8');
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    }
+  } catch (err) {
+    console.warn('Could not read posts_store.json:', err);
+  }
+  return [];
+}
+
+let inMemoryPosts: any[] = loadServerPosts();
+
+function saveServerPosts(posts: any[]) {
+  inMemoryPosts = posts;
+  try {
+    fs.writeFileSync(POSTS_FILE_PATH, JSON.stringify(posts, null, 2), 'utf-8');
+  } catch (err) {
+    console.warn('Could not write posts_store.json:', err);
+  }
+}
 
 // Lazy initialize GoogleGenAI client to avoid crash on startup if key is pending
 let geminiClient: GoogleGenAI | null = null;
@@ -31,6 +60,140 @@ async function startServer() {
       geminiConfigured: !!process.env.GEMINI_API_KEY,
       timestamp: new Date().toISOString()
     });
+  });
+
+  // -------------------------------------------------------------
+  // POSTS API - Shared Persistent Community Posts
+  // Ensures posts uploaded by ANY student are instantly saved and
+  // broadcasted to everyone across Tanzania
+  // -------------------------------------------------------------
+  app.get('/api/posts', (req: Request, res: Response) => {
+    inMemoryPosts = loadServerPosts();
+    return res.json({
+      success: true,
+      posts: inMemoryPosts,
+      total: inMemoryPosts.length
+    });
+  });
+
+  app.post('/api/posts', (req: Request, res: Response) => {
+    try {
+      const p = req.body;
+      if (!p || (!p.content && !p.mediaUrl && !p.pollOptions)) {
+        return res.status(400).json({ error: 'Maudhui ya chapisho yanahitajika' });
+      }
+
+      const now = new Date();
+      const timeFormatted = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      const newPost = {
+        id: p.id || `post-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        author: {
+          id: p.author?.id || 'usr-student',
+          name: p.author?.name || 'Mwanafunzi wa EduKan',
+          handle: p.author?.handle || 'mwanafunzi',
+          avatar: p.author?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80',
+          school: p.author?.school || p.schoolName || 'EduKan Network',
+          role: p.author?.role || 'student',
+          verified: p.author?.verified ?? true
+        },
+        type: p.type || 'normal',
+        category: p.category || 'masomo',
+        content: p.content || (p.mediaUrl ? 'Kiambatisho cha faili/picha ya masomo' : ''),
+        subject: p.subject || (p.type === 'question' ? 'Akademia' : 'Masomo ya Jumla'),
+        mediaUrl: p.mediaUrl || null,
+        mediaType: p.mediaType || null,
+        pollOptions: Array.isArray(p.pollOptions) ? p.pollOptions : null,
+        likes: p.likes || 0,
+        isLiked: false,
+        commentsCount: p.commentsCount || 0,
+        sharesCount: p.sharesCount || 0,
+        isSaved: false,
+        comments: Array.isArray(p.comments) ? p.comments : [],
+        schoolId: p.schoolId || p.author?.schoolId || null,
+        schoolName: p.schoolName || p.author?.school || 'EduKan Network',
+        createdAt: p.createdAt || `Sasa hivi (${timeFormatted})`
+      };
+
+      // Add to front of server posts
+      const updated = [newPost, ...inMemoryPosts.filter(item => item.id !== newPost.id)];
+      saveServerPosts(updated);
+
+      console.log(`📝 [NEW POST PUBLISHED] "${newPost.content.slice(0, 40)}..." by ${newPost.author.name} (${newPost.id})`);
+
+      return res.status(201).json({
+        success: true,
+        post: newPost,
+        total: updated.length,
+        message: 'Chapisho limepandishwa kikamilifu na linaonekana kwa kila mtu!'
+      });
+    } catch (err: any) {
+      console.error('Error creating post on server:', err);
+      return res.status(500).json({ error: 'Hitilafu wakati wa kupakia chapisho', details: err?.message });
+    }
+  });
+
+  app.post('/api/posts/:id/like', (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const { newLikes } = req.body;
+      const target = inMemoryPosts.find(p => p.id === id);
+      if (target) {
+        target.likes = typeof newLikes === 'number' ? newLikes : (target.likes || 0) + 1;
+        saveServerPosts(inMemoryPosts);
+        return res.json({ success: true, likes: target.likes });
+      }
+      return res.status(404).json({ error: 'Post not found' });
+    } catch (err) {
+      return res.status(500).json({ error: 'Like error' });
+    }
+  });
+
+  app.post('/api/posts/:id/comments', (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const comment = req.body;
+      const target = inMemoryPosts.find(p => p.id === id);
+      if (target) {
+        if (!target.comments) target.comments = [];
+        target.comments.push(comment);
+        target.commentsCount = (target.commentsCount || 0) + 1;
+        saveServerPosts(inMemoryPosts);
+        return res.json({ success: true, post: target });
+      }
+      return res.status(404).json({ error: 'Post not found' });
+    } catch (err) {
+      return res.status(500).json({ error: 'Comment error' });
+    }
+  });
+
+  app.post('/api/posts/:id/poll', (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const { optionId } = req.body;
+      const target = inMemoryPosts.find(p => p.id === id);
+      if (target && target.pollOptions) {
+        target.pollOptions = target.pollOptions.map((opt: any) =>
+          opt.id === optionId ? { ...opt, votes: (opt.votes || 0) + 1 } : opt
+        );
+        saveServerPosts(inMemoryPosts);
+        return res.json({ success: true, post: target });
+      }
+      return res.status(404).json({ error: 'Poll or post not found' });
+    } catch (err) {
+      return res.status(500).json({ error: 'Poll vote error' });
+    }
+  });
+
+  app.delete('/api/posts/:id', (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      inMemoryPosts = inMemoryPosts.filter(p => p.id !== id);
+      saveServerPosts(inMemoryPosts);
+      return res.json({ success: true, message: 'Chapisho limefutwa' });
+    } catch (err) {
+      return res.status(500).json({ error: 'Delete error' });
+    }
   });
 
   // -------------------------------------------------------------

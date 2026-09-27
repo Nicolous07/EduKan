@@ -1,0 +1,421 @@
+[
+  {
+    "id": "post-math-1",
+    "author": {
+      "id": "usr-daudi-math",
+      "name": "Daudi Mwakipesile",
+      "handle": "daudi_maths",
+      "avatar": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200&auto=format&fit=crop&q=80",
+      "school": "Tabora Boys Secondary School",
+      "role": "student",
+      "verified": true
+    },
+    "type": "normal",
+    "category": "masomo",
+    "content": "📐 Advanced Mathematics & BAM: Mwongozo wa kusuluhisha maswali magumu ya Integration by Parts kwa kutumia kanuni ya LIATE (Logarithmic, Inverse trig, Algebraic, Trigonometric, Exponential). Kumbuka ∫u dv = uv - ∫v du! Pia nimejumuisha mbinu za kutatua First Order Differential Equations kwa kutumia Integrating Factor.",
+    "subject": "Mathematics",
+    "mediaUrl": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800&auto=format&fit=crop&q=80",
+    "mediaType": "image",
+    "likes": 56,
+    "isLiked": false,
+    "commentsCount": 3,
+    "sharesCount": 14,
+    "isSaved": false,
+    "comments": [
+      {
+        "id": "comm-math-1",
+        "postId": "post-math-1",
+        "author": {
+          "id": "usr-sarah-ilboru",
+          "name": "Sarah Mmbaga",
+          "avatar": "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200&auto=format&fit=crop&q=80",
+          "school": "Ilboru High School",
+          "role": "student"
+        },
+        "content": "Asante Daudi! LIATE rule inaokoa muda mwingi kwenye paper 1 ya NECTA.",
+        "createdAt": "Dakika 15 zilizopita",
+        "likes": 4,
+        "isLiked": false
+      }
+    ],
+    "schoolId": "sch-tabora",
+    "schoolName": "Tabora Boys Secondary School",
+    "createdAt": "Dakika 10 zilizopita"
+  },
+  {
+    "id": "post-gs-1",
+    "author": {
+      "id": "usr-neema-gs",
+      "name": "Neema Kavishe",
+      "handle": "neema_gs",
+      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80",
+      "school": "Kibaha Secondary School",
+      "role": "student",
+      "verified": true
+    },
+    "type": "resource",
+    "category": "masomo",
+    "content": "🌍 General Studies (GS) Form V & VI: Muhtasari wa Mada ya \"Philosophy & Religion\" na \"International Relations and Diplomacy\". Maswali ya NECTA yanayorudiwa kuhusu mchango wa Mwalimu J.K. Nyerere katika Umoja wa Afrika (OAU/AU) na falsafa ya Ujamaa na Kujitegemea.",
+    "subject": "General Studies",
+    "mediaUrl": "https://images.unsplash.com/photo-1457369804613-52c61a468e7d?w=800&auto=format&fit=crop&q=80",
+    "mediaType": "image",
+    "likes": 73,
+    "isLiked": false,
+    "commentsCount": 5,
+    "sharesCount": 18,
+    "isSaved": true,
+    "comments": [
+      {
+        "id": "comm-gs-1",
+        "postId": "post-gs-1",
+        "author": {
+          "id": "usr-baraka-leader",
+          "name": "Baraka Mwita",
+          "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&auto=format&fit=crop&q=80",
+          "school": "Malampaka Secondary School",
+          "role": "student"
+        },
+        "content": "General Studies ni somo la lazima kwa wote, summary hii ni msaada mkubwa sana kwa maandalizi ya mtihani.",
+        "createdAt": "Dakika 25 zilizopita",
+        "likes": 7,
+        "isLiked": true
+      }
+    ],
+    "schoolId": "sch-kibaha",
+    "schoolName": "Kibaha Secondary School",
+    "createdAt": "Dakika 20 zilizopita"
+  },
+  {
+    "id": "post-1",
+    "author": {
+      "id": "usr-nicolous",
+      "name": "Nicolous Amini Munisi",
+      "handle": "municryptrix",
+      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80",
+      "school": "Malampaka Secondary School",
+      "role": "student",
+      "verified": true
+    },
+    "type": "normal",
+    "category": "masomo",
+    "content": "Leo nimefanikiwa kumaliza kusoma na kufanya maswali yote ya NECTA kwenye Chapter 4 ya Advanced Physics: \"Electromagnetism & Faraday's Laws\" 🔥. Uelewa wa Lenz's law umekuwa rahisi sana baada ya kufanya practical ya solenoid! Kila la heri kwa wenzangu wanaojiandaa na Mock na Mtihani Mkuu!",
+    "subject": "Physics",
+    "mediaUrl": "https://images.unsplash.com/photo-1636466497217-26a8cbeaf0aa?w=800&auto=format&fit=crop&q=80",
+    "mediaType": "image",
+    "likes": 42,
+    "isLiked": false,
+    "commentsCount": 2,
+    "sharesCount": 7,
+    "isSaved": false,
+    "comments": [
+      {
+        "id": "comm-1-1",
+        "postId": "post-1",
+        "author": {
+          "id": "usr-sarah-ilboru",
+          "name": "Sarah Mmbaga",
+          "avatar": "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200&auto=format&fit=crop&q=80",
+          "school": "Ilboru High School",
+          "role": "student"
+        },
+        "content": "Hongera sana Nicolous! Je, umegusia pia maswali ya Eddy Currents na Self-Inductance kwenye NECTA 2022 Paper 1?",
+        "createdAt": "Dakika 20 zilizopita",
+        "likes": 5,
+        "isLiked": false
+      },
+      {
+        "id": "comm-1-2",
+        "postId": "post-1",
+        "author": {
+          "id": "usr-kelvin-udsm",
+          "name": "Kelvin Komba",
+          "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop&q=80",
+          "school": "University of Dar es Salaam (UDSM)",
+          "role": "student"
+        },
+        "content": "Faraday's Law ni topic pendwa sana NECTA. Kumbuka kanuni ya minus sign kwenye emf = -N(dΦ/dt) inavyoelezea Lenz's Law!",
+        "createdAt": "Dakika 12 zilizopita",
+        "likes": 8,
+        "isLiked": true
+      }
+    ],
+    "schoolId": "sch-malampaka",
+    "schoolName": "Malampaka Secondary School",
+    "createdAt": "Dakika 35 zilizopita"
+  },
+  {
+    "id": "post-2",
+    "author": {
+      "id": "usr-baraka-leader",
+      "name": "Baraka Mwita",
+      "handle": "baraka_leader",
+      "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&auto=format&fit=crop&q=80",
+      "school": "Malampaka Secondary School",
+      "role": "student",
+      "verified": true
+    },
+    "type": "resource",
+    "category": "ushauri",
+    "content": "Habari za jioni wanafunzi wa Form VI. Nimeweka hapa muhtasari wa \"NECTA Mock Examination Tips 2026\" pamoja na ratiba ya vipindi vya kujisomea kwa makundi ya sayansi (PCB & PCM). Unaweza kupakua notes za bure na majaribio ya miaka 5 iliyopita kwenye chumba chetu cha masomo. Kila la heri katika maandalizi!",
+    "subject": "Akademia & Vidokezo vya Mitihani",
+    "likes": 89,
+    "isLiked": true,
+    "commentsCount": 2,
+    "sharesCount": 19,
+    "isSaved": true,
+    "comments": [
+      {
+        "id": "comm-2-1",
+        "postId": "post-2",
+        "author": {
+          "id": "usr-amina-mentor",
+          "name": "Dkt. Joyce Mwambungu",
+          "avatar": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&auto=format&fit=crop&q=80",
+          "school": "MUHAS",
+          "role": "student"
+        },
+        "content": "Ushauri mzuri sana Baraka! Kusoma kwa makundi ya watu 3-4 kutaongeza uelewa wa haraka wa topics ngumu.",
+        "createdAt": "Saa 1 iliyopita",
+        "likes": 12,
+        "isLiked": true
+      },
+      {
+        "id": "comm-2-2",
+        "postId": "post-2",
+        "author": {
+          "id": "usr-subira",
+          "name": "Subira Hassan",
+          "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&auto=format&fit=crop&q=80",
+          "school": "Lumumba Secondary School",
+          "role": "student"
+        },
+        "content": "Nimepakua tayari notes za NECTA tips! Asante sana kwa kutujali wanafunzi wote.",
+        "createdAt": "Dakika 45 zilizopita",
+        "likes": 4,
+        "isLiked": false
+      }
+    ],
+    "schoolId": "sch-malampaka",
+    "schoolName": "Malampaka Secondary School",
+    "createdAt": "Saa 2 zilizopita"
+  },
+  {
+    "id": "post-3",
+    "author": {
+      "id": "usr-sarah-ilboru",
+      "name": "Sarah Mmbaga",
+      "handle": "sarah_m",
+      "avatar": "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200&auto=format&fit=crop&q=80",
+      "school": "Ilboru High School",
+      "role": "student",
+      "verified": false
+    },
+    "type": "poll",
+    "category": "masomo",
+    "content": "Wanafunzi wa PCB na PCM Tanzania nzima: Ni mada gani kwenye Advanced Chemistry inakuchukua muda mrefu zaidi kuelewa vizuri wakati wa maandalizi ya NECTA?",
+    "subject": "Chemistry",
+    "pollOptions": [
+      {
+        "id": "opt-1",
+        "text": "Organic Chemistry (Reaction Mechanisms)",
+        "votes": 84
+      },
+      {
+        "id": "opt-2",
+        "text": "Physical Chemistry (Chemical Equilibrium)",
+        "votes": 41
+      },
+      {
+        "id": "opt-3",
+        "text": "Transition Elements & Coordination",
+        "votes": 29
+      },
+      {
+        "id": "opt-4",
+        "text": "Electrochemistry & Nernst Equation",
+        "votes": 22
+      }
+    ],
+    "likes": 67,
+    "isLiked": false,
+    "commentsCount": 1,
+    "sharesCount": 12,
+    "isSaved": false,
+    "comments": [
+      {
+        "id": "comm-3-1",
+        "postId": "post-3",
+        "author": {
+          "id": "usr-joseph-sports",
+          "name": "Josephat Massawe",
+          "avatar": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200&auto=format&fit=crop&q=80",
+          "school": "Ilboru High School",
+          "role": "student"
+        },
+        "content": "Mimi reaction mechanisms za Benzene na Diazonium salts ndizo zilinitesa sana mpaka nilipochora flow chart ya rangi!",
+        "createdAt": "Saa 3 zilizopita",
+        "likes": 9,
+        "isLiked": false
+      }
+    ],
+    "schoolId": "sch-ilboru",
+    "schoolName": "Ilboru High School",
+    "createdAt": "Saa 5 zilizopita"
+  },
+  {
+    "id": "post-4",
+    "author": {
+      "id": "usr-kelvin-udsm",
+      "name": "Kelvin Komba",
+      "handle": "kelvin_tech",
+      "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop&q=80",
+      "school": "University of Dar es Salaam (UDSM)",
+      "role": "student",
+      "verified": true
+    },
+    "type": "achievement",
+    "category": "burudani",
+    "content": "Nimepata furaha kubwa kutunukiwa cheti changu cha Python for Data Science & AI na kuteuliwa kushiriki Google Student Developers Summit 2026! 🎉🇹🇿 Shukrani kwa wanafunzi wenzangu wa EduKan Study Room kwa majadiliano yaliyosaidia sana.",
+    "subject": "Computer Science & AI",
+    "mediaUrl": "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&auto=format&fit=crop&q=80",
+    "mediaType": "image",
+    "likes": 124,
+    "isLiked": false,
+    "commentsCount": 45,
+    "sharesCount": 18,
+    "isSaved": false,
+    "comments": [],
+    "schoolId": "sch-udsm",
+    "schoolName": "University of Dar es Salaam (UDSM)",
+    "createdAt": "Jana"
+  },
+  {
+    "id": "post-5",
+    "author": {
+      "id": "usr-amina-mentor",
+      "name": "Dkt. Joyce Mwambungu",
+      "handle": "joyce_mentorship",
+      "avatar": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&auto=format&fit=crop&q=80",
+      "school": "Muhimbili University of Health and Allied Sciences (MUHAS)",
+      "role": "student",
+      "verified": true
+    },
+    "type": "normal",
+    "category": "ushauri",
+    "content": "💡 Ushauri kwa wanafunzi wanaopanga kusoma Udaktari (MD) au Ufamasia: Usiwe na hofu na wingi wa maudhui ya Biology na Chemistry kidato cha sita. Jenga ratiba ya \"Active Recall\" na kusoma maswali ya miaka 10 iliyopita. Pia hakikisha afya yako ya akili na usingizi vinapata kipaumbele.",
+    "subject": "Ushauri wa Kitaaluma & Afya ya Akili",
+    "likes": 156,
+    "isLiked": false,
+    "commentsCount": 38,
+    "sharesCount": 32,
+    "isSaved": false,
+    "comments": [],
+    "schoolId": "sch-muhas",
+    "schoolName": "MUHAS",
+    "createdAt": "Saa 6 zilizopita"
+  },
+  {
+    "id": "post-6",
+    "author": {
+      "id": "usr-joseph-sports",
+      "name": "Josephat Massawe",
+      "handle": "joseph_sports",
+      "avatar": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200&auto=format&fit=crop&q=80",
+      "school": "Ilboru High School",
+      "role": "student",
+      "verified": true
+    },
+    "type": "normal",
+    "category": "burudani",
+    "content": "⚽ Pongezi kubwa kwa timu yetu ya mpira wa miguu ya Ilboru kwa kuibuka kidedea 2-1 dhidi ya Tabora Boys kwenye bonanza la michezo la kirafiki! Michezo inaburudisha na kusaidia kuongeza umakini darasani. Tuko tayari kwa UMISSETA!",
+    "subject": "Michezo & Vipaji Shuleni",
+    "mediaUrl": "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=800&auto=format&fit=crop&q=80",
+    "mediaType": "image",
+    "likes": 95,
+    "isLiked": false,
+    "commentsCount": 22,
+    "sharesCount": 9,
+    "isSaved": false,
+    "comments": [],
+    "schoolId": "sch-ilboru",
+    "schoolName": "Ilboru High School",
+    "createdAt": "Masaa 8 yaliyopita"
+  },
+  {
+    "id": "post-uni-1",
+    "author": {
+      "id": "usr-kelvin-udsm",
+      "name": "Kelvin Komba",
+      "handle": "kelvin_tech",
+      "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop&q=80",
+      "school": "University of Dar es Salaam (UDSM)",
+      "role": "student",
+      "verified": true
+    },
+    "type": "resource",
+    "category": "masomo",
+    "content": "📚 Muhtasari wa Lecture: \"Distributed Systems & Cloud Computing Architecture\" kwa wanafunzi wa Shahada ya Computer Science (Year 2 & 3). Nimeambatanisha slide za maabara na miongozo ya kuelewa CAP Theorem, Microservices na Consensus Algorithms (Raft). Karibuni kwenye mjadala wa chuo kikuu!",
+    "subject": "Computer Science & Higher Ed",
+    "mediaUrl": "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&auto=format&fit=crop&q=80",
+    "mediaType": "image",
+    "likes": 142,
+    "isLiked": false,
+    "commentsCount": 18,
+    "sharesCount": 24,
+    "isSaved": true,
+    "comments": [],
+    "schoolId": "sch-udsm",
+    "schoolName": "University of Dar es Salaam (UDSM)",
+    "createdAt": "Masaa 4 yaliyopita"
+  },
+  {
+    "id": "post-uni-2",
+    "author": {
+      "id": "usr-amina-mentor",
+      "name": "Dkt. Joyce Mwambungu",
+      "handle": "joyce_mentorship",
+      "avatar": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&auto=format&fit=crop&q=80",
+      "school": "MUHAS",
+      "role": "student",
+      "verified": true
+    },
+    "type": "question",
+    "category": "masomo",
+    "content": "🩺 Swali la Kliniki (Chuo Kikuu - Pathology & Internal Medicine): Mgonjwa mwenye umri wa miaka 45 anafika na dalili za Diabetic Ketoacidosis (DKA). Ni hatua zipi sahihi za kurekebisha serum Potassium (K+) kabla na wakati wa kuanzisha intravenous insulin infusion?",
+    "subject": "Clinical Medicine (University)",
+    "likes": 98,
+    "isLiked": false,
+    "commentsCount": 14,
+    "sharesCount": 11,
+    "isSaved": false,
+    "comments": [],
+    "schoolId": "sch-muhas",
+    "schoolName": "MUHAS",
+    "createdAt": "Saa 1 iliyopita"
+  },
+  {
+    "id": "post-olevel-1",
+    "author": {
+      "id": "usr-zainab-olevel",
+      "name": "Zainab Ramadhani",
+      "handle": "zainab_csee",
+      "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&auto=format&fit=crop&q=80",
+      "school": "Jangwani Secondary School",
+      "role": "student",
+      "verified": false
+    },
+    "type": "question",
+    "category": "masomo",
+    "content": "🔬 Swali la NECTA CSEE Form IV Biology: Eleza muundo na kazi za chembechembe nyekundu za damu (Red Blood Cells), na namna zilivyojirekebisha (adaptations) kusafirisha hewa ya oksijeni kwa ufanisi mwilini.",
+    "subject": "Biology (Kidato cha IV)",
+    "likes": 64,
+    "isLiked": false,
+    "commentsCount": 9,
+    "sharesCount": 5,
+    "isSaved": false,
+    "comments": [],
+    "schoolId": "sch-jangwani",
+    "schoolName": "Jangwani Secondary School",
+    "createdAt": "Masaa 3 yaliyopita"
+  }
+]

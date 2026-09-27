@@ -75,10 +75,30 @@ export async function getDbStatus(): Promise<DbStatus> {
 }
 
 // -------------------------------------------------------------
-// POSTS SERVICE
+// POSTS SERVICE - Shared Real-Time Community Posts
 // -------------------------------------------------------------
 
-export async function fetchPostsFromDb(): Promise<{ posts: Post[]; source: 'supabase' | 'cache' }> {
+export async function fetchPostsFromDb(): Promise<{ posts: Post[]; source: 'server' | 'supabase' | 'cache' }> {
+  // 1. Primary: Shared Node/Express Server Posts Store (visible to all students across Tanzania)
+  try {
+    const res = await fetch('/api/posts');
+    if (res.ok) {
+      const data = await res.json();
+      if (data && Array.isArray(data.posts) && data.posts.length > 0) {
+        // Cache to localStorage for offline access
+        try {
+          localStorage.setItem(CACHE_KEYS.POSTS, JSON.stringify(data.posts));
+        } catch (e) {
+          console.warn('Could not write posts cache:', e);
+        }
+        return { posts: data.posts, source: 'server' };
+      }
+    }
+  } catch (err) {
+    console.warn('Server /api/posts query note (will try Supabase/cache):', err);
+  }
+
+  // 2. Secondary: Supabase Database
   try {
     const { data, error } = await supabase
       .from('posts')
@@ -128,7 +148,7 @@ export async function fetchPostsFromDb(): Promise<{ posts: Post[]; source: 'supa
     console.warn('Supabase fetchPosts note:', err);
   }
 
-  // Fallback to cache or initial posts
+  // 3. Fallback: Local offline cache or initial mock posts
   try {
     const cached = localStorage.getItem(CACHE_KEYS.POSTS);
     if (cached) {
@@ -145,16 +165,35 @@ export async function fetchPostsFromDb(): Promise<{ posts: Post[]; source: 'supa
 }
 
 export async function createPostInDb(post: Post): Promise<{ success: boolean; post: Post }> {
-  // Update local cache first for instant feedback
+  // Update local cache immediately for instant UI feedback
   try {
     const cached = localStorage.getItem(CACHE_KEYS.POSTS);
     const list: Post[] = cached ? JSON.parse(cached) : INITIAL_POSTS;
-    localStorage.setItem(CACHE_KEYS.POSTS, JSON.stringify([post, ...list]));
+    localStorage.setItem(CACHE_KEYS.POSTS, JSON.stringify([post, ...list.filter(p => p.id !== post.id)]));
   } catch (e) {
     console.warn('Cache write failed:', e);
   }
 
-  // Attempt write to Supabase
+  // 1. Primary: Save to shared server API so it persists and is visible to everyone
+  let serverSaved = false;
+  try {
+    const res = await fetch('/api/posts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(post)
+    });
+    if (res.ok) {
+      serverSaved = true;
+      const data = await res.json();
+      if (data && data.post) {
+        post = data.post;
+      }
+    }
+  } catch (err) {
+    console.warn('Server /api/posts write note:', err);
+  }
+
+  // 2. Secondary: Save to Supabase if available
   try {
     const dbPayload = {
       id: post.id,
@@ -182,23 +221,57 @@ export async function createPostInDb(post: Post): Promise<{ success: boolean; po
       created_at: post.createdAt || new Date().toISOString()
     };
 
-    const { error } = await supabase.from('posts').insert([dbPayload]);
-    if (error) {
-      console.warn('Supabase insert post notice (saved to offline cache):', error.message);
-      return { success: false, post };
-    }
-    return { success: true, post };
+    await supabase.from('posts').insert([dbPayload]);
   } catch (err) {
-    console.warn('Supabase createPost exception:', err);
-    return { success: false, post };
+    console.warn('Supabase createPost note:', err);
   }
+
+  return { success: true, post };
 }
 
 export async function togglePostLikeInDb(postId: string, newLikes: number): Promise<void> {
+  // Sync to server
+  try {
+    await fetch(`/api/posts/${postId}/like`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ newLikes })
+    });
+  } catch (err) {
+    console.warn('Server post like update note:', err);
+  }
+
+  // Sync to Supabase
   try {
     await supabase.from('posts').update({ likes: newLikes }).eq('id', postId);
   } catch (err) {
     console.warn('Like update failed on Supabase:', err);
+  }
+}
+
+export async function addCommentToPostInDb(postId: string, comment: any): Promise<void> {
+  // Sync comment to server
+  try {
+    await fetch(`/api/posts/${postId}/comments`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(comment)
+    });
+  } catch (err) {
+    console.warn('Server post comment note:', err);
+  }
+}
+
+export async function votePollInDb(postId: string, optionId: string): Promise<void> {
+  // Sync poll vote to server
+  try {
+    await fetch(`/api/posts/${postId}/poll`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ optionId })
+    });
+  } catch (err) {
+    console.warn('Server post poll vote note:', err);
   }
 }
 

@@ -20,7 +20,10 @@ import {
   Upload,
   Paperclip,
   Image as ImageIcon,
-  FileText
+  FileText,
+  Maximize2,
+  Eye,
+  Check
 } from 'lucide-react';
 import { Post, QuestionItem, UserProfile, PostCategory } from '../types';
 
@@ -34,11 +37,12 @@ interface Props {
   defaultMode?: 'post' | 'question';
 }
 
-const TANZANIA_SUBJECTS = [
+export const TANZANIA_SUBJECTS = [
+  'Mathematics',
+  'Biology',
+  'General Studies',
   'Physics',
   'Chemistry',
-  'Biology',
-  'Mathematics (BAM / Adv)',
   'Geography',
   'History',
   'Kiswahili',
@@ -77,6 +81,8 @@ export const QuickActionModal: React.FC<Props> = ({
   const [postMediaUrl, setPostMediaUrl] = useState<string | null>(null);
   const [postMediaType, setPostMediaType] = useState<'image' | 'document' | null>(null);
   const [postMediaName, setPostMediaName] = useState<string | null>(null);
+  const [isImageConfirmed, setIsImageConfirmed] = useState<boolean>(false);
+  const [zoomImageModal, setZoomImageModal] = useState<string | null>(null);
   const postFileInputRef = useRef<HTMLInputElement>(null);
 
   // Attachment State for Question
@@ -96,9 +102,22 @@ export const QuickActionModal: React.FC<Props> = ({
       setPostMediaUrl(reader.result as string);
       setPostMediaType(isImg ? 'image' : 'document');
       setPostMediaName(file.name);
+      // Require the user to explicitly confirm any uploaded image thumbnail before posting
+      setIsImageConfirmed(!isImg);
+      setValidationError(null);
     };
     reader.readAsDataURL(file);
     e.target.value = '';
+  };
+
+  const handleClearPostMedia = () => {
+    setPostMediaUrl(null);
+    setPostMediaType(null);
+    setPostMediaName(null);
+    setIsImageConfirmed(false);
+    if (postFileInputRef.current) {
+      postFileInputRef.current.value = '';
+    }
   };
 
   const handleQuestionFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -245,8 +264,18 @@ export const QuickActionModal: React.FC<Props> = ({
     e.preventDefault();
     setValidationError(null);
 
-    if (!postContent.trim() || postContent.trim().length < 5) {
-      setValidationError('Tafadhali andika maudhui ya chapisho (angalau herufi 5).');
+    const hasText = postContent.trim().length > 0;
+    const hasMedia = Boolean(postMediaUrl);
+    const hasPoll = postType === 'poll' && pollOptions.filter(o => o.trim()).length >= 2;
+
+    if (!hasText && !hasMedia && !hasPoll) {
+      setValidationError('Tafadhali andika maudhui, weka picha/faili, au andika kura ya maoni.');
+      return;
+    }
+
+    // Require the user to confirm their selected image preview before publishing
+    if (postMediaType === 'image' && postMediaUrl && !isImageConfirmed) {
+      setValidationError('Tafadhali kagua na uthibitishe picha uliyochagua kwa kubofya kitufe cha "Confirm Image (Thibitisha)" kabla ya kuchapisha.');
       return;
     }
 
@@ -262,10 +291,18 @@ export const QuickActionModal: React.FC<Props> = ({
       ? pollOptions.filter(o => o.trim()).map((text, i) => ({ id: `opt-${Date.now()}-${i}`, text, votes: 0 }))
       : undefined;
 
+    let contentToSubmit = postContent.trim();
+    if (!contentToSubmit) {
+      if (postMediaType === 'image') contentToSubmit = 'Picha na vielelezo vya masomo';
+      else if (postMediaType === 'document') contentToSubmit = 'Kiambatisho cha faili ya masomo';
+      else if (postType === 'poll') contentToSubmit = 'Kura ya maoni kwa wanafunzi';
+      else contentToSubmit = 'Chapisho jipya';
+    }
+
     const newPost: Partial<Post> = {
       type: postType,
       category: postCategory,
-      content: postContent.trim(),
+      content: contentToSubmit,
       subject: postCategory === 'masomo' ? subjectTag : (postCategory === 'ushauri' ? 'Ushauri wa Elimu' : 'Burudani & Michezo'),
       mediaUrl: postMediaUrl || undefined,
       mediaType: postMediaType || undefined,
@@ -273,7 +310,7 @@ export const QuickActionModal: React.FC<Props> = ({
     };
 
     onAddPost(newPost);
-    setSubmittedMessage('Your post is now live! +5 EduPoints earned 🌟');
+    setSubmittedMessage('Chapisho lako limepandishwa kikamilifu na linaonekana kwa kila mtu! +5 EduPoints 🌟');
     setTimeout(() => {
       setSubmittedMessage(null);
       setPostContent('');
@@ -638,7 +675,6 @@ export const QuickActionModal: React.FC<Props> = ({
                 )}
 
                 <textarea
-                  required
                   rows={4}
                   value={postContent}
                   onChange={(e) => setPostContent(e.target.value)}
@@ -680,30 +716,148 @@ export const QuickActionModal: React.FC<Props> = ({
                     )}
                   </div>
 
-                  {postMediaUrl && (
+                  {/* Image Preview Thumbnail with Explicit Confirmation before Posting */}
+                  {postMediaUrl && postMediaType === 'image' && (
+                    <div className="mt-3 p-3.5 bg-gradient-to-b from-emerald-50/80 to-white dark:from-slate-800/90 dark:to-slate-900 rounded-2xl border-2 border-emerald-400/80 dark:border-emerald-600/70 shadow-sm space-y-3 animate-in fade-in">
+                      {/* Top Header Row with status */}
+                      <div className="flex items-center justify-between gap-2 flex-wrap">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                            <ImageIcon className="w-4 h-4" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-xs font-bold text-gray-900 dark:text-white truncate max-w-[200px] sm:max-w-xs">
+                              {postMediaName || 'Attached Photo'}
+                            </p>
+                            <p className="text-[10px] text-gray-500 dark:text-slate-400">
+                              Image Preview Thumbnail • Kagua na uthibitishe
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Confirmation Badge */}
+                        {isImageConfirmed ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-600 text-white shadow-2xs">
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            <span>✓ Image Confirmed</span>
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-500 text-white shadow-2xs animate-pulse">
+                            <AlertCircle className="w-3.5 h-3.5" />
+                            <span>Confirmation Required</span>
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Prominent Image Thumbnail Preview */}
+                      <div className="relative rounded-xl overflow-hidden bg-slate-950 border border-emerald-300 dark:border-slate-700 h-48 sm:h-56 flex items-center justify-center group shadow-inner">
+                        <img
+                          src={postMediaUrl}
+                          alt="Selected thumbnail preview"
+                          className="w-full h-full object-contain cursor-pointer transition-transform duration-200 group-hover:scale-[1.01]"
+                          onClick={() => setZoomImageModal(postMediaUrl)}
+                        />
+
+                        {/* Overlay Controls */}
+                        <div className="absolute top-2 right-2 flex items-center gap-1.5 z-10">
+                          <button
+                            type="button"
+                            onClick={() => setZoomImageModal(postMediaUrl)}
+                            className="p-1.5 rounded-lg bg-black/60 hover:bg-black/80 text-white backdrop-blur-xs transition-colors cursor-pointer"
+                            title="Zoom in full view"
+                          >
+                            <Maximize2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleClearPostMedia}
+                            className="p-1.5 rounded-lg bg-black/60 hover:bg-red-600 text-white backdrop-blur-xs transition-colors cursor-pointer"
+                            title="Remove attachment"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+
+                        <div
+                          onClick={() => setZoomImageModal(postMediaUrl)}
+                          className="absolute bottom-2 left-2 px-2.5 py-1 rounded-lg bg-black/60 backdrop-blur-xs text-white text-[11px] font-medium flex items-center gap-1 opacity-90 group-hover:opacity-100 cursor-pointer"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          <span>Click to preview full size</span>
+                        </div>
+                      </div>
+
+                      {/* Confirmation Action Box */}
+                      {!isImageConfirmed ? (
+                        <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800/80 flex flex-col sm:flex-row items-center justify-between gap-3">
+                          <div className="text-left text-xs text-amber-900 dark:text-amber-200">
+                            <p className="font-bold flex items-center gap-1">
+                              <AlertCircle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
+                              <span>Confirm this image before posting:</span>
+                            </p>
+                            <p className="text-[11px] text-amber-700 dark:text-amber-300 mt-0.5">
+                              Tafadhali kagua picha hiyo hapo juu kisha bofya &ldquo;Confirm Image&rdquo; kuithibitisha kabla ya kubonyeza kitufe cha Post.
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            id="btn-confirm-image"
+                            onClick={() => {
+                              setIsImageConfirmed(true);
+                              setValidationError(null);
+                            }}
+                            className="w-full sm:w-auto shrink-0 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer"
+                          >
+                            <CheckCircle2 className="w-4 h-4" />
+                            <span>Confirm Image (Thibitisha)</span>
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800 flex items-center justify-between gap-2 text-xs text-emerald-900 dark:text-emerald-200">
+                          <div className="flex items-center gap-2">
+                            <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                            <span className="font-semibold">
+                              ✓ Image verified & confirmed for post (Picha imethibitishwa tayari)
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => postFileInputRef.current?.click()}
+                              className="text-[11px] text-emerald-700 dark:text-emerald-400 hover:underline font-semibold cursor-pointer"
+                            >
+                              Change
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleClearPostMedia}
+                              className="text-[11px] text-red-600 hover:underline font-semibold cursor-pointer"
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Document Attachment Preview */}
+                  {postMediaUrl && postMediaType === 'document' && (
                     <div className="mt-2 p-2.5 bg-emerald-50/90 dark:bg-slate-800/90 rounded-xl border border-emerald-200 dark:border-slate-700 flex items-center justify-between gap-2 text-xs animate-in fade-in">
                       <div className="flex items-center gap-2 min-w-0">
-                        {postMediaType === 'image' ? (
-                          <img src={postMediaUrl} alt="Preview" className="w-10 h-10 rounded-lg object-cover ring-1 ring-emerald-400 shrink-0" />
-                        ) : (
-                          <div className="w-9 h-9 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                            <FileText className="w-4 h-4" />
-                          </div>
-                        )}
+                        <div className="w-9 h-9 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                          <FileText className="w-4 h-4" />
+                        </div>
                         <div className="min-w-0">
                           <p className="font-semibold text-gray-900 dark:text-white truncate">{postMediaName || 'Attached File'}</p>
                           <p className="text-[10px] text-emerald-700 dark:text-emerald-400 font-mono">
-                            {postMediaType === 'image' ? 'Image Attachment' : 'PDF / Document File'}
+                            PDF / Document File
                           </p>
                         </div>
                       </div>
                       <button
                         type="button"
-                        onClick={() => {
-                          setPostMediaUrl(null);
-                          setPostMediaType(null);
-                          setPostMediaName(null);
-                        }}
+                        onClick={handleClearPostMedia}
                         className="p-1 rounded-lg text-gray-400 hover:text-red-600 hover:bg-gray-100 dark:hover:bg-slate-700 cursor-pointer shrink-0"
                         title="Remove attachment"
                       >
@@ -758,14 +912,38 @@ export const QuickActionModal: React.FC<Props> = ({
                   >
                     Cancel
                   </button>
-                  <button
-                    type="submit"
-                    disabled={!postContent.trim()}
-                    className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 text-white text-xs font-semibold px-5 py-2 rounded-xl transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <Send className="w-3.5 h-3.5" />
-                    <span>Post Now</span>
-                  </button>
+                  {(() => {
+                    const isImageAwaitingConfirmation = postMediaType === 'image' && Boolean(postMediaUrl) && !isImageConfirmed;
+                    const hasValidContent = postContent.trim().length > 0 || Boolean(postMediaUrl) || (postType === 'poll' && pollOptions.filter(o => o.trim()).length >= 2);
+                    const canSubmit = hasValidContent && !isImageAwaitingConfirmation;
+
+                    return (
+                      <button
+                        type="submit"
+                        disabled={!canSubmit}
+                        title={isImageAwaitingConfirmation ? 'Tafadhali thibitisha picha kwanza kabla ya kuchapisha' : 'Chapisha sasa'}
+                        className={`text-white text-xs font-semibold px-5 py-2 rounded-xl transition-all shadow-xs flex items-center gap-1.5 cursor-pointer ${
+                          canSubmit
+                            ? 'bg-emerald-600 hover:bg-emerald-700 active:scale-95'
+                            : isImageAwaitingConfirmation
+                            ? 'bg-amber-600 hover:bg-amber-700 ring-2 ring-amber-300 animate-pulse'
+                            : 'bg-emerald-600/50 cursor-not-allowed opacity-50'
+                        }`}
+                      >
+                        {isImageAwaitingConfirmation ? (
+                          <>
+                            <AlertCircle className="w-3.5 h-3.5" />
+                            <span>Confirm Image to Post</span>
+                          </>
+                        ) : (
+                          <>
+                            <Send className="w-3.5 h-3.5" />
+                            <span>Post Now</span>
+                          </>
+                        )}
+                      </button>
+                    );
+                  })()}
                 </div>
               </div>
             </form>
@@ -1016,6 +1194,51 @@ export const QuickActionModal: React.FC<Props> = ({
           )}
         </div>
       </div>
+
+      {/* Full-view Zoom Lightbox Modal */}
+      {zoomImageModal && (
+        <div
+          className="fixed inset-0 z-[120] bg-black/90 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in"
+          onClick={() => setZoomImageModal(null)}
+        >
+          <div
+            className="relative max-w-4xl max-h-[90vh] flex flex-col items-center gap-3"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-white/20 bg-black">
+              <img
+                src={zoomImageModal}
+                alt="Full size preview"
+                className="max-h-[75vh] w-auto object-contain rounded-xl"
+              />
+            </div>
+
+            <div className="flex items-center gap-3">
+              {!isImageConfirmed && activeMode === 'post' && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsImageConfirmed(true);
+                    setZoomImageModal(null);
+                    setValidationError(null);
+                  }}
+                  className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center gap-2 shadow-lg transition-all cursor-pointer"
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>Confirm Image (Thibitisha Picha)</span>
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => setZoomImageModal(null)}
+                className="px-5 py-2.5 bg-white/20 hover:bg-white/30 text-white rounded-xl text-xs font-bold backdrop-blur-md transition-all cursor-pointer"
+              >
+                Close (Funga)
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
