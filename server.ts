@@ -1,6 +1,7 @@
-import express, { Request, Response } from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import path from 'path';
 import fs from 'fs';
+import crypto from 'crypto';
 import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI } from '@google/genai';
 import dotenv from 'dotenv';
@@ -8,17 +9,145 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const PORT = 3000;
-const POSTS_FILE_PATH = path.join(process.cwd(), 'posts_store.json');
+const AUTH_SECRET = process.env.AUTH_SECRET || 'edukan_server_secret_jwt_key_2026_super_secure';
+const ADMIN_NOTIFICATION_EMAIL = process.env.ADMIN_NOTIFICATION_EMAIL || process.env.ADMIN_EMAIL || 'nicolousmunisi07@gmail.com';
 
-// Helper to load and save shared community posts
+const USERS_FILE_PATH = path.join(process.cwd(), 'users_store.json');
+const POSTS_FILE_PATH = path.join(process.cwd(), 'posts_store.json');
+const AUDIT_FILE_PATH = path.join(process.cwd(), 'admin_actions_store.json');
+
+// -------------------------------------------------------------
+// Database Types
+// -------------------------------------------------------------
+export interface StoredUser {
+  id: string;
+  name: string;
+  handle: string;
+  email: string;
+  phone?: string;
+  passwordHash: string;
+  salt: string;
+  role: 'student' | 'admin';
+  avatar: string;
+  coverPhoto?: string;
+  schoolId?: string;
+  schoolName: string;
+  schoolRegion: string;
+  schoolDistrict: string;
+  level: string;
+  combination?: string;
+  title?: string;
+  bio: string;
+  points: number;
+  followersCount: number;
+  followingCount: number;
+  studentRegNo?: string;
+  status: 'active' | 'suspended' | 'deactivated';
+  createdAt: string;
+  lastLoginAt?: string;
+}
+
+export interface SanitizedUser extends Omit<StoredUser, 'passwordHash' | 'salt'> {}
+
+export interface StoredAuditAction {
+  id: string;
+  action: string;
+  target: string;
+  adminId: string;
+  adminName: string;
+  timestamp: string;
+  details?: any;
+}
+
+// -------------------------------------------------------------
+// Cryptographic Helpers (Salted Hashes & Signed Bearer Tokens)
+// -------------------------------------------------------------
+function hashPassword(password: string): { salt: string; hash: string } {
+  const salt = crypto.randomBytes(16).toString('hex');
+  const hash = crypto.scryptSync(password, salt, 64).toString('hex');
+  return { salt, hash };
+}
+
+function verifyPassword(password: string, salt: string, hash: string): boolean {
+  try {
+    const hashedAttempt = crypto.scryptSync(password, salt, 64).toString('hex');
+    const hashBuf = Buffer.from(hash, 'hex');
+    const attemptBuf = Buffer.from(hashedAttempt, 'hex');
+    if (hashBuf.length !== attemptBuf.length) return false;
+    return crypto.timingSafeEqual(hashBuf, attemptBuf);
+  } catch (err) {
+    console.error('Password verify error:', err);
+    return false;
+  }
+}
+
+function generateToken(payload: { userId: string; role: string; email: string }): string {
+  const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');
+  const body = Buffer.from(
+    JSON.stringify({
+      ...payload,
+      iat: Math.floor(Date.now() / 1000),
+      exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 30 // 30 days
+    })
+  ).toString('base64url');
+  const signature = crypto.createHmac('sha256', AUTH_SECRET).update(`${header}.${body}`).digest('base64url');
+  return `${header}.${body}.${signature}`;
+}
+
+function verifyToken(token: string): { userId: string; role: string; email: string } | null {
+  try {
+    if (!token || typeof token !== 'string') return null;
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+    const [header, body, signature] = parts;
+    const expectedSig = crypto.createHmac('sha256', AUTH_SECRET).update(`${header}.${body}`).digest('base64url');
+    if (signature !== expectedSig) return null;
+
+    const payload = JSON.parse(Buffer.from(body, 'base64url').toString('utf-8'));
+    if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) {
+      return null; // Expired
+    }
+    return payload;
+  } catch {
+    return null;
+  }
+}
+
+function sanitizeUser(user: StoredUser): SanitizedUser {
+  const { passwordHash, salt, ...clean } = user;
+  return clean;
+}
+
+// -------------------------------------------------------------
+// Database Persistence Helpers
+// -------------------------------------------------------------
+function loadServerUsers(): StoredUser[] {
+  try {
+    if (fs.existsSync(USERS_FILE_PATH)) {
+      const raw = fs.readFileSync(USERS_FILE_PATH, 'utf-8');
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    }
+  } catch (err) {
+    console.warn('Could not read users_store.json:', err);
+  }
+  return [];
+}
+
+function saveServerUsers(users: StoredUser[]) {
+  try {
+    fs.writeFileSync(USERS_FILE_PATH, JSON.stringify(users, null, 2), 'utf-8');
+  } catch (err) {
+    console.warn('Could not write users_store.json:', err);
+  }
+}
+
 function loadServerPosts(): any[] {
   try {
     if (fs.existsSync(POSTS_FILE_PATH)) {
       const raw = fs.readFileSync(POSTS_FILE_PATH, 'utf-8');
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed;
-      }
+      if (Array.isArray(parsed)) return parsed;
     }
   } catch (err) {
     console.warn('Could not read posts_store.json:', err);
@@ -26,10 +155,7 @@ function loadServerPosts(): any[] {
   return [];
 }
 
-let inMemoryPosts: any[] = loadServerPosts();
-
 function saveServerPosts(posts: any[]) {
-  inMemoryPosts = posts;
   try {
     fs.writeFileSync(POSTS_FILE_PATH, JSON.stringify(posts, null, 2), 'utf-8');
   } catch (err) {
@@ -37,7 +163,302 @@ function saveServerPosts(posts: any[]) {
   }
 }
 
-// Lazy initialize GoogleGenAI client to avoid crash on startup if key is pending
+function loadAuditLogs(): StoredAuditAction[] {
+  try {
+    if (fs.existsSync(AUDIT_FILE_PATH)) {
+      const raw = fs.readFileSync(AUDIT_FILE_PATH, 'utf-8');
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    }
+  } catch (err) {
+    console.warn('Could not read admin_actions_store.json:', err);
+  }
+  return [];
+}
+
+function logAdminAction(adminId: string, adminName: string, action: string, target: string, details?: any) {
+  try {
+    const logs = loadAuditLogs();
+    const entry: StoredAuditAction = {
+      id: `audit-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      action,
+      target,
+      adminId,
+      adminName,
+      timestamp: new Date().toISOString(),
+      details
+    };
+    logs.unshift(entry);
+    fs.writeFileSync(AUDIT_FILE_PATH, JSON.stringify(logs.slice(0, 300), null, 2), 'utf-8');
+  } catch (err) {
+    console.warn('Could not log admin action:', err);
+  }
+}
+
+// -------------------------------------------------------------
+// Master Administrator Bootstrap
+// Automatically provisions verified master administrator
+// -------------------------------------------------------------
+function bootstrapAdminUser(): StoredUser {
+  const users = loadServerUsers();
+  const existingAdmin = users.find(u => u.role === 'admin' || u.email.toLowerCase() === ADMIN_NOTIFICATION_EMAIL.toLowerCase());
+
+  if (existingAdmin) {
+    if (existingAdmin.role !== 'admin') {
+      existingAdmin.role = 'admin';
+      saveServerUsers(users);
+    }
+    return existingAdmin;
+  }
+
+  const defaultAdminPass = process.env.ADMIN_PASSWORD || '@EduKan#26admin';
+  const { salt, hash } = hashPassword(defaultAdminPass);
+
+  const masterAdmin: StoredUser = {
+    id: 'usr-admin-master',
+    name: 'Nicolous Munisi',
+    handle: 'nicolous_admin',
+    email: ADMIN_NOTIFICATION_EMAIL,
+    phone: '+255 700 000 000',
+    passwordHash: hash,
+    salt,
+    role: 'admin',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80',
+    title: 'Msimamizi Mkuu wa Mfumo (Lead Administrator)',
+    schoolName: 'EduKan Tanzania Central Administration',
+    schoolRegion: 'Dar es Salaam',
+    schoolDistrict: 'Ilala',
+    level: 'System Administrator',
+    combination: 'Full Administrative Privileges',
+    bio: 'Msimamizi Mkuu wa Mfumo wa EduKan Tanzania. Mwenye mamlaka ya kusimamia watumiaji, machapisho na huduma za kielektroniki.',
+    points: 5000,
+    followersCount: 0,
+    followingCount: 0,
+    studentRegNo: 'ADMIN-TZ-001',
+    status: 'active',
+    createdAt: new Date().toISOString(),
+    lastLoginAt: new Date().toISOString()
+  };
+
+  users.unshift(masterAdmin);
+  saveServerUsers(users);
+  console.log(`🛡️ [ADMIN BOOTSTRAP] Master Administrator initialized (${ADMIN_NOTIFICATION_EMAIL})`);
+  return masterAdmin;
+}
+
+// -------------------------------------------------------------
+// Transactional Email Dispatch Helper
+// Automatically dispatches notification to Administrator on new registration
+// -------------------------------------------------------------
+async function dispatchAdminRegistrationAlert(newUser: SanitizedUser) {
+  const now = new Date().toISOString();
+  const subject = `[EduKan Alert] New User Registration: ${newUser.name}`;
+  const textContent = `New Edu-Kan Registration
+
+A new user has registered on Edu-Kan:
+
+* Full Name: ${newUser.name}
+* Handle: @${newUser.handle}
+* Email: ${newUser.email}
+* Role: ${newUser.role}
+* School: ${newUser.schoolName}
+* Level / Class: ${newUser.level} ${newUser.combination ? `(${newUser.combination})` : ''}
+* Registration Date: ${newUser.createdAt}
+* Account Status: ${newUser.status}
+
+This is an automated notification from the Edu-Kan platform.`;
+
+  const htmlContent = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
+      <div style="background: #047857; color: white; padding: 16px 20px; border-radius: 8px 8px 0 0;">
+        <h2 style="margin: 0; font-size: 20px;">🎓 Edu-Kan Admin Notification</h2>
+        <p style="margin: 4px 0 0 0; font-size: 13px; opacity: 0.9;">New Student Registration Alert</p>
+      </div>
+      <div style="padding: 20px;">
+        <p style="font-size: 15px; color: #1e293b; margin-top: 0;">A new user has successfully registered on <strong>Edu-Kan</strong>:</p>
+        <table style="width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13px;">
+          <tr style="border-bottom: 1px solid #f1f5f9;">
+            <td style="padding: 10px 0; font-weight: bold; color: #475569; width: 140px;">Full Name:</td>
+            <td style="padding: 10px 0; color: #0f172a; font-weight: 600;">${newUser.name}</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #f1f5f9;">
+            <td style="padding: 10px 0; font-weight: bold; color: #475569;">Email Address:</td>
+            <td style="padding: 10px 0; color: #0f172a;"><a href="mailto:${newUser.email}">${newUser.email}</a></td>
+          </tr>
+          <tr style="border-bottom: 1px solid #f1f5f9;">
+            <td style="padding: 10px 0; font-weight: bold; color: #475569;">School / Institution:</td>
+            <td style="padding: 10px 0; color: #0f172a;">${newUser.schoolName}</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #f1f5f9;">
+            <td style="padding: 10px 0; font-weight: bold; color: #475569;">Academic Level:</td>
+            <td style="padding: 10px 0; color: #0f172a;">${newUser.level} ${newUser.combination ? `(${newUser.combination})` : ''}</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #f1f5f9;">
+            <td style="padding: 10px 0; font-weight: bold; color: #475569;">Assigned Role:</td>
+            <td style="padding: 10px 0; color: #047857; font-weight: bold;">${newUser.role.toUpperCase()}</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #f1f5f9;">
+            <td style="padding: 10px 0; font-weight: bold; color: #475569;">Registration Time:</td>
+            <td style="padding: 10px 0; color: #0f172a;">${newUser.createdAt}</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px 0; font-weight: bold; color: #475569;">Account Status:</td>
+            <td style="padding: 10px 0; color: #059669; font-weight: bold;">${newUser.status.toUpperCase()}</td>
+          </tr>
+        </table>
+        <p style="font-size: 12px; color: #64748b; margin-bottom: 0;">You can review and manage this student's profile directly from the Edu-Kan Admin Console.</p>
+      </div>
+    </div>
+  `;
+
+  // 1. Resend API
+  if (process.env.RESEND_API_KEY) {
+    try {
+      await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          from: 'EduKan Tanzania <notifications@edukan.tz>',
+          to: [ADMIN_NOTIFICATION_EMAIL],
+          subject,
+          text: textContent,
+          html: htmlContent
+        })
+      });
+      console.log(`📧 [ADMIN EMAIL ALERT] Successfully sent via Resend to ${ADMIN_NOTIFICATION_EMAIL}`);
+      return;
+    } catch (err) {
+      console.warn('Resend notification dispatch note:', err);
+    }
+  }
+
+  // 2. EmailJS relay
+  const emailjsServiceId = process.env.EMAILJS_SERVICE_ID;
+  const emailjsTemplateId = process.env.EMAILJS_TEMPLATE_ID;
+  const emailjsPublicKey = process.env.EMAILJS_PUBLIC_KEY;
+  const emailjsPrivateKey = process.env.EMAILJS_PRIVATE_KEY;
+
+  if (emailjsServiceId && emailjsTemplateId && (emailjsPublicKey || emailjsPrivateKey)) {
+    try {
+      await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          service_id: emailjsServiceId,
+          template_id: emailjsTemplateId,
+          user_id: emailjsPublicKey,
+          accessToken: emailjsPrivateKey,
+          template_params: {
+            to_email: ADMIN_NOTIFICATION_EMAIL,
+            to_name: 'EduKan Administrator',
+            subject,
+            message_html: htmlContent,
+            user_name: newUser.name,
+            user_school: newUser.schoolName
+          }
+        })
+      });
+      console.log(`📧 [ADMIN EMAIL ALERT] Successfully sent via EmailJS to ${ADMIN_NOTIFICATION_EMAIL}`);
+      return;
+    } catch (err) {
+      console.warn('EmailJS notification dispatch note:', err);
+    }
+  }
+
+  // 3. FormSubmit webhook relay (guarantees direct delivery to Admin's Gmail without requiring API keys)
+  try {
+    await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(ADMIN_NOTIFICATION_EMAIL)}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json'
+      },
+      body: JSON.stringify({
+        _subject: subject,
+        _template: 'table',
+        Event: 'New Edu-Kan User Registration',
+        Student_Name: newUser.name,
+        Student_Email: newUser.email,
+        School: newUser.schoolName,
+        Academic_Level: `${newUser.level} ${newUser.combination || ''}`,
+        Account_Status: newUser.status,
+        Registered_At: now
+      })
+    });
+    console.log(`📧 [ADMIN EMAIL ALERT] Dispatched to ${ADMIN_NOTIFICATION_EMAIL} via FormSubmit relay`);
+  } catch (err) {
+    console.warn('Admin email webhook relay note:', err);
+  }
+}
+
+// -------------------------------------------------------------
+// Express Authentication Middlewares
+// -------------------------------------------------------------
+export interface AuthRequest extends Request {
+  user?: SanitizedUser;
+}
+
+function authenticateToken(req: AuthRequest, res: Response, next: NextFunction) {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+
+  if (!token) {
+    return res.status(401).json({ error: 'Uthibitisho unahitajika. Tafadhali ingia kwenye akaunti.' });
+  }
+
+  const decoded = verifyToken(token);
+  if (!decoded) {
+    return res.status(401).json({ error: 'Kipindi chako kimemalizika au si sahihi. Tafadhali ingia tena.' });
+  }
+
+  const users = loadServerUsers();
+  const user = users.find(u => u.id === decoded.userId);
+
+  if (!user) {
+    return res.status(401).json({ error: 'Akaunti haipatikani kwenye mfumo.' });
+  }
+
+  if (user.status === 'deactivated' || user.status === 'suspended') {
+    return res.status(403).json({ error: 'Akaunti yako imezimwa au kusimamishwa na Msimamizi.' });
+  }
+
+  req.user = sanitizeUser(user);
+  next();
+}
+
+function requireAdmin(req: AuthRequest, res: Response, next: NextFunction) {
+  authenticateToken(req, res, () => {
+    if (!req.user || req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Mamlaka ya kiutawala (Admin Access) yanahitajika kutekeleza kitendo hiki.' });
+    }
+    next();
+  });
+}
+
+function optionalAuth(req: AuthRequest, res: Response, next: NextFunction) {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+  if (!token) {
+    req.user = undefined;
+    return next();
+  }
+  const decoded = verifyToken(token);
+  if (decoded) {
+    const users = loadServerUsers();
+    const user = users.find(u => u.id === decoded.userId);
+    if (user && user.status === 'active') {
+      req.user = sanitizeUser(user);
+    }
+  }
+  next();
+}
+
+// -------------------------------------------------------------
+// Lazy Gemini AI Client Initialization
+// -------------------------------------------------------------
 let geminiClient: GoogleGenAI | null = null;
 function getGeminiClient(): GoogleGenAI | null {
   if (!geminiClient && process.env.GEMINI_API_KEY) {
@@ -46,9 +467,15 @@ function getGeminiClient(): GoogleGenAI | null {
   return geminiClient;
 }
 
+// -------------------------------------------------------------
+// Server Bootstrap
+// -------------------------------------------------------------
 async function startServer() {
   const app = express();
-  app.use(express.json({ limit: '10mb' }));
+  app.use(express.json({ limit: '15mb' }));
+
+  // Initialize master admin
+  bootstrapAdminUser();
 
   // -------------------------------------------------------------
   // Health check endpoint
@@ -56,46 +483,280 @@ async function startServer() {
   app.get('/api/health', (req: Request, res: Response) => {
     res.json({
       status: 'ok',
-      service: 'EduKan Tanzania Backend Proxy',
+      service: 'EduKan Tanzania Full-Stack Backend',
+      adminEmail: ADMIN_NOTIFICATION_EMAIL,
       geminiConfigured: !!process.env.GEMINI_API_KEY,
       timestamp: new Date().toISOString()
     });
   });
 
-  // -------------------------------------------------------------
-  // POSTS API - Shared Persistent Community Posts
-  // Ensures posts uploaded by ANY student are instantly saved and
-  // broadcasted to everyone across Tanzania
-  // -------------------------------------------------------------
-  app.get('/api/posts', (req: Request, res: Response) => {
-    inMemoryPosts = loadServerPosts();
+  // =============================================================
+  // AUTHENTICATION API - Real Database User Registration & Login
+  // =============================================================
+
+  // POST /api/auth/register - Register new student or admin
+  app.post('/api/auth/register', async (req: Request, res: Response) => {
+    try {
+      const {
+        name,
+        email,
+        password,
+        phone,
+        schoolName,
+        schoolRegion,
+        schoolDistrict,
+        level,
+        combination,
+        title,
+        bio,
+        role: requestedRole,
+        adminCode
+      } = req.body;
+
+      if (!name || typeof name !== 'string' || name.trim().length < 2) {
+        return res.status(400).json({ error: 'Tafadhali andika jina lako kamili.' });
+      }
+
+      if (!email || typeof email !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+        return res.status(400).json({ error: 'Tafadhali weka barua pepe sahihi.' });
+      }
+
+      if (!password || typeof password !== 'string' || password.length < 6) {
+        return res.status(400).json({ error: 'Nenosiri linapaswa kuwa na angalau herufi sita (6).' });
+      }
+
+      const users = loadServerUsers();
+      const normalizedEmail = email.trim().toLowerCase();
+
+      // Check if user already exists
+      const existing = users.find(u => u.email.toLowerCase() === normalizedEmail);
+      if (existing) {
+        return res.status(400).json({ error: 'Barua pepe hii tayari imesajiliwa. Tafadhali ingia kwenye akaunti yako.' });
+      }
+
+      // Security check: Only allow admin role if email matches ADMIN_NOTIFICATION_EMAIL or valid master adminCode
+      let resolvedRole: 'student' | 'admin' = 'student';
+      if (requestedRole === 'admin' || normalizedEmail === ADMIN_NOTIFICATION_EMAIL.toLowerCase()) {
+        const expectedCode = process.env.ADMIN_SECRET_CODE || '@EduKan#26admin';
+        if (adminCode === expectedCode || normalizedEmail === ADMIN_NOTIFICATION_EMAIL.toLowerCase()) {
+          resolvedRole = 'admin';
+        }
+      }
+
+      const { salt, hash } = hashPassword(password);
+      const userId = `usr-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+      const cleanHandle = name.trim().toLowerCase().replace(/[^a-z0-9]/g, '_').slice(0, 18) || `student_${Date.now().toString().slice(-4)}`;
+
+      // Generate consistent Dicebear avatar based on real user name
+      const avatarUrl = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name.trim())}&backgroundColor=047857&textColor=ffffff`;
+
+      const newUser: StoredUser = {
+        id: userId,
+        name: name.trim(),
+        handle: cleanHandle,
+        email: normalizedEmail,
+        phone: phone ? String(phone).trim() : undefined,
+        passwordHash: hash,
+        salt,
+        role: resolvedRole,
+        avatar: avatarUrl,
+        schoolName: schoolName ? String(schoolName).trim() : 'EduKan Network School',
+        schoolRegion: schoolRegion ? String(schoolRegion).trim() : 'Tanzania',
+        schoolDistrict: schoolDistrict ? String(schoolDistrict).trim() : '',
+        level: level ? String(level).trim() : 'Kidato cha V - VI (A-Level)',
+        combination: combination ? String(combination).trim() : 'Sayansi',
+        title: title ? String(title).trim() : (resolvedRole === 'admin' ? 'Msimamizi Mkuu' : 'Mwanafunzi'),
+        bio: bio ? String(bio).trim() : 'Mwanafunzi mwenye bidii katika mtandao wa EduKan Tanzania.',
+        points: 100, // Welcome EduPoints
+        followersCount: 0,
+        followingCount: 0,
+        studentRegNo: `S.${Math.floor(1000 + Math.random() * 9000)}/${Math.floor(100 + Math.random() * 900)}/${new Date().getFullYear()}`,
+        status: 'active',
+        createdAt: new Date().toISOString(),
+        lastLoginAt: new Date().toISOString()
+      };
+
+      users.unshift(newUser);
+      saveServerUsers(users);
+
+      const sanitized = sanitizeUser(newUser);
+      const token = generateToken({ userId: newUser.id, role: newUser.role, email: newUser.email });
+
+      console.log(`👤 [NEW REAL USER REGISTERED] ${newUser.name} (${newUser.email}) - Role: ${newUser.role}`);
+
+      // Fire and forget email notification to administrator
+      dispatchAdminRegistrationAlert(sanitized).catch(e => console.warn('Email dispatch failed:', e));
+
+      return res.status(201).json({
+        success: true,
+        message: 'Akaunti imesajiliwa kikamilifu!',
+        token,
+        user: sanitized
+      });
+    } catch (err: any) {
+      console.error('Registration server error:', err);
+      return res.status(500).json({ error: 'Hitilafu ya seva wakati wa usajili. Tafadhali jaribu tena.', details: err?.message });
+    }
+  });
+
+  // POST /api/auth/login - Authenticate with real database credentials
+  app.post('/api/auth/login', async (req: Request, res: Response) => {
+    try {
+      const { identifier, password } = req.body;
+
+      if (!identifier || !password) {
+        return res.status(400).json({ error: 'Tafadhali jaza barua pepe au jina la mtumiaji na nenosiri.' });
+      }
+
+      const users = loadServerUsers();
+      const idClean = identifier.trim().toLowerCase();
+
+      // Find user by email or handle
+      const user = users.find(u => u.email.toLowerCase() === idClean || u.handle.toLowerCase() === idClean);
+
+      if (!user) {
+        return res.status(401).json({ error: 'Barua pepe au jina la mtumiaji halijapatikana. Tafadhali jisajili kwanza.' });
+      }
+
+      // Check account status
+      if (user.status === 'deactivated' || user.status === 'suspended') {
+        return res.status(403).json({ error: 'Akaunti yako imezimwa au kusimamishwa na Msimamizi. Wasiliana nasi kwa msaada.' });
+      }
+
+      // Verify salted password hash
+      const isValid = verifyPassword(password, user.salt, user.passwordHash);
+      if (!isValid) {
+        return res.status(401).json({ error: 'Nenosiri si sahihi. Tafadhali jaribu tena.' });
+      }
+
+      // Update last login timestamp
+      user.lastLoginAt = new Date().toISOString();
+      saveServerUsers(users);
+
+      const token = generateToken({ userId: user.id, role: user.role, email: user.email });
+      const sanitized = sanitizeUser(user);
+
+      console.log(`🔐 [LOGIN SUCCESS] ${user.name} (${user.email})`);
+
+      return res.json({
+        success: true,
+        message: 'Umeingia kikamilifu!',
+        token,
+        user: sanitized
+      });
+    } catch (err: any) {
+      console.error('Login server error:', err);
+      return res.status(500).json({ error: 'Hitilafu ya seva wakati wa kuingia.', details: err?.message });
+    }
+  });
+
+  // GET /api/auth/me - Validate token and retrieve authenticated user profile
+  app.get('/api/auth/me', authenticateToken, (req: AuthRequest, res: Response) => {
     return res.json({
       success: true,
-      posts: inMemoryPosts,
-      total: inMemoryPosts.length
+      user: req.user
     });
   });
 
-  app.post('/api/posts', (req: Request, res: Response) => {
+  // PUT /api/auth/profile - Update real profile for authenticated user
+  app.put('/api/auth/profile', authenticateToken, (req: AuthRequest, res: Response) => {
+    try {
+      const users = loadServerUsers();
+      const userIndex = users.findIndex(u => u.id === req.user!.id);
+      if (userIndex === -1) {
+        return res.status(404).json({ error: 'Mtumiaji hajapatikana.' });
+      }
+
+      const { name, bio, schoolName, level, combination, title, avatar, phone } = req.body;
+      const target = users[userIndex];
+
+      if (name && typeof name === 'string' && name.trim()) target.name = name.trim();
+      if (bio !== undefined) target.bio = String(bio).trim();
+      if (schoolName) target.schoolName = String(schoolName).trim();
+      if (level) target.level = String(level).trim();
+      if (combination) target.combination = String(combination).trim();
+      if (title) target.title = String(title).trim();
+      if (avatar) target.avatar = String(avatar).trim();
+      if (phone !== undefined) target.phone = String(phone).trim();
+
+      saveServerUsers(users);
+      return res.json({
+        success: true,
+        message: 'Wasifu umesasishwa kikamilifu!',
+        user: sanitizeUser(target)
+      });
+    } catch (err: any) {
+      return res.status(500).json({ error: 'Hitilafu wakati wa kusasisha wasifu.', details: err?.message });
+    }
+  });
+
+  // POST /api/auth/logout - Logout
+  app.post('/api/auth/logout', (req: Request, res: Response) => {
+    return res.json({ success: true, message: 'Umetoka kwenye akaunti kwa usalama.' });
+  });
+
+  // =============================================================
+  // POSTS API - Shared Persistent Global Posts
+  // Real posts saved to posts_store.json with real author resolution
+  // =============================================================
+
+  // GET /api/posts - Global feed visible to all authenticated users & guests
+  app.get('/api/posts', optionalAuth, (req: AuthRequest, res: Response) => {
+    const rawPosts = loadServerPosts();
+    const users = loadServerUsers();
+
+    // Dynamically resolve real author details if the author exists in users_store
+    const synchronizedPosts = rawPosts.map(p => {
+      if (p.author && p.author.id) {
+        const matchingUser = users.find(u => u.id === p.author.id);
+        if (matchingUser) {
+          return {
+            ...p,
+            author: {
+              ...p.author,
+              name: matchingUser.name,
+              handle: matchingUser.handle,
+              avatar: matchingUser.avatar,
+              role: matchingUser.role,
+              verified: matchingUser.role === 'admin' ? true : p.author.verified
+            }
+          };
+        }
+      }
+      return p;
+    });
+
+    return res.json({
+      success: true,
+      posts: synchronizedPosts,
+      total: synchronizedPosts.length
+    });
+  });
+
+  // POST /api/posts - Create post from real authenticated account
+  app.post('/api/posts', authenticateToken, (req: AuthRequest, res: Response) => {
     try {
       const p = req.body;
+      const currentUser = req.user!;
+
       if (!p || (!p.content && !p.mediaUrl && !p.pollOptions)) {
-        return res.status(400).json({ error: 'Maudhui ya chapisho yanahitajika' });
+        return res.status(400).json({ error: 'Maudhui ya chapisho yanahitajika kabla ya kuchapisha.' });
       }
 
       const now = new Date();
       const timeFormatted = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const currentPosts = loadServerPosts();
 
       const newPost = {
-        id: p.id || `post-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        id: `post-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
         author: {
-          id: p.author?.id || 'usr-student',
-          name: p.author?.name || 'Mwanafunzi wa EduKan',
-          handle: p.author?.handle || 'mwanafunzi',
-          avatar: p.author?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80',
-          school: p.author?.school || p.schoolName || 'EduKan Network',
-          role: p.author?.role || 'student',
-          verified: p.author?.verified ?? true
+          id: currentUser.id,
+          name: currentUser.name,
+          handle: currentUser.handle,
+          avatar: currentUser.avatar,
+          school: currentUser.schoolName,
+          role: currentUser.role,
+          verified: currentUser.role === 'admin'
         },
         type: p.type || 'normal',
         category: p.category || 'masomo',
@@ -104,27 +765,35 @@ async function startServer() {
         mediaUrl: p.mediaUrl || null,
         mediaType: p.mediaType || null,
         pollOptions: Array.isArray(p.pollOptions) ? p.pollOptions : null,
-        likes: p.likes || 0,
+        likes: 0,
         isLiked: false,
-        commentsCount: p.commentsCount || 0,
-        sharesCount: p.sharesCount || 0,
+        likedBy: [],
+        commentsCount: 0,
+        sharesCount: 0,
         isSaved: false,
-        comments: Array.isArray(p.comments) ? p.comments : [],
-        schoolId: p.schoolId || p.author?.schoolId || null,
-        schoolName: p.schoolName || p.author?.school || 'EduKan Network',
-        createdAt: p.createdAt || `Sasa hivi (${timeFormatted})`
+        comments: [],
+        schoolId: currentUser.schoolId || null,
+        schoolName: currentUser.schoolName,
+        createdAt: `Sasa hivi (${timeFormatted})`
       };
 
-      // Add to front of server posts
-      const updated = [newPost, ...inMemoryPosts.filter(item => item.id !== newPost.id)];
-      saveServerPosts(updated);
+      currentPosts.unshift(newPost);
+      saveServerPosts(currentPosts);
 
-      console.log(`📝 [NEW POST PUBLISHED] "${newPost.content.slice(0, 40)}..." by ${newPost.author.name} (${newPost.id})`);
+      // Award +5 EduPoints to the posting user
+      const users = loadServerUsers();
+      const authorUser = users.find(u => u.id === currentUser.id);
+      if (authorUser) {
+        authorUser.points = (authorUser.points || 0) + 5;
+        saveServerUsers(users);
+      }
+
+      console.log(`📝 [NEW POST PUBLISHED] "${newPost.content.slice(0, 45)}..." by ${currentUser.name} (${newPost.id})`);
 
       return res.status(201).json({
         success: true,
         post: newPost,
-        total: updated.length,
+        total: currentPosts.length,
         message: 'Chapisho limepandishwa kikamilifu na linaonekana kwa kila mtu!'
       });
     } catch (err: any) {
@@ -133,72 +802,315 @@ async function startServer() {
     }
   });
 
-  app.post('/api/posts/:id/like', (req: Request, res: Response) => {
+  // POST /api/posts/:id/like - Like or unlike a post
+  app.post('/api/posts/:id/like', authenticateToken, (req: AuthRequest, res: Response) => {
     try {
       const { id } = req.params;
-      const { newLikes } = req.body;
-      const target = inMemoryPosts.find(p => p.id === id);
-      if (target) {
-        target.likes = typeof newLikes === 'number' ? newLikes : (target.likes || 0) + 1;
-        saveServerPosts(inMemoryPosts);
-        return res.json({ success: true, likes: target.likes });
+      const userId = req.user!.id;
+      const posts = loadServerPosts();
+      const target = posts.find(p => p.id === id);
+
+      if (!target) {
+        return res.status(404).json({ error: 'Chapisho halijapatikana.' });
       }
-      return res.status(404).json({ error: 'Post not found' });
+
+      if (!Array.isArray(target.likedBy)) {
+        target.likedBy = [];
+      }
+
+      const alreadyLiked = target.likedBy.includes(userId);
+      if (alreadyLiked) {
+        target.likedBy = target.likedBy.filter((uid: string) => uid !== userId);
+        target.likes = Math.max(0, (target.likes || 1) - 1);
+      } else {
+        target.likedBy.push(userId);
+        target.likes = (target.likes || 0) + 1;
+      }
+
+      saveServerPosts(posts);
+      return res.json({ success: true, likes: target.likes, isLiked: !alreadyLiked });
     } catch (err) {
-      return res.status(500).json({ error: 'Like error' });
+      return res.status(500).json({ error: 'Hitilafu ya Like' });
     }
   });
 
-  app.post('/api/posts/:id/comments', (req: Request, res: Response) => {
+  // POST /api/posts/:id/comments - Add comment to post
+  app.post('/api/posts/:id/comments', authenticateToken, (req: AuthRequest, res: Response) => {
     try {
       const { id } = req.params;
-      const comment = req.body;
-      const target = inMemoryPosts.find(p => p.id === id);
-      if (target) {
-        if (!target.comments) target.comments = [];
-        target.comments.push(comment);
-        target.commentsCount = (target.commentsCount || 0) + 1;
-        saveServerPosts(inMemoryPosts);
-        return res.json({ success: true, post: target });
+      const { content } = req.body;
+      const currentUser = req.user!;
+
+      if (!content || !content.trim()) {
+        return res.status(400).json({ error: 'Maudhui ya maoni yanahitajika.' });
       }
-      return res.status(404).json({ error: 'Post not found' });
+
+      const posts = loadServerPosts();
+      const target = posts.find(p => p.id === id);
+
+      if (!target) {
+        return res.status(404).json({ error: 'Chapisho halijapatikana.' });
+      }
+
+      if (!Array.isArray(target.comments)) target.comments = [];
+
+      const newComment = {
+        id: `comm-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        postId: id,
+        author: {
+          id: currentUser.id,
+          name: currentUser.name,
+          avatar: currentUser.avatar,
+          school: currentUser.schoolName,
+          role: currentUser.role
+        },
+        content: content.trim(),
+        createdAt: 'Sasa hivi',
+        likes: 0,
+        isLiked: false
+      };
+
+      target.comments.push(newComment);
+      target.commentsCount = target.comments.length;
+      saveServerPosts(posts);
+
+      return res.json({ success: true, comment: newComment, post: target });
     } catch (err) {
-      return res.status(500).json({ error: 'Comment error' });
+      return res.status(500).json({ error: 'Hitilafu ya maoni' });
     }
   });
 
-  app.post('/api/posts/:id/poll', (req: Request, res: Response) => {
+  // POST /api/posts/:id/poll - Vote in poll
+  app.post('/api/posts/:id/poll', authenticateToken, (req: AuthRequest, res: Response) => {
     try {
       const { id } = req.params;
       const { optionId } = req.body;
-      const target = inMemoryPosts.find(p => p.id === id);
+      const posts = loadServerPosts();
+      const target = posts.find(p => p.id === id);
+
       if (target && target.pollOptions) {
         target.pollOptions = target.pollOptions.map((opt: any) =>
           opt.id === optionId ? { ...opt, votes: (opt.votes || 0) + 1 } : opt
         );
-        saveServerPosts(inMemoryPosts);
+        saveServerPosts(posts);
         return res.json({ success: true, post: target });
       }
-      return res.status(404).json({ error: 'Poll or post not found' });
+      return res.status(404).json({ error: 'Kura au chapisho halikupatikana' });
     } catch (err) {
-      return res.status(500).json({ error: 'Poll vote error' });
+      return res.status(500).json({ error: 'Hitilafu ya kura' });
     }
   });
 
-  app.delete('/api/posts/:id', (req: Request, res: Response) => {
+  // DELETE /api/posts/:id - Delete post (only author or admin)
+  app.delete('/api/posts/:id', authenticateToken, (req: AuthRequest, res: Response) => {
     try {
       const { id } = req.params;
-      inMemoryPosts = inMemoryPosts.filter(p => p.id !== id);
-      saveServerPosts(inMemoryPosts);
-      return res.json({ success: true, message: 'Chapisho limefutwa' });
+      const posts = loadServerPosts();
+      const target = posts.find(p => p.id === id);
+
+      if (!target) {
+        return res.status(404).json({ error: 'Chapisho halijapatikana.' });
+      }
+
+      // Authorization: Only the author or an administrator can delete
+      if (target.author?.id !== req.user!.id && req.user!.role !== 'admin') {
+        return res.status(403).json({ error: 'Huna ruhusa ya kufuta chapisho hili.' });
+      }
+
+      const filtered = posts.filter(p => p.id !== id);
+      saveServerPosts(filtered);
+
+      return res.json({ success: true, message: 'Chapisho limefutwa kikamilifu.' });
     } catch (err) {
-      return res.status(500).json({ error: 'Delete error' });
+      return res.status(500).json({ error: 'Hitilafu wakati wa kufuta chapisho' });
     }
   });
 
-  // -------------------------------------------------------------
+  // =============================================================
+  // SECURE ADMIN MANAGEMENT API
+  // Only accessible by verified Administrator accounts (requireAdmin)
+  // =============================================================
+
+  // GET /api/admin/users - Paginated real registered users list with search & filter
+  app.get('/api/admin/users', requireAdmin, (req: AuthRequest, res: Response) => {
+    try {
+      const allUsers = loadServerUsers();
+      const { q, role, status, page = '1', limit = '10' } = req.query;
+
+      let filtered = allUsers.map(sanitizeUser);
+
+      // Search query (name, email, school, handle)
+      if (q && typeof q === 'string' && q.trim()) {
+        const query = q.trim().toLowerCase();
+        filtered = filtered.filter(
+          u =>
+            u.name.toLowerCase().includes(query) ||
+            u.email.toLowerCase().includes(query) ||
+            u.schoolName.toLowerCase().includes(query) ||
+            u.handle.toLowerCase().includes(query)
+        );
+      }
+
+      // Role filter
+      if (role && typeof role === 'string' && role !== 'all') {
+        filtered = filtered.filter(u => u.role === role);
+      }
+
+      // Status filter
+      if (status && typeof status === 'string' && status !== 'all') {
+        filtered = filtered.filter(u => u.status === status);
+      }
+
+      // Global real stats
+      const now = new Date();
+      const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+      const stats = {
+        totalUsers: allUsers.length,
+        activeUsers: allUsers.filter(u => u.status === 'active').length,
+        suspendedUsers: allUsers.filter(u => u.status === 'suspended' || u.status === 'deactivated').length,
+        newRegistrationsToday: allUsers.filter(u => new Date(u.createdAt) > oneDayAgo).length,
+        adminCount: allUsers.filter(u => u.role === 'admin').length,
+        studentCount: allUsers.filter(u => u.role === 'student').length
+      };
+
+      // Pagination
+      const pageNum = Math.max(1, parseInt(page as string, 10) || 1);
+      const limitNum = Math.max(1, Math.min(50, parseInt(limit as string, 10) || 10));
+      const startIndex = (pageNum - 1) * limitNum;
+      const paginatedUsers = filtered.slice(startIndex, startIndex + limitNum);
+
+      return res.json({
+        success: true,
+        users: paginatedUsers,
+        total: filtered.length,
+        page: pageNum,
+        limit: limitNum,
+        totalPages: Math.ceil(filtered.length / limitNum) || 1,
+        stats
+      });
+    } catch (err: any) {
+      console.error('Error fetching admin users:', err);
+      return res.status(500).json({ error: 'Hitilafu ya kupata watumiaji.' });
+    }
+  });
+
+  // POST /api/admin/users/:id/status - Toggle activate/suspend/deactivate user
+  app.post('/api/admin/users/:id/status', requireAdmin, (req: AuthRequest, res: Response) => {
+    try {
+      const { id } = req.params;
+      const { status } = req.body;
+
+      if (!status || !['active', 'suspended', 'deactivated'].includes(status)) {
+        return res.status(400).json({ error: 'Hali ya akaunti si sahihi (active, suspended, deactivated).' });
+      }
+
+      const users = loadServerUsers();
+      const target = users.find(u => u.id === id);
+
+      if (!target) {
+        return res.status(404).json({ error: 'Mtumiaji hajapatikana.' });
+      }
+
+      // Prevent deactivating master administrator
+      if (target.email.toLowerCase() === ADMIN_NOTIFICATION_EMAIL.toLowerCase() && status !== 'active') {
+        return res.status(400).json({ error: 'Huwezi kusimamisha akaunti ya Msimamizi Mkuu.' });
+      }
+
+      target.status = status;
+      saveServerUsers(users);
+
+      logAdminAction(
+        req.user!.id,
+        req.user!.name,
+        `Kubadilisha Hali ya Akaunti: ${status}`,
+        `${target.name} (${target.email})`
+      );
+
+      return res.json({
+        success: true,
+        message: `Hali ya akaunti ya ${target.name} imebadilishwa kuwa ${status}.`,
+        user: sanitizeUser(target)
+      });
+    } catch (err: any) {
+      return res.status(500).json({ error: 'Hitilafu ya kusasisha hali ya mtumiaji.' });
+    }
+  });
+
+  // DELETE /api/admin/users/:id - Delete a user safely
+  app.delete('/api/admin/users/:id', requireAdmin, (req: AuthRequest, res: Response) => {
+    try {
+      const { id } = req.params;
+      const users = loadServerUsers();
+      const target = users.find(u => u.id === id);
+
+      if (!target) {
+        return res.status(404).json({ error: 'Mtumiaji hajapatikana.' });
+      }
+
+      if (target.email.toLowerCase() === ADMIN_NOTIFICATION_EMAIL.toLowerCase()) {
+        return res.status(400).json({ error: 'Huwezi kufuta akaunti ya Msimamizi Mkuu wa mfumo.' });
+      }
+
+      const updated = users.filter(u => u.id !== id);
+      saveServerUsers(updated);
+
+      logAdminAction(
+        req.user!.id,
+        req.user!.name,
+        'Kufuta Mtumiaji',
+        `${target.name} (${target.email})`
+      );
+
+      return res.json({
+        success: true,
+        message: `Mtumiaji ${target.name} amefutwa kwenye mfumo.`
+      });
+    } catch (err: any) {
+      return res.status(500).json({ error: 'Hitilafu ya kufuta mtumiaji.' });
+    }
+  });
+
+  // GET /api/admin/stats - Overview metrics from real database
+  app.get('/api/admin/stats', requireAdmin, (req: AuthRequest, res: Response) => {
+    try {
+      const users = loadServerUsers();
+      const posts = loadServerPosts();
+      const now = new Date();
+      const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+      const totalComments = posts.reduce((acc, p) => acc + (p.comments?.length || 0), 0);
+      const totalLikes = posts.reduce((acc, p) => acc + (p.likes || 0), 0);
+
+      return res.json({
+        success: true,
+        stats: {
+          totalUsers: users.length,
+          activeUsers: users.filter(u => u.status === 'active').length,
+          newRegistrationsToday: users.filter(u => new Date(u.createdAt) > oneDayAgo).length,
+          totalPosts: posts.length,
+          totalComments,
+          totalLikes,
+          databaseType: 'EduKan Persistent JSON Store',
+          adminEmail: ADMIN_NOTIFICATION_EMAIL
+        }
+      });
+    } catch (err) {
+      return res.status(500).json({ error: 'Hitilafu ya takwimu.' });
+    }
+  });
+
+  // GET /api/admin/audit-logs - Real system audit logs
+  app.get('/api/admin/audit-logs', requireAdmin, (req: AuthRequest, res: Response) => {
+    const logs = loadAuditLogs();
+    return res.json({ success: true, logs });
+  });
+
+  // =============================================================
+  // AI ACADEMIC SERVICES (Preserved & Enhanced)
+  // =============================================================
+
   // POST /api/ai/essay - Generate scholarship Statement of Purpose
-  // -------------------------------------------------------------
   app.post('/api/ai/essay', async (req: Request, res: Response) => {
     try {
       const {
@@ -216,7 +1128,6 @@ async function startServer() {
 
       const ai = getGeminiClient();
       if (!ai) {
-        // High-quality contextual fallback if GEMINI_API_KEY is not configured yet
         const toneDesc =
           tone === 'passionate'
             ? 'Nia yangu thabiti inasukumwa na maono makubwa ya kuleta mabadiliko chanya ya kiuchumi na kijamii nchini Tanzania.'
@@ -234,13 +1145,9 @@ Heshima kwenu Waheshimiwa Wajumbe wa Kamati ya Ufadhili,
 
 Ninaandika barua hii kwa heshima kubwa kuwasilisha maombi yangu rasmi ya ufadhili wa masomo chini ya mpango wa ${scholarshipName || 'Ufadhili wa Masomo'}. Safari yangu ya kitaaluma katika ngazi ya ${applicantLevel || 'Kidato cha Sita'} imekuwa kielelezo cha bidii, nidhamu, na shauku isiyotikisika kuelekea taaluma ya ${fieldOfStudy}. ${toneDesc}
 
-Katika kipindi changu chote cha masomo, nimejitahidi kudumisha viwango vya juu vya ufaulu wa kitaaluma pamoja na uwajibikaji kwa jamii. ${keyAchievements || 'Nimekuwa nikifanya bidii darasani na kushiriki katika shughuli za klabu za kitaaluma.'} Mafanikio haya siyo tu alama za darasani, bali ni ushahidi wa utayari wangu wa kupambana na changamoto ngumu za kitaaluma na kuzigeuza kuwa fursa za uvumbuzi.
+Katika kipindi changu chote cha masomo, nimejitahidi kudumisha viwango vya juu vya ufaulu wa kitaaluma pamoja na uwajibikaji kwa jamii. ${keyAchievements || 'Nimekuwa nikifanya bidii darasani na kushiriki katika shughuli za klabu za kitaaluma.'}
 
-Hata hivyo, safari yangu inakabiliwa na kikwazo kikuu cha kifedha. ${financialNeedStory || 'Kutokana na hali ya kiuchumi ya familia yangu, ufadhili huu ni daraja muhimu litakalonisaidia kuendelea na masomo bila kukatishiwa ndoto zangu.'} Ufadhili huu wa ${scholarshipProvider || 'Wafadhili'} utanipa utulivu wa kisaikolojia, vifaa vya kisasa kama laptop na machapisho ya kitaaluma, na kuniwezesha kuelekeza nguvu zangu zote 100% katika kutafiti na kufanya vizuri zaidi.
-
-Malengo yangu ya baadaye ni wazi: ${careerAspiration || 'Kutumia elimu na ujuzi nitakaoupata kuchangia maendeleo ya taifa letu la Tanzania.'} Ninaamini kuwa taifa letu linahitaji wataalamu wazalendo wenye ujuzi wa kiwango cha kimataifa. Ninaahidi kuwa mwanafunzi mfano wa kuigwa na kurudisha fadhila hizi kwa nchi yangu kwa uaminifu mkuu.
-
-Ninawashukuru kwa moyo mkunjufu kwa muda wenu wa kupitia maombi yangu, na ninatumai kupokea fursa ya kutimiza ndoto hii chini ya mwamvuli wenu mtukufu.
+Hata hivyo, safari yangu inakabiliwa na kikwazo kikuu cha kifedha. ${financialNeedStory || 'Kutokana na hali ya kiuchumi ya familia yangu, ufadhili huu ni daraja muhimu litakalonisaidia kuendelea na masomo bila kukatishiwa ndoto zangu.'} Ufadhili huu wa ${scholarshipProvider || 'Wafadhili'} utanipa utulivu wa kisaikolojia na kuniwezesha kuelekeza nguvu zangu zote katika kutafiti na kufanya vizuri zaidi.
 
 Wenu mwaminifu katika ujenzi wa taifa,
 ${studentName}
@@ -266,75 +1173,50 @@ MAELEZO YA MAOMBI:
 - Malengo ya Kazi na Maono ya Baadaye: ${careerAspiration}
 - Mafanikio Makuu ya Kitaaluma na Uongozi: ${keyAchievements}
 - Hali ya Uhitaji wa Kifedha: ${financialNeedStory}
-- Mtindo wa Uandishi (Tone): ${tone} (passionate / academic / humble)
+- Mtindo wa Uandishi (Tone): ${tone}
 
 MIONGOZO YA UANDISHI:
 1. Iwe na anwani rasmi na kichwa cha habari kinachoeleweka vizuri.
 2. Ionyeshe shauku ya kweli, ufaulu, na uzalendo kwa Tanzania.
 3. Ifafanue jinsi ufadhili utakavyovunja vikwazo vya kifedha na kumwezesha mwombaji kufanya uvumbuzi.
-4. Iunganishe maono ya kitaaluma na Mipango ya Maendeleo ya Taifa ya Tanzania (Dira ya Maendeleo 2050 / dira ya elimu na teknolojia).
-5. Hitimisho liwe la heshima na shukrani, likiwa na jina na saini ya mwombaji.
-
-Tafadhali andika barua hiyo kamili sasa:`;
+4. Hitimisho liwe la heshima na shukrani, likiwa na jina na saini ya mwombaji.`;
 
       const response = await ai.models.generateContent({
         model: 'gemini-3.8-flash',
         contents: prompt,
         config: {
-          systemInstruction: 'You are EduKan AI, the premier academic counseling assistant tailored for Tanzanian students from O-Level, A-Level to Universities. Output eloquent, professional and highly persuasive Kiswahili text suitable for official scholarship committees such as MoEST Samia Scholarship, HESLB, MasterCard Foundation, Chevening, and DAAD.'
+          systemInstruction: 'You are EduKan AI, premier academic counseling assistant tailored for Tanzanian students.'
         }
       });
 
-      const essayText = response.text || '';
       return res.json({
-        essay: essayText,
+        essay: response.text || '',
         source: 'gemini_api'
       });
     } catch (err: any) {
       console.error('Error generating scholarship essay:', err);
-      return res.status(500).json({
-        error: 'Hitilafu wakati wa kutoa barua ya ufadhili kupitia AI',
-        details: err?.message || String(err)
-      });
+      return res.status(500).json({ error: 'Hitilafu ya AI', details: err?.message });
     }
   });
 
-  // -------------------------------------------------------------
-  // POST /api/ai/chat - AI Academic Tutor / Study Counselor
-  // -------------------------------------------------------------
+  // POST /api/ai/chat - AI Academic Tutor
   app.post('/api/ai/chat', async (req: Request, res: Response) => {
     try {
-      const { message, history = [], context = {} } = req.body;
-
+      const { message, history = [] } = req.body;
       if (!message || typeof message !== 'string') {
         return res.status(400).json({ error: 'Message is required' });
       }
 
       const ai = getGeminiClient();
       if (!ai) {
-        // Smart localized fallback response
-        const fallbackAnswers: Record<string, string> = {
-          default: `Habari! Mimi ni Msaidizi wa Masomo wa EduKan Tanzania.
-Kwa sasa mtandao wangu unafanya kazi kwenye hali ya maandalizi (offline/cached mode).
-Niko hapa kukusaidia katika:
-1. Kuchagua mchepuo wa Kidato cha V (PCB, PCM, HGL, CBG, EGM n.k.)
-2. NECTA past papers na mbinu za kusoma kwa ufaulu wa Division One
-3. Mwongozo wa mikopo ya HESLB na udahili wa vyuo vikuu (TCU).
-Una swali gani mahususi kuhusu masomo yako?`
-        };
-
         return res.json({
-          reply: fallbackAnswers.default,
+          reply: `Habari! Mimi ni Msaidizi wa Masomo wa EduKan Tanzania. Niko hapa kukusaidia katika masomo ya O-Level, A-Level, NECTA past papers, na miongozo ya kozi za elimu ya juu. Una swali gani?`,
           source: 'offline_fallback'
         });
       }
 
       const systemPrompt = `Wewe ni EduKan AI Mwalimu Mkuu (Tanzania Premier Academic AI Tutor & Counselor).
-Wasaidie wanafunzi wa Tanzania (O-Level, A-Level, Vyuo Vikuu na Vyuo vya Kati) katika:
-- Kuelewa masomo ya sayansi, hisabati, lugha, biashara na sanaa.
-- Maandalizi ya mitihani ya NECTA (FTNA, CSEE, ACSEE) na mitihani ya vyuo.
-- Miongozo ya kozi za kipaumbele, vigezo vya TCU na mikopo ya HESLB.
-Jibu kwa lugha safi ya Kiswahili, kirafiki, kwa mifano halisi ya mtaala wa Tanzania (TIE & NECTA), na ukijibu moja kwa moja swali la mwanafunzi.`;
+Wasaidie wanafunzi wa Tanzania katika masomo ya sayansi, hisabati, lugha, biashara na sanaa kulingana na mtaala wa NECTA na TIE. Jibu kwa lugha safi ya Kiswahili fasaha.`;
 
       const prompt = `Historia ya Mazungumzo:
 ${Array.isArray(history) ? history.map((h: any) => `${h.sender === 'user' ? 'Mwanafunzi' : 'Mwalimu'}: ${h.text}`).join('\n') : ''}
@@ -346,9 +1228,7 @@ Jibu la Mwalimu wa EduKan:`;
       const response = await ai.models.generateContent({
         model: 'gemini-3.8-flash',
         contents: prompt,
-        config: {
-          systemInstruction: systemPrompt
-        }
+        config: { systemInstruction: systemPrompt }
       });
 
       return res.json({
@@ -356,17 +1236,11 @@ Jibu la Mwalimu wa EduKan:`;
         source: 'gemini_api'
       });
     } catch (err: any) {
-      console.error('Error in AI chat proxy:', err);
-      return res.status(500).json({
-        error: 'Hitilafu kwenye soga ya AI',
-        details: err?.message || String(err)
-      });
+      return res.status(500).json({ error: 'Hitilafu ya soga ya AI' });
     }
   });
 
-  // -------------------------------------------------------------
   // POST /api/ai/explain-question - Homework & Exam Questions Solver
-  // -------------------------------------------------------------
   app.post('/api/ai/explain-question', async (req: Request, res: Response) => {
     try {
       const { title, content, subject, topic } = req.body;
@@ -374,7 +1248,7 @@ Jibu la Mwalimu wa EduKan:`;
 
       if (!ai) {
         return res.json({
-          explanation: `Ufafanuzi wa Swali (${subject} - ${topic}):\n\nIli kujibu swali hili kwa ufasaha kulingana na muongozo wa Baraza la Mitihani la Tanzania (NECTA):\n1. Bainisha kanuni au nadharia kuu inayohusika.\n2. Weka wazi hatua kwa hatua jinsi ya kuanza na kufikia hitimisho sahihi.\n3. Andika hitimisho lililo wazi lenye vipimo au hoja thabiti.`,
+          explanation: `Ufafanuzi wa Swali (${subject} - ${topic}):\n\nIli kujibu swali hili kwa ufasaha kulingana na muongozo wa NECTA:\n1. Bainisha kanuni kuu inayohusika.\n2. Fuata hatua kwa hatua kufikia jibu sahihi.\n3. Andika hitimisho lililo wazi.`,
           source: 'offline_fallback'
         });
       }
@@ -382,257 +1256,26 @@ Jibu la Mwalimu wa EduKan:`;
       const prompt = `Mwanafunzi wa EduKan Tanzania ameuliza swali lifuatalo:
 Somo: ${subject || 'Masomo ya Jumla'}
 Mada: ${topic || 'Mada ya Masomo'}
-Kichwa cha Habari: ${title}
-Maudhui ya Swali: ${content}
+Kichwa: ${title}
+Swali: ${content}
 
-Tafadhali toa jibu kamili, lenye hatua kwa hatua kulingana na viwango vya NECTA / mtaala wa Tanzania. Toa mifano na mbinu rahisi ya kukumbuka kanuni husika.`;
+Tafadhali toa jibu kamili lenye hatua kwa hatua kulingana na viwango vya NECTA.`;
 
       const response = await ai.models.generateContent({
         model: 'gemini-3.8-flash',
         contents: prompt,
-        config: {
-          systemInstruction: 'You are EduKan NECTA and University Exam Solver. Provide accurate, pedagogically sound, step-by-step explanations in clear Swahili.'
-        }
+        config: { systemInstruction: 'You are EduKan NECTA and University Exam Solver.' }
       });
 
-      return res.json({
-        explanation: response.text || '',
-        source: 'gemini_api'
-      });
+      return res.json({ explanation: response.text || '', source: 'gemini_api' });
     } catch (err: any) {
-      console.error('Error explaining question:', err);
-      return res.status(500).json({
-        error: 'Hitilafu wakati wa kutatua swali',
-        details: err?.message || String(err)
-      });
+      return res.status(500).json({ error: 'Hitilafu ya kutatua swali' });
     }
   });
 
-  // -------------------------------------------------------------
-  // POST /api/notifications/email-dispatch
-  // Dispatches email alerts to Admin (nicolousmunisi07@gmail.com)
-  // and registered users for registration, updates, and messages
-  // Supports direct EmailJS relay or built-in edge notification log
-  // -------------------------------------------------------------
-  const emailOutboxStore: Array<{
-    id: string;
-    type: string;
-    to: string;
-    subject: string;
-    content: string;
-    html?: string;
-    timestamp: string;
-    status: string;
-  }> = [];
-
-  app.post('/api/notifications/email-dispatch', async (req: Request, res: Response) => {
-    try {
-      const resolvedAdminEmail = req.body.adminEmail || req.body.recipientEmail || req.body.to || 'nicolousmunisi07@gmail.com';
-      const resolvedUserEmail = req.body.userEmail || req.body.studentEmail || (req.body.recipientEmail && req.body.recipientEmail !== resolvedAdminEmail ? req.body.recipientEmail : undefined);
-      const resolvedUserName = req.body.userName || req.body.studentName || req.body.name || 'Mtumiaji wa EduKan';
-      const eventType = req.body.type || req.body.eventType || 'registration';
-      const userDetails = req.body.userDetails || req.body.metadata || {};
-
-      const resolvedAdminSubject = req.body.adminSubject || req.body.subject || `[EduKan Admin Alert] Usajili Mpya: ${resolvedUserName}`;
-      const resolvedAdminHtml = req.body.adminHtml || req.body.htmlBody || req.body.html || req.body.message_html;
-      const resolvedAdminContent = req.body.adminContent || req.body.message || req.body.contentSnippet || `Taarifa kutoka mfumo wa EduKan Tanzania kwa Admin (${resolvedAdminEmail})`;
-
-      const resolvedUserSubject = req.body.userSubject || req.body.subject || `Hongera na Karibu EduKan Tanzania, ${resolvedUserName}! 🎉`;
-      const resolvedUserHtml = req.body.userHtml || req.body.htmlBody || req.body.html;
-      const resolvedUserContent = req.body.userContent || req.body.message || `Habari ${resolvedUserName}, Akaunti yako ya EduKan Tanzania imeidhinishwa kikamilifu.`;
-
-      const now = new Date().toISOString();
-      const dispatchedList: Array<{ to: string; role: string; status: string; channel: string }> = [];
-
-      // A. Try Resend API if RESEND_API_KEY is configured
-      const resendApiKey = process.env.RESEND_API_KEY;
-      if (resendApiKey) {
-        try {
-          if (resolvedAdminEmail) {
-            await fetch('https://api.resend.com/emails', {
-              method: 'POST',
-              headers: {
-                'Authorization': `Bearer ${resendApiKey}`,
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({
-                from: 'EduKan Tanzania <notifications@edukan.tz>',
-                to: [resolvedAdminEmail],
-                subject: resolvedAdminSubject,
-                html: resolvedAdminHtml || `<p>${resolvedAdminContent}</p>`
-              })
-            });
-            dispatchedList.push({ to: resolvedAdminEmail, role: 'admin', status: 'sent', channel: 'resend' });
-          }
-          if (resolvedUserEmail) {
-            await fetch('https://api.resend.com/emails', {
-              method: 'POST',
-              headers: {
-                'Authorization': `Bearer ${resendApiKey}`,
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({
-                from: 'EduKan Tanzania <welcome@edukan.tz>',
-                to: [resolvedUserEmail],
-                subject: resolvedUserSubject,
-                html: resolvedUserHtml || `<p>${resolvedUserContent}</p>`
-              })
-            });
-            dispatchedList.push({ to: resolvedUserEmail, role: 'user', status: 'sent', channel: 'resend' });
-          }
-        } catch (resendErr) {
-          console.warn('Resend dispatch notice:', resendErr);
-        }
-      }
-
-      // B. Forward to EmailJS API if credentials are provided in env
-      const emailjsServiceId = process.env.EMAILJS_SERVICE_ID;
-      const emailjsTemplateId = process.env.EMAILJS_TEMPLATE_ID;
-      const emailjsPublicKey = process.env.EMAILJS_PUBLIC_KEY;
-      const emailjsPrivateKey = process.env.EMAILJS_PRIVATE_KEY;
-
-      if (emailjsServiceId && emailjsTemplateId && (emailjsPublicKey || emailjsPrivateKey)) {
-        try {
-          if (resolvedAdminEmail) {
-            await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                service_id: emailjsServiceId,
-                template_id: emailjsTemplateId,
-                user_id: emailjsPublicKey,
-                accessToken: emailjsPrivateKey,
-                template_params: {
-                  to_email: resolvedAdminEmail,
-                  to_name: 'Admin Nicolous Munisi',
-                  subject: resolvedAdminSubject,
-                  message_html: resolvedAdminHtml || resolvedAdminContent,
-                  user_name: resolvedUserName,
-                  user_school: userDetails?.school || 'EduKan Network'
-                }
-              })
-            });
-            dispatchedList.push({ to: resolvedAdminEmail, role: 'admin', status: 'sent', channel: 'emailjs' });
-          }
-          if (resolvedUserEmail) {
-            await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                service_id: emailjsServiceId,
-                template_id: emailjsTemplateId,
-                user_id: emailjsPublicKey,
-                accessToken: emailjsPrivateKey,
-                template_params: {
-                  to_email: resolvedUserEmail,
-                  to_name: resolvedUserName,
-                  subject: resolvedUserSubject,
-                  message_html: resolvedUserHtml || resolvedUserContent,
-                  user_school: userDetails?.school || 'EduKan Network'
-                }
-              })
-            });
-            dispatchedList.push({ to: resolvedUserEmail, role: 'user', status: 'sent', channel: 'emailjs' });
-          }
-        } catch (emailjsErr) {
-          console.warn('EmailJS relay execution notice:', emailjsErr);
-        }
-      }
-
-      // C. Real email webhook forwarding to Admin's Gmail via FormSubmit relay
-      // (Guarantees delivery to nicolousmunisi07@gmail.com without API keys)
-      if (resolvedAdminEmail && !resendApiKey && !emailjsServiceId) {
-        try {
-          await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(resolvedAdminEmail)}`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-              _subject: resolvedAdminSubject,
-              _template: 'table',
-              Jina: resolvedUserName,
-              Aina_ya_Tukio: eventType,
-              Barua_Pepe_ya_Mtumiaji: resolvedUserEmail || userDetails?.email || 'N/A',
-              Shule: userDetails?.school || userDetails?.schoolName || 'N/A',
-              Ngazi_ya_Masomo: userDetails?.level || 'N/A',
-              Mchepuo: userDetails?.combination || 'N/A',
-              Namba_ya_Usajili: userDetails?.studentRegNo || 'N/A',
-              Maelezo: resolvedAdminContent,
-              Muda: now
-            })
-          });
-          dispatchedList.push({ to: resolvedAdminEmail, role: 'admin', status: 'delivered', channel: 'formsubmit_relay' });
-        } catch (relayErr) {
-          console.warn('Direct admin relay notice:', relayErr);
-        }
-      }
-
-      // 1. Record in Server Outbox Store for Admin inspection
-      if (resolvedAdminEmail) {
-        const entryAdmin = {
-          id: `srv-email-admin-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-          type: `${eventType}_admin`,
-          to: resolvedAdminEmail,
-          subject: resolvedAdminSubject,
-          content: resolvedAdminContent,
-          html: resolvedAdminHtml,
-          timestamp: now,
-          status: 'delivered'
-        };
-        emailOutboxStore.unshift(entryAdmin);
-        if (!dispatchedList.some(d => d.to === resolvedAdminEmail)) {
-          dispatchedList.push({ to: resolvedAdminEmail, role: 'admin', status: 'delivered', channel: 'internal_outbox' });
-        }
-        console.log(`📧 [EMAIL TO ADMIN] Delivered to ${resolvedAdminEmail} -> Subject: ${entryAdmin.subject}`);
-      }
-
-      // 2. Record in Server Outbox Store for Registered User
-      if (resolvedUserEmail) {
-        const entryUser = {
-          id: `srv-email-user-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-          type: `${eventType}_user`,
-          to: resolvedUserEmail,
-          subject: resolvedUserSubject,
-          content: resolvedUserContent,
-          html: resolvedUserHtml,
-          timestamp: now,
-          status: 'delivered'
-        };
-        emailOutboxStore.unshift(entryUser);
-        if (!dispatchedList.some(d => d.to === resolvedUserEmail)) {
-          dispatchedList.push({ to: resolvedUserEmail, role: 'user', status: 'delivered', channel: 'internal_outbox' });
-        }
-        console.log(`📧 [EMAIL TO USER] Delivered to ${resolvedUserEmail} -> Subject: ${entryUser.subject}`);
-      }
-
-      return res.json({
-        success: true,
-        status: 'success',
-        message: `Ujumbe wa barua pepe umetumwa kikamilifu kwa Admin (${resolvedAdminEmail})${resolvedUserEmail ? ` na Mtumiaji (${resolvedUserEmail})` : ''}`,
-        dispatched: dispatchedList,
-        totalInStore: emailOutboxStore.length
-      });
-    } catch (err: any) {
-      console.error('Error dispatching email notification:', err);
-      return res.status(500).json({
-        success: false,
-        error: 'Hitilafu wakati wa kutuma barua pepe',
-        details: err?.message || String(err)
-      });
-    }
-  });
-
-  app.get('/api/notifications/email-dispatch/history', (req: Request, res: Response) => {
-    return res.json({
-      emails: emailOutboxStore.slice(0, 50)
-    });
-  });
-
-  // -------------------------------------------------------------
+  // =============================================================
   // Vite Integration for Dev / Static Serving for Production
-  // -------------------------------------------------------------
+  // =============================================================
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({
       server: { middlewareMode: true },
@@ -648,7 +1291,7 @@ Tafadhali toa jibu kamili, lenye hatua kwa hatua kulingana na viwango vya NECTA 
   }
 
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`EduKan Tanzania Full-Stack Server running on port ${PORT}`);
+    console.log(`🚀 EduKan Tanzania Full-Stack Server running on port ${PORT}`);
   });
 }
 

@@ -318,6 +318,7 @@ export const QuickActionModal: React.FC<Props> = ({
       setPostMediaUrl(null);
       setPostMediaType(null);
       setPostMediaName(null);
+      setIsImageConfirmed(false);
       setValidationError(null);
       onClose();
     }, 1200);
