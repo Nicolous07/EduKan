@@ -26,6 +26,7 @@ import {
   AdminInboxMessage
 } from '../../services/adminRegistrationService';
 import { sendRegistrationEmails } from '../../services/emailService';
+import { getAuthHeaders } from '../../lib/authService';
 
 interface Props {
   students: ManagedStudent[];
@@ -50,8 +51,37 @@ export const AdminRegistrationsTab: React.FC<Props> = ({
 
   const adminEmail = 'nicolousmunisi07@gmail.com';
 
-  const loadData = () => {
-    setAlerts(getAdminRegistrationAlerts());
+  const loadData = async () => {
+    let localAlerts = getAdminRegistrationAlerts();
+    try {
+      const res = await fetch('/api/admin/users', { headers: getAuthHeaders() });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && Array.isArray(data.users)) {
+          const dbAlerts: AdminRegistrationAlert[] = data.users.map((u: any) => ({
+            id: `alert-db-${u.id}`,
+            userId: u.id,
+            userName: u.name,
+            userHandle: u.handle,
+            userEmail: u.email,
+            userPhone: u.phone || 'Hakuna',
+            schoolName: u.schoolName,
+            level: u.level,
+            combination: u.combination || '',
+            registeredAt: new Date(u.createdAt).toLocaleString('sw-TZ'),
+            emailSentToAdmin: true,
+            emailSentToUser: true,
+            status: 'verified' as const
+          }));
+          const existingUserIds = new Set(localAlerts.map(a => a.userId));
+          const newFromDb = dbAlerts.filter(a => !existingUserIds.has(a.userId));
+          localAlerts = [...newFromDb, ...localAlerts];
+        }
+      }
+    } catch (e) {
+      // Quietly fall back to local alerts
+    }
+    setAlerts(localAlerts);
     setMessages(getAdminInboxMessages());
   };
 

@@ -1,4 +1,5 @@
 import { supabase, checkSupabaseConnection } from './supabase';
+import { getAuthHeaders } from './authService';
 import {
   Post,
   PostComment,
@@ -179,7 +180,7 @@ export async function createPostInDb(post: Post): Promise<{ success: boolean; po
   try {
     const res = await fetch('/api/posts', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify(post)
     });
     if (res.ok) {
@@ -234,7 +235,7 @@ export async function togglePostLikeInDb(postId: string, newLikes: number): Prom
   try {
     await fetch(`/api/posts/${postId}/like`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify({ newLikes })
     });
   } catch (err) {
@@ -254,7 +255,7 @@ export async function addCommentToPostInDb(postId: string, comment: any): Promis
   try {
     await fetch(`/api/posts/${postId}/comments`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify(comment)
     });
   } catch (err) {
@@ -267,7 +268,7 @@ export async function votePollInDb(postId: string, optionId: string): Promise<vo
   try {
     await fetch(`/api/posts/${postId}/poll`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify({ optionId })
     });
   } catch (err) {
@@ -275,11 +276,48 @@ export async function votePollInDb(postId: string, optionId: string): Promise<vo
   }
 }
 
+export async function downloadStudyMaterial(materialId: string): Promise<{ success: boolean; downloadUrl?: string; error?: string; requiresAuth?: boolean }> {
+  try {
+    const res = await fetch(`/api/materials/${materialId}/download`, {
+      headers: getAuthHeaders()
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      return { success: true, downloadUrl: data.downloadUrl };
+    }
+    if (res.status === 401) {
+      return { success: false, error: 'Create an account or sign in to download this material.', requiresAuth: true };
+    }
+    return { success: false, error: data.error || 'Failed to download material' };
+  } catch (err: any) {
+    return { success: false, error: err?.message || 'Network error' };
+  }
+}
+
 // -------------------------------------------------------------
 // BOOKS / LIBRARY SERVICE
 // -------------------------------------------------------------
 
-export async function fetchBooksFromDb(): Promise<{ books: LibraryItem[]; source: 'supabase' | 'cache' }> {
+export async function fetchBooksFromDb(): Promise<{ books: LibraryItem[]; source: 'server' | 'supabase' | 'cache' }> {
+  // 1. Primary: Shared Node/Express Server Materials Store
+  try {
+    const res = await fetch('/api/materials');
+    if (res.ok) {
+      const data = await res.json();
+      if (data && Array.isArray(data.materials) && data.materials.length > 0) {
+        try {
+          localStorage.setItem(CACHE_KEYS.BOOKS, JSON.stringify(data.materials));
+        } catch (e) {
+          console.warn('Could not write books cache:', e);
+        }
+        return { books: data.materials, source: 'server' };
+      }
+    }
+  } catch (err) {
+    console.warn('Server /api/materials query note:', err);
+  }
+
+  // 2. Secondary: Supabase database
   try {
     const { data, error } = await supabase
       .from('books')
@@ -339,6 +377,16 @@ export async function fetchBooksFromDb(): Promise<{ books: LibraryItem[]; source
 }
 
 export async function createBookInDb(book: LibraryItem): Promise<{ success: boolean; book: LibraryItem }> {
+  // Sync to server
+  try {
+    await fetch('/api/materials', {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(book)
+    });
+  } catch (err) {
+    console.warn('Server /api/materials write note:', err);
+  }
   try {
     const cached = localStorage.getItem(CACHE_KEYS.BOOKS);
     const list: LibraryItem[] = cached ? JSON.parse(cached) : INITIAL_LIBRARY_BOOKS;

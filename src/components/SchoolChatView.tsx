@@ -50,6 +50,8 @@ interface Props {
   initialChannelId?: string;
   onOpenSchoolProfile?: (schoolId: string) => void;
   onBackToDirectory?: () => void;
+  isLoggedIn?: boolean;
+  onRequireAuth?: (action: 'post' | 'download' | 'comment' | 'like' | 'message' | 'follow' | 'poll' | 'general', message?: string) => void;
 }
 
 export const SchoolChatView: React.FC<Props> = ({
@@ -57,7 +59,9 @@ export const SchoolChatView: React.FC<Props> = ({
   initialSchoolId,
   initialChannelId,
   onOpenSchoolProfile,
-  onBackToDirectory
+  onBackToDirectory,
+  isLoggedIn = false,
+  onRequireAuth
 }) => {
   // Persistent channels and messages
   const [channels, setChannels] = useState<SchoolChatChannel[]>(() => {
@@ -225,6 +229,17 @@ export const SchoolChatView: React.FC<Props> = ({
   // Handle sending a new message
   const handleSendMessage = (e?: React.FormEvent, attachmentToSend?: ChatAttachment) => {
     if (e) e.preventDefault();
+
+    // Req 19 & 28: Guests cannot send messages
+    if (!isLoggedIn) {
+      if (onRequireAuth) {
+        onRequireAuth('message', 'Please create an account or sign in to continue.');
+      } else {
+        alert('Kutuma ujumbe kunahitaji akaunti. Tafadhali fungua akaunti au ingia.');
+      }
+      return;
+    }
+
     const finalAttachment = attachmentToSend || pendingAttachment || undefined;
     if (!inputText.trim() && !finalAttachment) return;
 

@@ -35,6 +35,8 @@ interface Props {
   onAddQuestion: (q: Partial<QuestionItem>) => void;
   onNavigateTab: (tab: string) => void;
   defaultMode?: 'post' | 'question';
+  isLoggedIn?: boolean;
+  onRequireAuth?: (action: 'post' | 'download' | 'comment' | 'like' | 'message' | 'follow' | 'poll' | 'general', message?: string) => void;
 }
 
 export const TANZANIA_SUBJECTS = [
@@ -60,7 +62,9 @@ export const QuickActionModal: React.FC<Props> = ({
   onAddPost,
   onAddQuestion,
   onNavigateTab,
-  defaultMode = 'post'
+  defaultMode = 'post',
+  isLoggedIn = false,
+  onRequireAuth
 }) => {
   const [activeMode, setActiveMode] = useState<'post' | 'question'>(defaultMode);
 
@@ -264,6 +268,17 @@ export const QuickActionModal: React.FC<Props> = ({
     e.preventDefault();
     setValidationError(null);
 
+    // Req 19 & 20: Guest cannot create posts
+    if (!isLoggedIn) {
+      if (onRequireAuth) {
+        onClose();
+        onRequireAuth('post', 'Please create an account or sign in to continue.');
+      } else {
+        setValidationError('Kuchapisha kunahitaji akaunti halisi. Tafadhali fungua akaunti au ingia.');
+      }
+      return;
+    }
+
     const hasText = postContent.trim().length > 0;
     const hasMedia = Boolean(postMediaUrl);
     const hasPoll = postType === 'poll' && pollOptions.filter(o => o.trim()).length >= 2;
@@ -327,6 +342,17 @@ export const QuickActionModal: React.FC<Props> = ({
   const handleQuestionSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setValidationError(null);
+
+    // Req 19 & 20: Guest cannot create questions
+    if (!isLoggedIn) {
+      if (onRequireAuth) {
+        onClose();
+        onRequireAuth('post', 'Please create an account or sign in to continue.');
+      } else {
+        setValidationError('Kuuliza maswali kunahitaji akaunti halisi. Tafadhali fungua akaunti au ingia.');
+      }
+      return;
+    }
 
     if (!questionTitle.trim() || questionTitle.trim().length < 5) {
       setValidationError('Tafadhali andika kichwa cha swali kinachoeleweka (angalau herufi 5).');

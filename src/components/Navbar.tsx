@@ -1063,7 +1063,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                             <div>
                               <div className="text-xs font-semibold text-gray-800 dark:text-slate-100">Active Role</div>
                               <div className="text-[10px] text-gray-500 dark:text-slate-400">
-                                {currentRole === 'student' ? 'Student (Nicolous)' : 'EduKan Admin'}
+                                {currentRole === 'student' ? `Student (${currentUser.name?.split(' ')[0] || 'Mwanafunzi'})` : 'EduKan Admin'}
                               </div>
                             </div>
                           </div>

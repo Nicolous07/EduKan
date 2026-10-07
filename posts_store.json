@@ -1,1 +1,130 @@
-[]
+[
+  {
+    "id": "post-1791413031856-adnzl",
+    "author": {
+      "id": "usr-1791413013202-nzkq7",
+      "name": "Amina Bakari",
+      "handle": "amina_bakari",
+      "avatar": "https://api.dicebear.com/7.x/initials/svg?seed=Amina%20Bakari&backgroundColor=047857&textColor=ffffff",
+      "school": "Tambaza High School",
+      "role": "student",
+      "verified": false
+    },
+    "type": "question",
+    "category": "masomo",
+    "content": "Leo nimeanza kusoma topic ya Organic Chemistry (A-Level). Ni mbinu gani nzuri ya kukariri reaction mechanisms?",
+    "subject": "Chemistry",
+    "mediaUrl": null,
+    "mediaType": null,
+    "pollOptions": null,
+    "likes": 0,
+    "isLiked": false,
+    "likedBy": [],
+    "commentsCount": 0,
+    "sharesCount": 0,
+    "isSaved": false,
+    "comments": [],
+    "schoolId": null,
+    "schoolName": "Tambaza High School",
+    "createdAt": "Sasa hivi (10:43 PM)",
+    "serverCreatedAt": "2026-10-07T22:43:51.836Z"
+  },
+  {
+    "id": "post-seed-001",
+    "author": {
+      "id": "usr-admin-master",
+      "name": "Nicolous Munisi",
+      "handle": "nicolous_admin",
+      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80",
+      "school": "EduKan Tanzania Central Administration",
+      "role": "admin",
+      "verified": true
+    },
+    "type": "normal",
+    "category": "masomo",
+    "content": "Karibuni wanafunzi wote wa Tanzania kwenye mfumo mpya wa Edu-Kan! Maktaba yetu ina vitabu vya bure vya TIE na mitihani yote ya NECTA iliyotatuliwa. Jisajili au ingia ili uweze kuchapisha maswali na kupakua nyaraka zote za masomo.",
+    "subject": "Masomo ya Jumla",
+    "mediaUrl": null,
+    "mediaType": null,
+    "pollOptions": null,
+    "likes": 18,
+    "likedBy": [],
+    "commentsCount": 3,
+    "sharesCount": 5,
+    "isSaved": false,
+    "isPinned": true,
+    "comments": [
+      {
+        "id": "comm-init-1",
+        "postId": "post-seed-001",
+        "author": {
+          "id": "usr-grace-mrema",
+          "name": "Dr. Grace Mrema",
+          "avatar": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&auto=format&fit=crop&q=80",
+          "school": "Ilala Secondary School",
+          "role": "student"
+        },
+        "content": "Hongera sana kwa uboreshaji huu. Huu ni msaada mkubwa kwa wanafunzi wanaojiandaa na mitihani ya NECTA!",
+        "createdAt": "Masaa 2 yaliyopita",
+        "likes": 4,
+        "isLiked": false
+      }
+    ],
+    "schoolName": "EduKan Tanzania Central Administration",
+    "createdAt": "Masaa machache yaliyopita"
+  },
+  {
+    "id": "post-seed-002",
+    "author": {
+      "id": "usr-grace-mrema",
+      "name": "Dr. Grace Mrema",
+      "handle": "grace_biology",
+      "avatar": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&auto=format&fit=crop&q=80",
+      "school": "Ilala Secondary School",
+      "role": "student",
+      "verified": true
+    },
+    "type": "question",
+    "category": "masomo",
+    "content": "Katika somo la Biology Form VI (Genetics & Mendelian Inheritance): Ni mambo gani muhimu ya kuzingatia wakati wa kuelezea Dihybrid Cross na Epistasis katika mtihani wa NECTA? Wanafunzi wengi wanakosa alama kwenye Punnett square layout.",
+    "subject": "Biology",
+    "mediaUrl": null,
+    "mediaType": null,
+    "pollOptions": null,
+    "likes": 12,
+    "likedBy": [],
+    "commentsCount": 1,
+    "sharesCount": 2,
+    "isSaved": false,
+    "comments": [],
+    "schoolName": "Ilala Secondary School",
+    "createdAt": "Masaa 4 yaliyopita"
+  },
+  {
+    "id": "post-seed-003",
+    "author": {
+      "id": "usr-samwel-math",
+      "name": "Mwl. Samwel Mshana",
+      "handle": "samwel_bam",
+      "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop&q=80",
+      "school": "Kibaha Secondary School",
+      "role": "student",
+      "verified": true
+    },
+    "type": "normal",
+    "category": "masomo",
+    "content": "NECTA Advanced Mathematics Tips: Hakikisha unajua derivatives za trigonometric functions (sin, cos, tan, sec) na integration by parts. Maswali ya Form 6 Paper 1 yanajirudia kila mwaka!",
+    "subject": "Mathematics",
+    "mediaUrl": null,
+    "mediaType": null,
+    "pollOptions": null,
+    "likes": 24,
+    "likedBy": [],
+    "commentsCount": 0,
+    "sharesCount": 6,
+    "isSaved": false,
+    "comments": [],
+    "schoolName": "Kibaha Secondary School",
+    "createdAt": "Jana"
+  }
+]

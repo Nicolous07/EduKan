@@ -14,6 +14,8 @@ import { LeaderboardModal } from './components/LeaderboardModal';
 import { FeedbackModal } from './components/FeedbackModal';
 import { LoginPage } from './components/LoginPage';
 import { EduLoading } from './components/EduLoading';
+import { AuthPromptModal, AuthRequiredAction } from './components/AuthPromptModal';
+import { GUEST_USER, getAuthToken, removeAuthToken, getAuthHeaders, fetchCurrentServerUser } from './lib/authService';
 import { Plus } from 'lucide-react';
 
 import {
@@ -60,7 +62,20 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<string>('feed');
   const [currentRole, setCurrentRole] = useState<UserRole>(() => getInitialState('edukan_active_role', 'student'));
   
-  const [currentUser, setCurrentUser] = useState<UserProfile>(() => getInitialState('edukan_user', INITIAL_USER));
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => {
+    return Boolean(getInitialState('edukan_is_registered', false)) && Boolean(getAuthToken());
+  });
+
+  const [currentUser, setCurrentUser] = useState<UserProfile>(() => {
+    const isReg = Boolean(getInitialState('edukan_is_registered', false)) && Boolean(getAuthToken());
+    if (isReg) {
+      const savedUser = getInitialState<UserProfile | null>('edukan_user', null);
+      if (savedUser && savedUser.id && !savedUser.id.startsWith('guest')) {
+        return savedUser;
+      }
+    }
+    return GUEST_USER;
+  });
 
   // Global Dark Mode state with persistence in localStorage
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
@@ -126,46 +141,33 @@ export default function App() {
   const [isQuickActionOpen, setIsQuickActionOpen] = useState(false);
   const [isLeaderboardOpen, setIsLeaderboardOpen] = useState(false);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
-  // User login and registration state
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => {
-    return Boolean(getInitialState('edukan_is_registered', false));
-  });
-  // Opens login page right away if user is not registered yet
-  const [isLoginPageOpen, setIsLoginPageOpen] = useState<boolean>(() => {
-    return !getInitialState('edukan_is_registered', false);
-  });
+  // Opens login page when user clicks Sign In or triggers auth prompt
+  const [isLoginPageOpen, setIsLoginPageOpen] = useState<boolean>(false);
   const [isLoadingAnim, setIsLoadingAnim] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('Inapakia data za elimu...');
   const [quickActionMode, setQuickActionMode] = useState<'post' | 'question'>('post');
 
+  // Auth Required Guard Modal (Req 19, 20, 22, 23, 33)
+  const [isAuthPromptOpen, setIsAuthPromptOpen] = useState<boolean>(false);
+  const [authPromptAction, setAuthPromptAction] = useState<AuthRequiredAction>('general');
+  const [authPromptCustomMessage, setAuthPromptCustomMessage] = useState<string | undefined>(undefined);
+
+  const triggerAuthRequired = (action: AuthRequiredAction, message?: string) => {
+    setAuthPromptAction(action);
+    setAuthPromptCustomMessage(message);
+    setIsAuthPromptOpen(true);
+  };
+
   const handleLogout = () => {
     setIsLoggedIn(false);
     saveState('edukan_is_registered', false);
+    removeAuthToken();
     try {
       localStorage.removeItem('edukan_is_registered');
     } catch (e) {
       console.warn('Error clearing registered session', e);
     }
-    const guestUser: UserProfile = {
-      id: `guest-${Date.now()}`,
-      name: 'Mwanafunzi (Guest)',
-      handle: 'mgeni',
-      email: '',
-      role: 'student',
-      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop&q=80',
-      schoolName: 'EduKan Tanzania Portal',
-      schoolRegion: 'Tanzania',
-      schoolDistrict: '',
-      level: 'Kidato cha IV / VI',
-      combination: 'General Studies',
-      title: 'Mtumiaji Mgeni',
-      bio: 'Karibu EduKan Tanzania. Sajili akaunti au ingia ili kupata huduma kamili, maoni, na alama zako.',
-      points: 0,
-      followersCount: 0,
-      followingCount: 0,
-      achievements: [],
-      activities: []
-    };
+    const guestUser: UserProfile = { ...GUEST_USER, id: `guest-${Date.now()}` };
     setCurrentUser(guestUser);
     saveState('edukan_user', guestUser);
     setCurrentRole('student');
@@ -248,6 +250,31 @@ export default function App() {
       setIsSyncing(false);
     }
   };
+
+  // Verify real user session with server on initial mount
+  useEffect(() => {
+    const token = getAuthToken();
+    if (token) {
+      fetchCurrentServerUser().then((res) => {
+        if (res.success && res.user) {
+          setCurrentUser(res.user);
+          setIsLoggedIn(true);
+          saveState('edukan_user', res.user);
+          saveState('edukan_is_registered', true);
+        } else {
+          // Token expired or invalid, fall back to Guest Mode
+          setIsLoggedIn(false);
+          setCurrentUser(GUEST_USER);
+          removeAuthToken();
+        }
+      }).catch(() => {
+        // Keep current state on offline glitches
+      });
+    } else {
+      setIsLoggedIn(false);
+      setCurrentUser(GUEST_USER);
+    }
+  }, []);
 
   // Sync from Server/Supabase on mount and establish live polling
   useEffect(() => {
@@ -347,6 +374,12 @@ export default function App() {
 
   // Post Handlers
   const handleAddPost = (p: Partial<Post>) => {
+    // Req 19 & 20: Authenticated real account required for posting
+    if (!isLoggedIn || !getAuthToken()) {
+      triggerAuthRequired('post', 'Please create an account or sign in to continue.');
+      return;
+    }
+
     const now = new Date();
     const timeFormatted = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const postId = p.id || `post-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
@@ -414,6 +447,10 @@ export default function App() {
   };
 
   const handleLikePost = (postId: string) => {
+    if (!isLoggedIn || !getAuthToken()) {
+      triggerAuthRequired('like', 'Please create an account or sign in to continue.');
+      return;
+    }
     setPosts(posts.map(p => {
       if (p.id === postId) {
         const isLiked = !p.isLiked;
@@ -434,6 +471,10 @@ export default function App() {
   };
 
   const handleVotePoll = (postId: string, optionId: string) => {
+    if (!isLoggedIn || !getAuthToken()) {
+      triggerAuthRequired('poll', 'Please create an account or sign in to continue.');
+      return;
+    }
     setPosts(posts.map(p => {
       if (p.id === postId && p.pollOptions) {
         // Toggle if clicked again
@@ -464,6 +505,10 @@ export default function App() {
 
   const handleAddComment = (postId: string, text: string) => {
     if (!text.trim()) return;
+    if (!isLoggedIn || !getAuthToken()) {
+      triggerAuthRequired('comment', 'Please create an account or sign in to continue.');
+      return;
+    }
     const now = new Date();
     const timeFormatted = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const newComment = {
@@ -701,6 +746,10 @@ export default function App() {
         isDarkMode={isDarkMode}
         onToggleDarkMode={() => setIsDarkMode(prev => !prev)}
         onOpenQuickAction={(mode) => {
+          if (!isLoggedIn) {
+            triggerAuthRequired('post', 'Please create an account or sign in to continue.');
+            return;
+          }
           setQuickActionMode(mode || 'post');
           setIsQuickActionOpen(true);
         }}
@@ -714,6 +763,8 @@ export default function App() {
             currentUser={currentUser}
             schools={schools}
             isOnline={isOnline}
+            isLoggedIn={isLoggedIn}
+            onRequireAuth={triggerAuthRequired}
             onOpenLeaderboard={() => setIsLeaderboardOpen(true)}
             onAddPost={handleAddPost}
             onLikePost={handleLikePost}
@@ -725,6 +776,10 @@ export default function App() {
             onDeleteComment={handleDeleteComment}
             onNavigateTab={setActiveTab}
             onOpenQuickAction={(mode) => {
+              if (!isLoggedIn) {
+                triggerAuthRequired('post', 'Please create an account or sign in to continue.');
+                return;
+              }
               setQuickActionMode(mode || 'post');
               setIsQuickActionOpen(true);
             }}
@@ -735,6 +790,9 @@ export default function App() {
           <LibraryView
             books={libraryBooks}
             currentUser={currentUser}
+            currentRole={currentRole}
+            isLoggedIn={isLoggedIn}
+            onRequireAuth={triggerAuthRequired}
             onAddBook={handleAddLibraryBook}
             onDownloadBook={handleDownloadLibraryBook}
             onToggleSaveBook={handleToggleSaveLibraryBook}
@@ -746,6 +804,8 @@ export default function App() {
             questions={questions}
             resources={resources}
             currentUser={currentUser}
+            isLoggedIn={isLoggedIn}
+            onRequireAuth={triggerAuthRequired}
             onAddQuestion={handleAddQuestion}
             onAddAnswer={handleAddAnswer}
             onMarkBestAnswer={handleMarkBestAnswer}
@@ -757,6 +817,8 @@ export default function App() {
           <SchoolCommunities
             schools={schools}
             currentUser={currentUser}
+            isLoggedIn={isLoggedIn}
+            onRequireAuth={triggerAuthRequired}
             onToggleJoin={handleToggleJoinSchool}
             onExploreSchool={(schId) => setActiveTab('feed')}
           />
@@ -766,6 +828,8 @@ export default function App() {
           <OpportunitiesView
             opportunities={opportunities}
             currentUser={currentUser}
+            isLoggedIn={isLoggedIn}
+            onRequireAuth={triggerAuthRequired}
             onToggleSave={handleToggleSaveOpp}
             onAwardPoints={handleAwardPoints}
           />
@@ -813,7 +877,7 @@ export default function App() {
             currentUser={currentUser}
             onNavigateTab={setActiveTab}
             onOpenFeedback={() => setIsFeedbackOpen(true)}
-            onBroadcastAnnouncement={(title, msg, priority, audience) => {
+            onBroadcastAnnouncement={async (title, msg, priority = 'normal', audience = 'Wanafunzi Wote Tanzania') => {
               const notif: AppNotification = {
                 id: `notif-${Date.now()}`,
                 title: `📢 ${title}`,
@@ -822,7 +886,18 @@ export default function App() {
                 timestamp: 'Sasa hivi',
                 read: false
               };
-              setNotifications([notif, ...notifications]);
+              setNotifications(prev => [notif, ...prev]);
+
+              // Persist announcement and broadcast to database
+              try {
+                await fetch('/api/admin/announcements', {
+                  method: 'POST',
+                  headers: getAuthHeaders(),
+                  body: JSON.stringify({ title, message: msg, priority, audience })
+                });
+              } catch (err) {
+                console.warn('Could not post announcement to server:', err);
+              }
             }}
             onVerifySchool={(id) => {
               setSchools(schools.map(s => s.id === id ? { ...s, verified: !s.verified } : s));
@@ -992,6 +1067,10 @@ export default function App() {
         <button
           id="global-quick-action-fab"
           onClick={() => {
+            if (!isLoggedIn) {
+              triggerAuthRequired('post', 'Please create an account or sign in to continue.');
+              return;
+            }
             setQuickActionMode('post');
             setIsQuickActionOpen(true);
           }}
@@ -1011,6 +1090,8 @@ export default function App() {
         onAddQuestion={handleAddQuestion}
         onNavigateTab={setActiveTab}
         defaultMode={quickActionMode}
+        isLoggedIn={isLoggedIn}
+        onRequireAuth={triggerAuthRequired}
       />
 
       {/* Vinara (Leaderboard) Modal */}
@@ -1086,6 +1167,20 @@ export default function App() {
           onDismiss={() => setIsLoadingAnim(false)}
         />
       )}
+
+      {/* Authentication Required Guard Modal (Req 19, 20, 22, 23, 33) */}
+      <AuthPromptModal
+        isOpen={isAuthPromptOpen}
+        onClose={() => setIsAuthPromptOpen(false)}
+        action={authPromptAction}
+        customMessage={authPromptCustomMessage}
+        onOpenRegister={() => {
+          setIsLoginPageOpen(true);
+        }}
+        onOpenLogin={() => {
+          setIsLoginPageOpen(true);
+        }}
+      />
     </div>
   );
 }

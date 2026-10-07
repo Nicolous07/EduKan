@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ShieldCheck,
   TrendingUp,
@@ -73,6 +73,31 @@ import { AdminFeedbackTab } from './admin/AdminFeedbackTab';
 import { AdminRegistrationsTab } from './admin/AdminRegistrationsTab';
 import { exportStudentsToCSV, exportPostsToCSV } from '../services/adminRegistrationService';
 import { FeedbackModal } from './FeedbackModal';
+import { getAuthHeaders } from '../lib/authService';
+
+export interface RealAdminUser {
+  id: string;
+  name: string;
+  handle: string;
+  email: string;
+  phone?: string;
+  role: 'student' | 'admin';
+  avatar: string;
+  schoolName: string;
+  schoolRegion: string;
+  schoolDistrict: string;
+  level: string;
+  combination?: string;
+  title?: string;
+  bio: string;
+  points: number;
+  followersCount: number;
+  followingCount: number;
+  studentRegNo?: string;
+  status: 'active' | 'suspended' | 'deactivated';
+  createdAt: string;
+  lastLoginAt?: string;
+}
 
 interface Props {
   schools: SchoolCommunity[];
@@ -292,20 +317,34 @@ export const AdminPanel: React.FC<Props> = ({
     triggerFeedback('Kipindi cha utawala kimefungwa kwa usalama.');
   };
 
-  // Student management state
-  const [students, setStudents] = useState<ManagedStudent[]>(() => {
-    try {
-      const raw = localStorage.getItem('edukan_managed_students');
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      }
-    } catch {}
-    return managedStudents || INITIAL_MANAGED_STUDENTS;
-  });
+  // Managed students state
+  const [students, setStudents] = useState<ManagedStudent[]>(() => managedStudents || []);
+
+  // Real Database Registered Users State (Requirements 1, 5, 6)
+  const [realUsers, setRealUsers] = useState<RealAdminUser[]>([]);
+  const [realUsersTotal, setRealUsersTotal] = useState<number>(0);
+  const [realUsersPage, setRealUsersPage] = useState<number>(1);
+  const [realUsersTotalPages, setRealUsersTotalPages] = useState<number>(1);
+  const [realUsersLoading, setRealUsersLoading] = useState<boolean>(false);
+
+  // Real Database Stats (Requirement 5)
+  const [serverStats, setServerStats] = useState<{
+    totalUsers: number;
+    newRegistrationsThisWeek: number;
+    newRegistrationsToday: number;
+    activeUsers: number;
+    totalPosts: number;
+    totalMaterials: number;
+    totalAnnouncements: number;
+  } | null>(null);
+
+  // Real Database Announcements (Requirement 27)
+  const [serverAnnouncements, setServerAnnouncements] = useState<any[]>([]);
+
+  // Student management filters
   const [studentSearch, setStudentSearch] = useState('');
-  const [studentFilter, setStudentFilter] = useState<'all' | 'active' | 'banned' | 'admin'>('all');
-  const [selectedStudentForPoints, setSelectedStudentForPoints] = useState<ManagedStudent | null>(null);
+  const [studentFilter, setStudentFilter] = useState<'all' | 'active' | 'suspended' | 'banned' | 'admin'>('all');
+  const [selectedStudentForPoints, setSelectedStudentForPoints] = useState<RealAdminUser | null>(null);
   const [pointsInput, setPointsInput] = useState('50');
 
   // Audit logs state
@@ -318,46 +357,200 @@ export const AdminPanel: React.FC<Props> = ({
     setTimeout(() => setAdminFeedback(null), 3500);
   };
 
-  // Broadcast Handler
-  const handleBroadcast = (e: React.FormEvent) => {
+  // Fetch real database users with server-side pagination, search, and filtering
+  const fetchRealUsers = async (page = realUsersPage, search = studentSearch, filter = studentFilter) => {
+    setRealUsersLoading(true);
+    try {
+      const params = new URLSearchParams();
+      params.set('page', String(page));
+      params.set('limit', '10');
+      if (search.trim()) params.set('q', search.trim());
+      if (filter !== 'all') {
+        if (filter === 'admin') params.set('role', 'admin');
+        else if (filter === 'banned') params.set('status', 'suspended');
+        else params.set('status', filter);
+      }
+      const res = await fetch(`/api/admin/users?${params.toString()}`, {
+        headers: getAuthHeaders()
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          setRealUsers(data.users || []);
+          setRealUsersTotal(data.total || 0);
+          setRealUsersPage(data.page || 1);
+          setRealUsersTotalPages(data.totalPages || 1);
+          if (data.stats) {
+            setServerStats(data.stats);
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('Could not load real admin users:', err);
+    } finally {
+      setRealUsersLoading(false);
+    }
+  };
+
+  // Fetch real platform stats
+  const fetchServerStats = async () => {
+    try {
+      const res = await fetch('/api/admin/stats', { headers: getAuthHeaders() });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          setServerStats({
+            totalUsers: data.totalUsers || 0,
+            newRegistrationsThisWeek: data.newRegistrationsThisWeek || 0,
+            newRegistrationsToday: data.newRegistrationsToday || 0,
+            activeUsers: data.activeUsers || 0,
+            totalPosts: data.totalPosts || 0,
+            totalMaterials: data.totalMaterials || 0,
+            totalAnnouncements: data.totalAnnouncements || 0
+          });
+        }
+      }
+    } catch (err) {
+      console.warn('Could not load server stats:', err);
+    }
+  };
+
+  // Fetch real announcements
+  const fetchServerAnnouncements = async () => {
+    try {
+      const res = await fetch('/api/announcements');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.announcements) {
+          setServerAnnouncements(data.announcements);
+        }
+      }
+    } catch (err) {
+      console.warn('Could not load server announcements:', err);
+    }
+  };
+
+  // Synchronize data on tab change and initial mount
+  useEffect(() => {
+    fetchServerStats();
+    fetchRealUsers(1, studentSearch, studentFilter);
+    fetchServerAnnouncements();
+  }, []);
+
+  useEffect(() => {
+    if (adminTab === 'students') {
+      fetchRealUsers(1, studentSearch, studentFilter);
+    } else if (adminTab === 'overview') {
+      fetchServerStats();
+    } else if (adminTab === 'broadcasts') {
+      fetchServerAnnouncements();
+    }
+  }, [adminTab]);
+
+  // Handle Account Status (Requirement 6: deactivate/reactivate/suspend)
+  const handleUpdateUserStatus = async (userId: string, newStatus: 'active' | 'suspended' | 'deactivated') => {
+    const actionLabel = newStatus === 'active' ? 'kuwezesha' : newStatus === 'suspended' ? 'kusimamisha' : 'kuzima';
+    if (!window.confirm(`Je, una uhakika unataka ${actionLabel} akaunti hii ya mwanafunzi?`)) return;
+
+    try {
+      const res = await fetch(`/api/admin/users/${userId}/status`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ status: newStatus })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        triggerFeedback(`Hali ya akaunti imesasishwa kuwa "${newStatus}"! ✅`);
+        fetchRealUsers(realUsersPage, studentSearch, studentFilter);
+        fetchServerStats();
+      } else {
+        triggerFeedback(data.error || 'Hitilafu ya kubadilisha hali ya akaunti.');
+      }
+    } catch (err) {
+      triggerFeedback('Hitilafu ya seva wakati wa kubadilisha hali.');
+    }
+  };
+
+  // Handle Permanent User Deletion (Requirement 6: delete with confirmation)
+  const handleDeleteUser = async (userId: string, userName: string) => {
+    if (!window.confirm(`ONYO: Je, una uhakika unataka kumfuta kabisa mwanafunzi "${userName}" kutoka kwenye mfumo wa Edu-Kan? Kitendo hiki hakiwezi kubatilishwa.`)) return;
+
+    try {
+      const res = await fetch(`/api/admin/users/${userId}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders()
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        triggerFeedback(`Akaunti ya "${userName}" imefutwa kikamilifu. 🗑️`);
+        fetchRealUsers(realUsersPage, studentSearch, studentFilter);
+        fetchServerStats();
+      } else {
+        triggerFeedback(data.error || 'Hitilafu ya kufuta mtumiaji.');
+      }
+    } catch (err) {
+      triggerFeedback('Hitilafu ya seva wakati wa kufuta mtumiaji.');
+    }
+  };
+
+  // Delete an official announcement (Requirement 27)
+  const handleDeleteAnnouncement = async (annId: string) => {
+    if (!window.confirm('Je, una uhakika unataka kufuta tangazo hili rasmi la kitaifa?')) return;
+    try {
+      const res = await fetch(`/api/admin/announcements/${annId}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders()
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        triggerFeedback('Tangazo limefutwa kikamilifu.');
+        fetchServerAnnouncements();
+      } else {
+        triggerFeedback(data.error || 'Hitilafu ya kufuta tangazo.');
+      }
+    } catch (err) {
+      triggerFeedback('Hitilafu ya mtandao wakati wa kufuta tangazo.');
+    }
+  };
+
+  // Broadcast Handler (Requirement 27: Admin Announcements)
+  const handleBroadcast = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!announcementTitle.trim() || !announcementMsg.trim()) return;
 
-    onBroadcastAnnouncement(
-      announcementTitle.trim(),
-      announcementMsg.trim(),
-      announcementPriority,
-      announcementAudience
-    );
-
-    const newBroadcast: BroadcastItem = {
-      id: `bc-${Date.now()}`,
-      title: announcementTitle.trim(),
-      message: announcementMsg.trim(),
-      priority: announcementPriority,
-      audience: announcementAudience,
-      sentAt: 'Sasa hivi',
-      recipientsCount: 12483
-    };
-
-    setBroadcastList([newBroadcast, ...broadcastList]);
-
-    // Add to audit log
-    const newLog: AdminAuditLog = {
-      id: `log-${Date.now()}`,
-      action: 'Imetuma Tangazo la Kitaifa',
-      target: announcementTitle.trim(),
-      adminName: currentUser.name,
-      timestamp: 'Sasa hivi',
-      type: 'broadcast'
-    };
-    setAuditLogs([newLog, ...auditLogs]);
-
-    setAnnouncementTitle('');
-    setAnnouncementMsg('');
-    setBroadcastSent(true);
-    triggerFeedback('Tangazo la Utawala limetangazwa kwa mafanikio kitaifa! 📢');
-    setTimeout(() => setBroadcastSent(false), 3500);
+    try {
+      const res = await fetch('/api/admin/announcements', {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+          title: announcementTitle.trim(),
+          message: announcementMsg.trim(),
+          priority: announcementPriority,
+          audience: announcementAudience
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        triggerFeedback('Tangazo la Utawala limetangazwa kwa mafanikio kitaifa! 📢');
+        setAnnouncementTitle('');
+        setAnnouncementMsg('');
+        setBroadcastSent(true);
+        setTimeout(() => setBroadcastSent(false), 3500);
+        fetchServerAnnouncements();
+        fetchServerStats();
+      } else {
+        triggerFeedback(data.error || 'Hitilafu ya kutangaza tangazo.');
+      }
+    } catch (err) {
+      // Fallback
+      onBroadcastAnnouncement(
+        announcementTitle.trim(),
+        announcementMsg.trim(),
+        announcementPriority,
+        announcementAudience
+      );
+      triggerFeedback('Tangazo limetangazwa.');
+    }
   };
 
   // Add School Handler
@@ -986,7 +1179,7 @@ export const AdminPanel: React.FC<Props> = ({
           }`}
         >
           <Users className="w-3.5 h-3.5" />
-          <span>Students & Accounts ({students.length})</span>
+          <span>Students & Accounts ({serverStats?.totalUsers ?? realUsersTotal})</span>
         </button>
 
         <button
@@ -1059,9 +1252,11 @@ export const AdminPanel: React.FC<Props> = ({
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-emerald-100 dark:border-slate-800 shadow-2xs">
               <span className="text-[11px] uppercase tracking-wider text-gray-400 dark:text-slate-400 font-semibold block">Wanafunzi Waliosajiliwa</span>
-              <div className="text-2xl font-bold font-mono text-gray-900 dark:text-white mt-1">12,483</div>
+              <div className="text-2xl font-bold font-mono text-gray-900 dark:text-white mt-1">
+                {(serverStats?.totalUsers ?? realUsersTotal).toLocaleString()}
+              </div>
               <div className="text-[10px] text-emerald-700 dark:text-emerald-400 mt-1 font-semibold flex items-center gap-1">
-                <TrendingUp className="w-3 h-3" /> +187 wapya leo (Kiwango cha juu)
+                <TrendingUp className="w-3 h-3" /> +{serverStats?.newRegistrationsToday ?? 0} wapya leo
               </div>
             </div>
 
@@ -1072,15 +1267,15 @@ export const AdminPanel: React.FC<Props> = ({
             </div>
 
             <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-emerald-100 dark:border-slate-800 shadow-2xs">
-              <span className="text-[11px] uppercase tracking-wider text-gray-400 dark:text-slate-400 font-semibold block">Machapisho & Mijadala</span>
-              <div className="text-2xl font-bold font-mono text-gray-900 dark:text-white mt-1">{posts.length + 1420}</div>
-              <div className="text-[10px] text-emerald-700 dark:text-emerald-400 mt-1 font-semibold">96% ni maudhui ya kimasomo</div>
+              <span className="text-[11px] uppercase tracking-wider text-gray-400 dark:text-slate-400 font-semibold block">Machapisho ya Jumla</span>
+              <div className="text-2xl font-bold font-mono text-gray-900 dark:text-white mt-1">{serverStats?.totalPosts ?? posts.length}</div>
+              <div className="text-[10px] text-emerald-700 dark:text-emerald-400 mt-1 font-semibold">Kwenye seva kuu</div>
             </div>
 
             <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-emerald-100 dark:border-slate-800 shadow-2xs">
-              <span className="text-[11px] uppercase tracking-wider text-gray-400 dark:text-slate-400 font-semibold block">Ulinzi wa Maudhui</span>
-              <div className="text-2xl font-bold font-mono text-emerald-700 dark:text-emerald-400 mt-1">100% Salama</div>
-              <div className="text-[10px] text-gray-500 dark:text-slate-400 mt-1">0 machapisho yaliyopigwa marufuku</div>
+              <span className="text-[11px] uppercase tracking-wider text-gray-400 dark:text-slate-400 font-semibold block">Nyenzo & Mitihani</span>
+              <div className="text-2xl font-bold font-mono text-emerald-700 dark:text-emerald-400 mt-1">{serverStats?.totalMaterials ?? libraryBooks.length}</div>
+              <div className="text-[10px] text-gray-500 dark:text-slate-400 mt-1">Vitabu vya TIE & NECTA</div>
             </div>
           </div>
 
@@ -1826,42 +2021,55 @@ export const AdminPanel: React.FC<Props> = ({
       )}
 
       {/* ========================================================= */}
-      {/* 4. STUDENT & USER MANAGEMENT TAB */}
+      {/* 4. STUDENT & USER MANAGEMENT TAB (Requirements 1, 5, 6) */}
       {/* ========================================================= */}
       {adminTab === 'students' && (
         <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-gray-200 dark:border-slate-800 shadow-2xs space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h3 className="font-heading font-bold text-gray-900 dark:text-white text-base">
-                Usimamizi wa Wanafunzi na Akaunti ({students.length})
+              <h3 className="font-heading font-bold text-gray-900 dark:text-white text-base flex items-center gap-2">
+                <Users className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                Usimamizi wa Watumiaji na Wanafunzi ({realUsersTotal})
               </h3>
               <p className="text-xs text-gray-500 dark:text-slate-400">
-                Wanafunzi waliosajiliwa, zawadi za EduPoints, kubadilisha wadhifa, na uthibitisho au kupiga marufuku (ban) akaunti.
+                Watumiaji halisi waliosajiliwa kutoka kwenye hifadhidata ya seva. Tazama tarehe za usajili, shule, shughuli, na simamia hali ya akaunti.
               </p>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
               <button
                 id="export-students-csv-btn"
                 type="button"
                 onClick={() => {
-                  exportStudentsToCSV(students);
+                  exportStudentsToCSV(realUsers as any);
                   triggerFeedback('Orodha ya wanafunzi imepakuliwa kwenye faili la CSV!');
                 }}
                 className="bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs font-bold px-3 py-1.5 rounded-xl transition-all shadow-xs flex items-center gap-1.5 cursor-pointer shrink-0"
                 title="Pakua orodha ya wanafunzi katika muundo wa CSV"
               >
                 <Download className="w-3.5 h-3.5" />
-                <span>Pakua Orodha (CSV)</span>
+                <span>Pakua CSV</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => fetchRealUsers(realUsersPage, studentSearch, studentFilter)}
+                className="p-1.5 bg-gray-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-slate-700 text-gray-600 dark:text-slate-300 rounded-xl transition-colors cursor-pointer"
+                title="Pakia upya kutoka seva"
+              >
+                <RefreshCw className={`w-4 h-4 ${realUsersLoading ? 'animate-spin text-emerald-600' : ''}`} />
               </button>
 
               <div className="relative">
                 <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-gray-400 dark:text-slate-400" />
                 <input
                   type="text"
-                  placeholder="Tafuta mwanafunzi au shule..."
+                  placeholder="Tafuta jina, barua pepe, au shule..."
                   value={studentSearch}
-                  onChange={(e) => setStudentSearch(e.target.value)}
+                  onChange={(e) => {
+                    setStudentSearch(e.target.value);
+                    fetchRealUsers(1, e.target.value, studentFilter);
+                  }}
                   className="pl-8 pr-3 py-1.5 text-xs bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-900 text-gray-900 dark:text-white"
                 />
               </div>
@@ -1871,157 +2079,224 @@ export const AdminPanel: React.FC<Props> = ({
           {/* Student Filter Pills */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
             <button
-              onClick={() => setStudentFilter('all')}
+              onClick={() => {
+                setStudentFilter('all');
+                fetchRealUsers(1, studentSearch, 'all');
+              }}
               className={`px-3 py-1 rounded-full font-medium whitespace-nowrap transition-all cursor-pointer ${
                 studentFilter === 'all'
                   ? 'bg-emerald-800 dark:bg-emerald-700 text-white shadow-2xs font-semibold'
                   : 'bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200 dark:border-slate-700'
               }`}
             >
-              Wote ({students.length})
+              Wote ({realUsersTotal})
             </button>
             <button
-              onClick={() => setStudentFilter('active')}
+              onClick={() => {
+                setStudentFilter('active');
+                fetchRealUsers(1, studentSearch, 'active');
+              }}
               className={`px-3 py-1 rounded-full font-medium whitespace-nowrap transition-all cursor-pointer ${
                 studentFilter === 'active'
                   ? 'bg-emerald-800 dark:bg-emerald-700 text-white shadow-2xs font-semibold'
                   : 'bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200 dark:border-slate-700'
               }`}
             >
-              Akaunti Hai ({students.filter(s => s.status === 'active').length})
+              Akaunti Hai ({serverStats?.activeUsers ?? realUsers.filter(s => s.status === 'active').length})
             </button>
             <button
-              onClick={() => setStudentFilter('banned')}
+              onClick={() => {
+                setStudentFilter('suspended');
+                fetchRealUsers(1, studentSearch, 'suspended');
+              }}
               className={`px-3 py-1 rounded-full font-medium whitespace-nowrap transition-all cursor-pointer ${
-                studentFilter === 'banned'
-                  ? 'bg-red-700 dark:bg-red-800 text-white shadow-2xs font-semibold'
+                studentFilter === 'suspended'
+                  ? 'bg-amber-700 dark:bg-amber-800 text-white shadow-2xs font-semibold'
                   : 'bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200 dark:border-slate-700'
               }`}
             >
-              Waliopigwa Marufuku (Banned) ({students.filter(s => s.status === 'banned').length})
+              Zilizosimimamishwa / Banned
             </button>
             <button
-              onClick={() => setStudentFilter('admin')}
+              onClick={() => {
+                setStudentFilter('admin');
+                fetchRealUsers(1, studentSearch, 'admin');
+              }}
               className={`px-3 py-1 rounded-full font-medium whitespace-nowrap transition-all cursor-pointer ${
                 studentFilter === 'admin'
                   ? 'bg-purple-800 dark:bg-purple-700 text-white shadow-2xs font-semibold'
                   : 'bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200 dark:border-slate-700'
               }`}
             >
-              Wasimamizi (Admins) ({students.filter(s => s.role === 'admin').length})
+              Wasimamizi (Admins)
             </button>
           </div>
 
           {/* Student Management Cards */}
           <div className="space-y-3 pt-2">
-            {filteredStudents.length === 0 ? (
-              <div className="p-8 text-center bg-gray-50 dark:bg-slate-800/60 rounded-2xl text-gray-500 dark:text-slate-400 text-xs">
-                Hakuna wanafunzi waliopatikana kwa kichujio hiki.
+            {realUsersLoading && realUsers.length === 0 ? (
+              <div className="p-12 text-center bg-gray-50 dark:bg-slate-800/60 rounded-2xl flex items-center justify-center gap-2 text-gray-500 dark:text-slate-400 text-xs">
+                <RefreshCw className="w-4 h-4 animate-spin text-emerald-600" />
+                <span>Inapakia watumiaji kutoka kwenye database ya seva...</span>
+              </div>
+            ) : realUsers.length === 0 ? (
+              <div className="p-12 text-center bg-gray-50 dark:bg-slate-800/60 rounded-2xl border border-gray-200 dark:border-slate-800 text-gray-500 dark:text-slate-400 text-xs">
+                <Users className="w-10 h-10 mx-auto mb-2 text-gray-400 opacity-60" />
+                <p className="font-bold text-sm text-gray-700 dark:text-slate-200">Hakuna watumiaji waliosajiliwa bado (No users yet).</p>
+                <p className="mt-1 text-gray-500">Watumiaji wapya wakijisajili kwenye Edu-Kan watahifadhiwa na kuonekana hapa moja kwa moja.</p>
               </div>
             ) : (
-              filteredStudents.map((student) => (
+              realUsers.map((user) => (
                 <div
-                  key={student.id}
-                  className={`p-4 rounded-2xl border transition-all flex flex-col md:flex-row md:items-center justify-between gap-3 ${
-                    student.status === 'banned'
-                      ? 'bg-red-50/50 dark:bg-red-950/20 border-red-200 dark:border-red-900/60'
+                  key={user.id}
+                  className={`p-4 rounded-2xl border transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-3 ${
+                    user.status === 'suspended' || user.status === 'deactivated'
+                      ? 'bg-amber-50/40 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/60'
                       : 'bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-800 hover:border-emerald-200 dark:hover:border-emerald-800'
                   }`}
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="relative">
+                  <div className="flex items-start sm:items-center gap-3">
+                    <div className="relative shrink-0">
                       <img
-                        src={student.avatar}
-                        alt={student.name}
+                        src={user.avatar}
+                        alt={user.name}
                         className="w-12 h-12 rounded-full object-cover ring-2 ring-emerald-500/20 dark:ring-emerald-500/30"
                       />
-                      {student.verified && (
-                        <span className="absolute bottom-0 right-0 w-4 h-4 bg-emerald-600 rounded-full flex items-center justify-center text-white text-[9px] ring-2 ring-white dark:ring-slate-900">
-                          ✓
+                      {user.role === 'admin' && (
+                        <span className="absolute bottom-0 right-0 w-4 h-4 bg-purple-600 rounded-full flex items-center justify-center text-white text-[9px] ring-2 ring-white dark:ring-slate-900">
+                          ★
                         </span>
                       )}
                     </div>
+
                     <div>
                       <div className="flex items-center gap-2 flex-wrap">
-                        <h4 className="font-bold text-sm text-gray-900 dark:text-white font-heading">{student.name}</h4>
-                        <span className="text-xs text-gray-400 dark:text-slate-400">@{student.handle}</span>
+                        <h4 className="font-bold text-sm text-gray-900 dark:text-white font-heading">{user.name}</h4>
+                        <span className="text-xs text-gray-400 dark:text-slate-400">@{user.handle}</span>
+                        
                         <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${
-                          student.role === 'admin'
+                          user.role === 'admin'
                             ? 'bg-purple-100 dark:bg-purple-950/60 text-purple-900 dark:text-purple-300'
                             : 'bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-300'
                         }`}>
-                          {student.role === 'admin' ? 'Msimamizi Mkuu' : 'Mwanafunzi'}
+                          {user.role === 'admin' ? 'Msimamizi Mkuu' : 'Mwanafunzi'}
                         </span>
+
                         <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${
-                          student.status === 'banned'
+                          user.status === 'deactivated'
                             ? 'bg-red-600 text-white font-bold'
-                            : student.status === 'suspended'
+                            : user.status === 'suspended'
                             ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300'
                             : 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300'
                         }`}>
-                          {student.status === 'banned'
-                            ? '🛑 Imepigwa Marufuku (Banned)'
-                            : student.status === 'suspended'
-                            ? '⚠️ Imesimamishwa'
-                            : '✅ Akaunti Hai'}
+                          {user.status === 'deactivated'
+                            ? '🛑 Imefungwa (Deactivated)'
+                            : user.status === 'suspended'
+                            ? '⚠️ Imesimamishwa (Suspended)'
+                            : '✅ Akaunti Hai (Active)'}
                         </span>
                       </div>
 
-                      <div className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
-                        {student.schoolName} • {student.level} {student.combination ? `(${student.combination})` : ''}
+                      <div className="text-xs text-gray-600 dark:text-slate-300 mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
+                        <span className="flex items-center gap-1 text-gray-500 dark:text-slate-400">
+                          <Mail className="w-3.5 h-3.5 text-gray-400" />
+                          <strong className="text-gray-700 dark:text-slate-200">{user.email}</strong>
+                        </span>
+                        <span>•</span>
+                        <span>{user.schoolName} ({user.level || 'Tanzania'})</span>
+                        {user.studentRegNo && (
+                          <>
+                            <span>•</span>
+                            <span className="font-mono text-[11px] text-gray-400">{user.studentRegNo}</span>
+                          </>
+                        )}
                       </div>
 
-                      <div className="flex items-center gap-3 text-xs mt-1">
+                      <div className="flex items-center gap-3 text-xs mt-1.5 flex-wrap">
                         <span className="font-mono font-bold text-emerald-800 dark:text-emerald-400">
-                          {student.points.toLocaleString()} EduPoints
+                          {user.points.toLocaleString()} EduPoints
                         </span>
-                        <span className="text-gray-400 dark:text-slate-400 text-[11px]">• Alijiunga: {student.joinDate}</span>
+                        <span className="text-gray-400 dark:text-slate-400 text-[11px]">
+                          • Alijiunga: {new Date(user.createdAt).toLocaleDateString('sw-TZ', { year: 'numeric', month: 'short', day: 'numeric' })}
+                        </span>
+                        {user.lastLoginAt && (
+                          <span className="text-gray-400 dark:text-slate-400 text-[11px]">
+                            • Kuingia Mwisho: {new Date(user.lastLoginAt).toLocaleTimeString('sw-TZ', { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
 
-                  {/* Admin Action Buttons for Student */}
-                  <div className="flex items-center gap-2 flex-wrap">
+                  {/* Admin Safe Action Buttons (Requirement 6) */}
+                  <div className="flex items-center gap-2 flex-wrap pt-2 lg:pt-0">
                     <button
-                      onClick={() => setSelectedStudentForPoints(student)}
+                      onClick={() => setSelectedStudentForPoints(user)}
                       className="bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/60 text-amber-900 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60 text-xs font-bold px-3 py-1.5 rounded-xl flex items-center gap-1 cursor-pointer transition-colors"
+                      title="Ongeza au punguza pointi"
                     >
                       <Award className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                       <span>Pointi (+/-)</span>
                     </button>
 
-                    <button
-                      onClick={() => handleToggleStudentRole(student.id)}
-                      className="bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-200 border border-gray-200 dark:border-slate-700 text-xs font-semibold px-3 py-1.5 rounded-xl transition-colors cursor-pointer"
-                    >
-                      Wadhifa: {student.role === 'admin' ? 'Admin' : 'Mwanafunzi'}
-                    </button>
+                    {/* Deactivate / Reactivate Account Button */}
+                    {user.status === 'active' ? (
+                      <button
+                        onClick={() => handleUpdateUserStatus(user.id, 'suspended')}
+                        className="bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/60 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60 text-xs font-semibold px-3 py-1.5 rounded-xl transition-colors cursor-pointer"
+                        title="Simamisha akaunti ya mwanafunzi huyu"
+                      >
+                        Simamisha (Suspend)
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleUpdateUserStatus(user.id, 'active')}
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3 py-1.5 rounded-xl transition-colors cursor-pointer shadow-2xs"
+                        title="Washa tena akaunti ya mwanafunzi huyu"
+                      >
+                        Wezesha (Reactivate)
+                      </button>
+                    )}
 
+                    {/* Delete User Button with Confirmation */}
                     <button
-                      onClick={() => handleToggleStudentVerified(student.id)}
-                      className={`text-xs font-semibold px-3 py-1.5 rounded-xl border transition-colors cursor-pointer ${
-                        student.verified
-                          ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/60'
-                          : 'bg-gray-50 dark:bg-slate-800 text-gray-500 dark:text-slate-400 border-gray-200 dark:border-slate-700'
-                      }`}
+                      onClick={() => handleDeleteUser(user.id, user.name)}
+                      className="bg-red-50 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-900/60 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800/60 text-xs font-bold px-3 py-1.5 rounded-xl transition-all cursor-pointer flex items-center gap-1"
+                      title="Futa mtumiaji huyu kabisa kwenye mfumo"
                     >
-                      {student.verified ? 'Imethibitishwa ✓' : 'Thibitisha'}
-                    </button>
-
-                    <button
-                      onClick={() => handleToggleStudentBan(student.id)}
-                      className={`text-xs font-bold px-3.5 py-1.5 rounded-xl transition-all cursor-pointer ${
-                        student.status === 'banned'
-                          ? 'bg-emerald-700 hover:bg-emerald-800 text-white shadow-xs'
-                          : 'bg-red-50 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-900/60 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800/60'
-                      }`}
-                      title={student.status === 'banned' ? 'Fungulia Mtumiaji Huyu' : 'Piga Marufuku Mtumiaji Huyu'}
-                    >
-                      {student.status === 'banned' ? 'Fungulia (Unban)' : 'Piga Marufuku (Ban)'}
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>Futa</span>
                     </button>
                   </div>
                 </div>
               ))
+            )}
+
+            {/* Pagination Controls (Requirement 5) */}
+            {realUsersTotalPages > 1 && (
+              <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-slate-800 text-xs">
+                <button
+                  type="button"
+                  disabled={realUsersPage <= 1 || realUsersLoading}
+                  onClick={() => fetchRealUsers(realUsersPage - 1, studentSearch, studentFilter)}
+                  className="px-3.5 py-2 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-800 dark:text-slate-200 rounded-xl font-semibold disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
+                >
+                  ← Ukurasa Uliopita
+                </button>
+
+                <span className="font-mono font-semibold text-gray-600 dark:text-slate-400">
+                  Ukurasa {realUsersPage} wa {realUsersTotalPages} (Jumla: {realUsersTotal})
+                </span>
+
+                <button
+                  type="button"
+                  disabled={realUsersPage >= realUsersTotalPages || realUsersLoading}
+                  onClick={() => fetchRealUsers(realUsersPage + 1, studentSearch, studentFilter)}
+                  className="px-3.5 py-2 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-800 dark:text-slate-200 rounded-xl font-semibold disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
+                >
+                  Ukurasa Unaofuata →
+                </button>
+              </div>
             )}
           </div>
         </div>
@@ -2114,32 +2389,60 @@ export const AdminPanel: React.FC<Props> = ({
             </form>
           </div>
 
-          {/* Broadcast History */}
+          {/* Broadcast History (Requirement 27: Admin Announcements from Database) */}
           <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-gray-200 dark:border-slate-800 shadow-2xs space-y-3">
-            <h4 className="font-heading font-bold text-gray-900 dark:text-white text-sm">Historia ya Matangazo Yaliyotumwa</h4>
+            <div className="flex items-center justify-between">
+              <h4 className="font-heading font-bold text-gray-900 dark:text-white text-sm">
+                Matangazo Rasmi ya Kitaifa ({serverAnnouncements.length})
+              </h4>
+              <button
+                type="button"
+                onClick={fetchServerAnnouncements}
+                className="text-xs text-emerald-700 dark:text-emerald-400 font-semibold hover:underline flex items-center gap-1 cursor-pointer"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                <span>Sasisha</span>
+              </button>
+            </div>
+
             <div className="space-y-2.5 text-xs">
-              {broadcastList.map((item) => (
-                <div key={item.id} className="p-3.5 bg-gray-50 dark:bg-slate-800/60 rounded-xl border border-gray-100 dark:border-slate-800 flex items-start justify-between gap-3">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-gray-900 dark:text-white">{item.title}</span>
-                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${
-                        item.priority === 'urgent'
-                          ? 'bg-red-100 dark:bg-red-950/60 text-red-900 dark:text-red-300'
-                          : item.priority === 'exam'
-                          ? 'bg-blue-100 dark:bg-blue-950/60 text-blue-900 dark:text-blue-300'
-                          : 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-300'
-                      }`}>
-                        {item.priority}
-                      </span>
-                    </div>
-                    <p className="text-gray-600 dark:text-slate-300 text-xs mt-1">{item.message}</p>
-                    <div className="text-[11px] text-gray-400 dark:text-slate-400 mt-1">
-                      Walengwa: {item.audience} • Ilitumwa: {item.sentAt} • Waliofikiwa: {item.recipientsCount.toLocaleString()}
-                    </div>
-                  </div>
+              {serverAnnouncements.length === 0 ? (
+                <div className="p-8 text-center text-gray-400 bg-gray-50 dark:bg-slate-800/40 rounded-xl">
+                  Hakuna matangazo rasmi ya kitaifa kwa sasa. Tuma tangazo jipya hapo juu.
                 </div>
-              ))}
+              ) : (
+                serverAnnouncements.map((item) => (
+                  <div key={item.id} className="p-3.5 bg-gray-50 dark:bg-slate-800/60 rounded-xl border border-gray-100 dark:border-slate-800 flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-bold text-gray-900 dark:text-white">{item.title}</span>
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${
+                          item.priority === 'urgent'
+                            ? 'bg-red-100 dark:bg-red-950/60 text-red-900 dark:text-red-300'
+                            : item.priority === 'exam'
+                            ? 'bg-blue-100 dark:bg-blue-950/60 text-blue-900 dark:text-blue-300'
+                            : 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-300'
+                        }`}>
+                          {item.priority}
+                        </span>
+                      </div>
+                      <p className="text-gray-600 dark:text-slate-300 text-xs mt-1 leading-relaxed">{item.message}</p>
+                      <div className="text-[11px] text-gray-400 dark:text-slate-400 mt-1">
+                        Mwandishi: {item.authorName} • Walengwa: {item.audience} • Tarehe: {new Date(item.createdAt).toLocaleString('sw-TZ')}
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteAnnouncement(item.id)}
+                      className="p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors cursor-pointer shrink-0"
+                      title="Futa tangazo hili"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>

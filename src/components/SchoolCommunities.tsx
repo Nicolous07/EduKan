@@ -16,6 +16,8 @@ import { SchoolChatView } from './SchoolChatView';
 interface Props {
   schools: SchoolCommunity[];
   currentUser?: UserProfile;
+  isLoggedIn?: boolean;
+  onRequireAuth?: (action: 'post' | 'download' | 'comment' | 'like' | 'message' | 'follow' | 'poll' | 'general', message?: string) => void;
   onToggleJoin: (schoolId: string) => void;
   onExploreSchool?: (schoolId: string) => void;
 }
@@ -23,6 +25,8 @@ interface Props {
 export const SchoolCommunities: React.FC<Props> = ({
   schools,
   currentUser,
+  isLoggedIn = false,
+  onRequireAuth,
   onToggleJoin,
   onExploreSchool
 }) => {
@@ -137,6 +141,8 @@ export const SchoolCommunities: React.FC<Props> = ({
           currentUser={user}
           initialSchoolId={selectedSchoolChatId}
           initialChannelId={selectedChannelId}
+          isLoggedIn={isLoggedIn}
+          onRequireAuth={onRequireAuth}
           onBackToDirectory={() => setActiveView('directory')}
           onOpenSchoolProfile={(schoolId) => {
             if (onExploreSchool) onExploreSchool(schoolId);

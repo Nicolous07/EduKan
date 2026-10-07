@@ -15,10 +15,22 @@ const ADMIN_NOTIFICATION_EMAIL = process.env.ADMIN_NOTIFICATION_EMAIL || process
 const USERS_FILE_PATH = path.join(process.cwd(), 'users_store.json');
 const POSTS_FILE_PATH = path.join(process.cwd(), 'posts_store.json');
 const AUDIT_FILE_PATH = path.join(process.cwd(), 'admin_actions_store.json');
+const NOTIFICATIONS_FILE_PATH = path.join(process.cwd(), 'notifications_store.json');
+const ANNOUNCEMENTS_FILE_PATH = path.join(process.cwd(), 'announcements_store.json');
+const MESSAGES_FILE_PATH = path.join(process.cwd(), 'messages_store.json');
+const MATERIALS_FILE_PATH = path.join(process.cwd(), 'materials_store.json');
 
 // -------------------------------------------------------------
 // Database Types
 // -------------------------------------------------------------
+export interface NotificationPreferences {
+  newPosts: boolean;
+  announcements: boolean;
+  newMessages: boolean;
+  studyMaterials: boolean;
+  pushEnabled?: boolean;
+}
+
 export interface StoredUser {
   id: string;
   name: string;
@@ -43,11 +55,77 @@ export interface StoredUser {
   followingCount: number;
   studentRegNo?: string;
   status: 'active' | 'suspended' | 'deactivated';
+  notificationPreferences?: NotificationPreferences;
   createdAt: string;
   lastLoginAt?: string;
 }
 
 export interface SanitizedUser extends Omit<StoredUser, 'passwordHash' | 'salt'> {}
+
+export interface StoredNotification {
+  id: string;
+  recipientId: string; // 'all' or specific userId
+  type: 'post' | 'message' | 'announcement' | 'material' | 'system' | 'like' | 'comment';
+  title: string;
+  message: string;
+  senderId?: string;
+  senderName?: string;
+  senderAvatar?: string;
+  relatedPostId?: string;
+  relatedMessageId?: string;
+  relatedAnnouncementId?: string;
+  relatedMaterialId?: string;
+  createdAt: string;
+  readBy: string[]; // List of user IDs who have read this
+}
+
+export interface StoredAnnouncement {
+  id: string;
+  title: string;
+  message: string;
+  priority: 'normal' | 'urgent' | 'exam';
+  audience: string;
+  authorId: string;
+  authorName: string;
+  createdAt: string;
+}
+
+export interface StoredMessage {
+  id: string;
+  senderId: string;
+  senderName: string;
+  senderAvatar: string;
+  recipientId: string;
+  recipientName: string;
+  channelId?: string;
+  content: string;
+  attachment?: any;
+  createdAt: string;
+  readBy: string[];
+}
+
+export interface StoredMaterial {
+  id: string;
+  title: string;
+  authorOrPublisher: string;
+  level: string;
+  category: string;
+  classGrade: string;
+  subject: string;
+  coverImage?: string;
+  downloadUrl: string;
+  fileSize: string;
+  fileFormat: string;
+  year?: number;
+  downloadsCount: number;
+  description: string;
+  uploaderId?: string;
+  uploaderName: string;
+  uploaderRole: string;
+  uploaderSchool: string;
+  createdAt: string;
+  verified?: boolean;
+}
 
 export interface StoredAuditAction {
   id: string;
@@ -192,6 +270,374 @@ function logAdminAction(adminId: string, adminName: string, action: string, targ
     fs.writeFileSync(AUDIT_FILE_PATH, JSON.stringify(logs.slice(0, 300), null, 2), 'utf-8');
   } catch (err) {
     console.warn('Could not log admin action:', err);
+  }
+}
+
+function loadServerNotifications(): StoredNotification[] {
+  try {
+    if (fs.existsSync(NOTIFICATIONS_FILE_PATH)) {
+      const raw = fs.readFileSync(NOTIFICATIONS_FILE_PATH, 'utf-8');
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    }
+  } catch (err) {
+    console.warn('Could not read notifications_store.json:', err);
+  }
+  return [];
+}
+
+function saveServerNotifications(notifs: StoredNotification[]) {
+  try {
+    fs.writeFileSync(NOTIFICATIONS_FILE_PATH, JSON.stringify(notifs, null, 2), 'utf-8');
+  } catch (err) {
+    console.warn('Could not write notifications_store.json:', err);
+  }
+}
+
+function broadcastNotification(params: {
+  recipientId?: string; // 'all' or specific user ID
+  type: 'post' | 'message' | 'announcement' | 'material' | 'system' | 'like' | 'comment';
+  title: string;
+  message: string;
+  senderId?: string;
+  senderName?: string;
+  senderAvatar?: string;
+  relatedPostId?: string;
+  relatedMessageId?: string;
+  relatedAnnouncementId?: string;
+  relatedMaterialId?: string;
+}): StoredNotification {
+  const notifs = loadServerNotifications();
+  const newNotif: StoredNotification = {
+    id: `notif-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    recipientId: params.recipientId || 'all',
+    type: params.type,
+    title: params.title,
+    message: params.message,
+    senderId: params.senderId,
+    senderName: params.senderName,
+    senderAvatar: params.senderAvatar,
+    relatedPostId: params.relatedPostId,
+    relatedMessageId: params.relatedMessageId,
+    relatedAnnouncementId: params.relatedAnnouncementId,
+    relatedMaterialId: params.relatedMaterialId,
+    createdAt: new Date().toISOString(),
+    readBy: []
+  };
+
+  notifs.unshift(newNotif);
+  saveServerNotifications(notifs.slice(0, 500));
+  console.log(`🔔 [NOTIFICATION DISPATCHED] [${params.type.toUpperCase()}] "${params.title}" -> ${params.recipientId || 'all'}`);
+  return newNotif;
+}
+
+function loadServerAnnouncements(): StoredAnnouncement[] {
+  try {
+    if (fs.existsSync(ANNOUNCEMENTS_FILE_PATH)) {
+      const raw = fs.readFileSync(ANNOUNCEMENTS_FILE_PATH, 'utf-8');
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    }
+  } catch (err) {
+    console.warn('Could not read announcements_store.json:', err);
+  }
+  return [];
+}
+
+function saveServerAnnouncements(announcements: StoredAnnouncement[]) {
+  try {
+    fs.writeFileSync(ANNOUNCEMENTS_FILE_PATH, JSON.stringify(announcements, null, 2), 'utf-8');
+  } catch (err) {
+    console.warn('Could not write announcements_store.json:', err);
+  }
+}
+
+function loadServerMessages(): StoredMessage[] {
+  try {
+    if (fs.existsSync(MESSAGES_FILE_PATH)) {
+      const raw = fs.readFileSync(MESSAGES_FILE_PATH, 'utf-8');
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    }
+  } catch (err) {
+    console.warn('Could not read messages_store.json:', err);
+  }
+  return [];
+}
+
+function saveServerMessages(messages: StoredMessage[]) {
+  try {
+    fs.writeFileSync(MESSAGES_FILE_PATH, JSON.stringify(messages, null, 2), 'utf-8');
+  } catch (err) {
+    console.warn('Could not write messages_store.json:', err);
+  }
+}
+
+function loadServerMaterials(): StoredMaterial[] {
+  try {
+    if (fs.existsSync(MATERIALS_FILE_PATH)) {
+      const raw = fs.readFileSync(MATERIALS_FILE_PATH, 'utf-8');
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    }
+  } catch (err) {
+    console.warn('Could not read materials_store.json:', err);
+  }
+  return [];
+}
+
+function saveServerMaterials(materials: StoredMaterial[]) {
+  try {
+    fs.writeFileSync(MATERIALS_FILE_PATH, JSON.stringify(materials, null, 2), 'utf-8');
+  } catch (err) {
+    console.warn('Could not write materials_store.json:', err);
+  }
+}
+
+// Initial Data Seeders
+function seedInitialServerData() {
+  // 1. Seed initial announcements if empty
+  const announcements = loadServerAnnouncements();
+  if (announcements.length === 0) {
+    const initialAnnouncement: StoredAnnouncement = {
+      id: 'ann-init-001',
+      title: 'Karibu Edu-Kan Tanzania - Jukwaa Rasmi la Kitaifa',
+      message: 'Karibu kwenye mtandao wa Edu-Kan Tanzania. Hapa utapata vitabu vya kiada vya TIE, mitihani ya NECTA, majadiliano ya kitaaluma, na fursa za ufadhili wa masomo.',
+      priority: 'normal',
+      audience: 'Wanafunzi Wote Tanzania',
+      authorId: 'usr-admin-master',
+      authorName: 'Nicolous Munisi',
+      createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
+    };
+    announcements.push(initialAnnouncement);
+    saveServerAnnouncements(announcements);
+  }
+
+  // 2. Seed initial notifications if empty
+  const notifs = loadServerNotifications();
+  if (notifs.length === 0) {
+    notifs.push(
+      {
+        id: 'notif-welcome-system',
+        recipientId: 'all',
+        type: 'announcement',
+        title: 'New Edu-Kan announcement',
+        message: 'Mfumo wa Edu-Kan sasa umefunguliwa kwa wanafunzi wote wa shule za msingi, sekondari na vyuo vikuu nchini Tanzania.',
+        senderId: 'usr-admin-master',
+        senderName: 'Nicolous Munisi',
+        senderAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80',
+        createdAt: new Date(Date.now() - 3600000).toISOString(),
+        readBy: []
+      },
+      {
+        id: 'notif-material-welcome',
+        recipientId: 'all',
+        type: 'material',
+        title: 'New study material has been added',
+        message: 'NECTA Biology Form 6 Past Papers & Mark Schemes 2025 sasa inapatikana kwenye Maktaba ya Kidijitali.',
+        createdAt: new Date(Date.now() - 7200000).toISOString(),
+        readBy: []
+      }
+    );
+    saveServerNotifications(notifs);
+  }
+
+  // 3. Seed initial materials if empty
+  const materials = loadServerMaterials();
+  if (materials.length === 0) {
+    const seedMaterials: StoredMaterial[] = [
+      {
+        id: 'mat-necta-bio-2025',
+        title: 'NECTA Biology Paper 1 & 2 (Form VI) - 2025 Solved Exam',
+        authorOrPublisher: 'Baraza la Mitihani la Taifa (NECTA)',
+        level: 'A-Level',
+        category: 'Mitihani ya NECTA',
+        classGrade: 'Kidato cha 6',
+        subject: 'Biology',
+        coverImage: 'https://images.unsplash.com/photo-1530210124550-912dc1381cb8?w=400&auto=format&fit=crop&q=80',
+        downloadUrl: '/downloads/necta_biology_2025_form6_solved.pdf',
+        fileSize: '4.8 MB',
+        fileFormat: 'PDF',
+        year: 2025,
+        downloadsCount: 142,
+        description: 'Mtihani kamili wa taifa wa Kidato cha Sita (NECTA 2025) ukiwa na maswali yote na mwongozo wa masahihisho (Marking Scheme).',
+        uploaderName: 'NECTA Official Repository',
+        uploaderRole: 'admin',
+        uploaderSchool: 'Edu-Kan Tanzania Central Administration',
+        createdAt: new Date(Date.now() - 86400000).toISOString(),
+        verified: true
+      },
+      {
+        id: 'mat-tie-math-adv',
+        title: 'TIE Advanced Mathematics Textbook - Form 5 & 6',
+        authorOrPublisher: 'Taasisi ya Elimu Tanzania (TIE)',
+        level: 'A-Level',
+        category: 'Vitabu vya Masomo',
+        classGrade: 'Kidato cha 5 & 6',
+        subject: 'Mathematics',
+        coverImage: 'https://images.unsplash.com/photo-1509228468518-180dd4864904?w=400&auto=format&fit=crop&q=80',
+        downloadUrl: '/downloads/tie_advanced_mathematics_form5_6.pdf',
+        fileSize: '12.4 MB',
+        fileFormat: 'PDF',
+        year: 2024,
+        downloadsCount: 389,
+        description: 'Kitabu rasmi cha kiada cha Taasisi ya Elimu Tanzania (TIE) kinachofunika Calculus, Coordinate Geometry, Trigonometry na Algebra.',
+        uploaderName: 'TIE Tanzania',
+        uploaderRole: 'admin',
+        uploaderSchool: 'Tanzania Institute of Education',
+        createdAt: new Date(Date.now() - 172800000).toISOString(),
+        verified: true
+      },
+      {
+        id: 'mat-chem-organic-notes',
+        title: 'Organic Chemistry & Reaction Mechanisms Comprehensive Notes',
+        authorOrPublisher: 'Tanzania Science Teachers Association',
+        level: 'A-Level',
+        category: 'Notisi za Masomo',
+        classGrade: 'Kidato cha 5 & 6',
+        subject: 'Chemistry',
+        coverImage: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=400&auto=format&fit=crop&q=80',
+        downloadUrl: '/downloads/organic_chemistry_notes_2025.pdf',
+        fileSize: '3.1 MB',
+        fileFormat: 'PDF',
+        year: 2025,
+        downloadsCount: 215,
+        description: 'Notisi fupi na zenye michoro ya kina inayoelezea mechanisms za SN1, SN2, Electrophilic Addition, na Spectroscopy.',
+        uploaderName: 'Mwl. Daudi Mussa',
+        uploaderRole: 'student',
+        uploaderSchool: 'Ilaborabora High School',
+        createdAt: new Date(Date.now() - 259200000).toISOString(),
+        verified: true
+      },
+      {
+        id: 'mat-gs-philosophy-guide',
+        title: 'General Studies Form VI - Philosophy, National Ethics & Development',
+        authorOrPublisher: 'Edu-Kan Academic Panel',
+        level: 'A-Level',
+        category: 'Notisi za Masomo',
+        classGrade: 'Kidato cha 6',
+        subject: 'General Studies',
+        coverImage: 'https://images.unsplash.com/photo-1457369804613-52c61a468e7d?w=400&auto=format&fit=crop&q=80',
+        downloadUrl: '/downloads/general_studies_philosophy_notes.pdf',
+        fileSize: '2.5 MB',
+        fileFormat: 'PDF',
+        year: 2025,
+        downloadsCount: 98,
+        description: 'Miongozo ya kujibu maswali ya insha katika somo la General Studies (GS) Form 6 kuhusu Falsafa, Maadili ya Kitaifa na Sayansi na Teknolojia.',
+        uploaderName: 'Edu-Kan Academic Panel',
+        uploaderRole: 'admin',
+        uploaderSchool: 'Edu-Kan Central Network',
+        createdAt: new Date(Date.now() - 345600000).toISOString(),
+        verified: true
+      }
+    ];
+    saveServerMaterials(seedMaterials);
+  }
+
+  // 4. Seed initial posts if empty so feed is rich for visitors & users
+  const posts = loadServerPosts();
+  if (posts.length === 0) {
+    const seedPosts = [
+      {
+        id: 'post-seed-001',
+        author: {
+          id: 'usr-admin-master',
+          name: 'Nicolous Munisi',
+          handle: 'nicolous_admin',
+          avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80',
+          school: 'EduKan Tanzania Central Administration',
+          role: 'admin',
+          verified: true
+        },
+        type: 'normal',
+        category: 'masomo',
+        content: 'Karibuni wanafunzi wote wa Tanzania kwenye mfumo mpya wa Edu-Kan! Maktaba yetu ina vitabu vya bure vya TIE na mitihani yote ya NECTA iliyotatuliwa. Jisajili au ingia ili uweze kuchapisha maswali na kupakua nyaraka zote za masomo.',
+        subject: 'Masomo ya Jumla',
+        mediaUrl: null,
+        mediaType: null,
+        pollOptions: null,
+        likes: 18,
+        likedBy: [],
+        commentsCount: 3,
+        sharesCount: 5,
+        isSaved: false,
+        isPinned: true,
+        comments: [
+          {
+            id: 'comm-init-1',
+            postId: 'post-seed-001',
+            author: {
+              id: 'usr-grace-mrema',
+              name: 'Dr. Grace Mrema',
+              avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&auto=format&fit=crop&q=80',
+              school: 'Ilala Secondary School',
+              role: 'student'
+            },
+            content: 'Hongera sana kwa uboreshaji huu. Huu ni msaada mkubwa kwa wanafunzi wanaojiandaa na mitihani ya NECTA!',
+            createdAt: 'Masaa 2 yaliyopita',
+            likes: 4,
+            isLiked: false
+          }
+        ],
+        schoolName: 'EduKan Tanzania Central Administration',
+        createdAt: 'Masaa machache yaliyopita'
+      },
+      {
+        id: 'post-seed-002',
+        author: {
+          id: 'usr-grace-mrema',
+          name: 'Dr. Grace Mrema',
+          handle: 'grace_biology',
+          avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&auto=format&fit=crop&q=80',
+          school: 'Ilala Secondary School',
+          role: 'student',
+          verified: true
+        },
+        type: 'question',
+        category: 'masomo',
+        content: 'Katika somo la Biology Form VI (Genetics & Mendelian Inheritance): Ni mambo gani muhimu ya kuzingatia wakati wa kuelezea Dihybrid Cross na Epistasis katika mtihani wa NECTA? Wanafunzi wengi wanakosa alama kwenye Punnett square layout.',
+        subject: 'Biology',
+        mediaUrl: null,
+        mediaType: null,
+        pollOptions: null,
+        likes: 12,
+        likedBy: [],
+        commentsCount: 1,
+        sharesCount: 2,
+        isSaved: false,
+        comments: [],
+        schoolName: 'Ilala Secondary School',
+        createdAt: 'Masaa 4 yaliyopita'
+      },
+      {
+        id: 'post-seed-003',
+        author: {
+          id: 'usr-samwel-math',
+          name: 'Mwl. Samwel Mshana',
+          handle: 'samwel_bam',
+          avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop&q=80',
+          school: 'Kibaha Secondary School',
+          role: 'student',
+          verified: true
+        },
+        type: 'normal',
+        category: 'masomo',
+        content: 'NECTA Advanced Mathematics Tips: Hakikisha unajua derivatives za trigonometric functions (sin, cos, tan, sec) na integration by parts. Maswali ya Form 6 Paper 1 yanajirudia kila mwaka!',
+        subject: 'Mathematics',
+        mediaUrl: null,
+        mediaType: null,
+        pollOptions: null,
+        likes: 24,
+        likedBy: [],
+        commentsCount: 0,
+        sharesCount: 6,
+        isSaved: false,
+        comments: [],
+        schoolName: 'Kibaha Secondary School',
+        createdAt: 'Jana'
+      }
+    ];
+    saveServerPosts(seedPosts);
   }
 }
 
@@ -476,6 +922,7 @@ async function startServer() {
 
   // Initialize master admin
   bootstrapAdminUser();
+  seedInitialServerData();
 
   // -------------------------------------------------------------
   // Health check endpoint
@@ -774,7 +1221,8 @@ async function startServer() {
         comments: [],
         schoolId: currentUser.schoolId || null,
         schoolName: currentUser.schoolName,
-        createdAt: `Sasa hivi (${timeFormatted})`
+        createdAt: `Sasa hivi (${timeFormatted})`,
+        serverCreatedAt: now.toISOString()
       };
 
       currentPosts.unshift(newPost);
@@ -787,6 +1235,18 @@ async function startServer() {
         authorUser.points = (authorUser.points || 0) + 5;
         saveServerUsers(users);
       }
+
+      // Trigger notification for all other Edu-Kan users
+      broadcastNotification({
+        recipientId: 'all',
+        type: 'post',
+        title: 'New post available',
+        message: `${currentUser.name} (${currentUser.schoolName}): "${(newPost.content || '').slice(0, 60)}"`,
+        senderId: currentUser.id,
+        senderName: currentUser.name,
+        senderAvatar: currentUser.avatar,
+        relatedPostId: newPost.id
+      });
 
       console.log(`📝 [NEW POST PUBLISHED] "${newPost.content.slice(0, 45)}..." by ${currentUser.name} (${newPost.id})`);
 
@@ -874,6 +1334,20 @@ async function startServer() {
       target.commentsCount = target.comments.length;
       saveServerPosts(posts);
 
+      // Trigger notification for the author if different user
+      if (target.author && target.author.id && target.author.id !== currentUser.id) {
+        broadcastNotification({
+          recipientId: target.author.id,
+          type: 'comment',
+          title: `Maoni mapya kutoka kwa ${currentUser.name}`,
+          message: `"${content.trim().slice(0, 60)}" kwenye chapisho lako`,
+          senderId: currentUser.id,
+          senderName: currentUser.name,
+          senderAvatar: currentUser.avatar,
+          relatedPostId: target.id
+        });
+      }
+
       return res.json({ success: true, comment: newComment, post: target });
     } catch (err) {
       return res.status(500).json({ error: 'Hitilafu ya maoni' });
@@ -923,6 +1397,527 @@ async function startServer() {
       return res.json({ success: true, message: 'Chapisho limefutwa kikamilifu.' });
     } catch (err) {
       return res.status(500).json({ error: 'Hitilafu wakati wa kufuta chapisho' });
+    }
+  });
+
+  // =============================================================
+  // STUDY MATERIALS & DOWNLOAD GATE API (Req 22)
+  // Guests can view material details, but downloads strictly require authentication.
+  // =============================================================
+
+  // GET /api/materials - List available study materials (open for browsing)
+  app.get('/api/materials', (req: Request, res: Response) => {
+    const materials = loadServerMaterials();
+    const { category, subject, level } = req.query;
+
+    let filtered = materials;
+    if (category && typeof category === 'string' && category !== 'all') {
+      filtered = filtered.filter(m => m.category === category);
+    }
+    if (subject && typeof subject === 'string' && subject !== 'all') {
+      filtered = filtered.filter(m => m.subject.toLowerCase() === subject.toLowerCase());
+    }
+    if (level && typeof level === 'string' && level !== 'all') {
+      filtered = filtered.filter(m => m.level === level);
+    }
+
+    return res.json({
+      success: true,
+      materials: filtered,
+      total: filtered.length
+    });
+  });
+
+  // POST /api/materials - Upload/contribute study material (requires login)
+  app.post('/api/materials', authenticateToken, (req: AuthRequest, res: Response) => {
+    try {
+      const {
+        title,
+        authorOrPublisher,
+        level,
+        category,
+        classGrade,
+        subject,
+        fileFormat = 'PDF',
+        fileSize = '3.5 MB',
+        downloadUrl,
+        description,
+        year
+      } = req.body;
+
+      if (!title || !title.trim()) {
+        return res.status(400).json({ error: 'Jina la kitabu au mtihani linahitajika.' });
+      }
+
+      const currentUser = req.user!;
+      const materials = loadServerMaterials();
+
+      const newMaterial: StoredMaterial = {
+        id: `mat-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        title: title.trim(),
+        authorOrPublisher: authorOrPublisher?.trim() || currentUser.schoolName,
+        level: level || 'A-Level',
+        category: category || 'Vitabu vya Masomo',
+        classGrade: classGrade || 'Kidato cha 5 & 6',
+        subject: subject || 'Masomo',
+        fileFormat: fileFormat || 'PDF',
+        fileSize: fileSize || '4.0 MB',
+        downloadUrl: downloadUrl || `/downloads/${encodeURIComponent(title.toLowerCase().replace(/\s+/g, '_'))}.pdf`,
+        year: year ? parseInt(year, 10) : new Date().getFullYear(),
+        downloadsCount: 0,
+        description: description?.trim() || `Nyenzo ya masomo iliyopakiwa na ${currentUser.name}.`,
+        uploaderId: currentUser.id,
+        uploaderName: currentUser.name,
+        uploaderRole: currentUser.role,
+        uploaderSchool: currentUser.schoolName,
+        createdAt: new Date().toISOString(),
+        verified: currentUser.role === 'admin'
+      };
+
+      materials.unshift(newMaterial);
+      saveServerMaterials(materials);
+
+      // Trigger notification for all users
+      broadcastNotification({
+        recipientId: 'all',
+        type: 'material',
+        title: 'New study material has been added',
+        message: `"${newMaterial.title}" (${newMaterial.subject}) ipo tayari kwenye Maktaba.`,
+        senderId: currentUser.id,
+        senderName: currentUser.name,
+        senderAvatar: currentUser.avatar,
+        relatedMaterialId: newMaterial.id
+      });
+
+      return res.status(201).json({
+        success: true,
+        material: newMaterial,
+        message: 'Nyenzo ya masomo imepakiwa kikamilifu!'
+      });
+    } catch (err: any) {
+      return res.status(500).json({ error: 'Hitilafu ya kupakia nyenzo ya masomo.' });
+    }
+  });
+
+  // GET /api/materials/:id/download - Secure download gate (STRICTLY requires authenticated token)
+  app.get('/api/materials/:id/download', authenticateToken, (req: AuthRequest, res: Response) => {
+    try {
+      const { id } = req.params;
+      const materials = loadServerMaterials();
+      const target = materials.find(m => m.id === id);
+
+      if (!target) {
+        return res.status(404).json({ error: 'Faili la masomo halijapatikana.' });
+      }
+
+      // Increment download counter
+      target.downloadsCount = (target.downloadsCount || 0) + 1;
+      saveServerMaterials(materials);
+
+      console.log(`📥 [MATERIAL DOWNLOAD AUTHORIZED] User "${req.user!.name}" downloaded "${target.title}"`);
+
+      return res.json({
+        success: true,
+        downloadUrl: target.downloadUrl,
+        title: target.title,
+        fileFormat: target.fileFormat,
+        downloadsCount: target.downloadsCount,
+        message: `Upakuaji wa "${target.title}" umethibitishwa.`
+      });
+    } catch (err) {
+      return res.status(500).json({ error: 'Hitilafu wakati wa kupakua nyenzo.' });
+    }
+  });
+
+  // =============================================================
+  // NOTIFICATIONS API (Req 24, 25, 26, 29, 31, 32)
+  // Real database-backed notifications with user-level read state and preferences
+  // =============================================================
+
+  // GET /api/notifications - Real-time notifications for authenticated user
+  app.get('/api/notifications', authenticateToken, (req: AuthRequest, res: Response) => {
+    try {
+      const currentUserId = req.user!.id;
+      const allNotifs = loadServerNotifications();
+
+      // Filter notifications: broadcast to 'all' or private to currentUserId
+      const userNotifs = allNotifs.filter(
+        n => n.recipientId === 'all' || n.recipientId === currentUserId
+      );
+
+      // Map read state specific to currentUserId
+      const mapped = userNotifs.map(n => ({
+        ...n,
+        isRead: Array.isArray(n.readBy) && n.readBy.includes(currentUserId)
+      }));
+
+      const unreadCount = mapped.filter(n => !n.isRead).length;
+
+      return res.json({
+        success: true,
+        notifications: mapped,
+        unreadCount
+      });
+    } catch (err: any) {
+      return res.status(500).json({ error: 'Hitilafu ya kupata arifa.' });
+    }
+  });
+
+  // GET /api/notifications/unread-count - Lightweight polling endpoint
+  app.get('/api/notifications/unread-count', authenticateToken, (req: AuthRequest, res: Response) => {
+    try {
+      const currentUserId = req.user!.id;
+      const allNotifs = loadServerNotifications();
+      const count = allNotifs.filter(
+        n => (n.recipientId === 'all' || n.recipientId === currentUserId) &&
+             (!Array.isArray(n.readBy) || !n.readBy.includes(currentUserId))
+      ).length;
+
+      return res.json({ success: true, unreadCount: count });
+    } catch (err) {
+      return res.status(500).json({ unreadCount: 0 });
+    }
+  });
+
+  // POST /api/notifications/:id/read - Mark single notification as read
+  app.post('/api/notifications/:id/read', authenticateToken, (req: AuthRequest, res: Response) => {
+    try {
+      const { id } = req.params;
+      const currentUserId = req.user!.id;
+      const notifs = loadServerNotifications();
+      const target = notifs.find(n => n.id === id);
+
+      if (target) {
+        if (!Array.isArray(target.readBy)) target.readBy = [];
+        if (!target.readBy.includes(currentUserId)) {
+          target.readBy.push(currentUserId);
+          saveServerNotifications(notifs);
+        }
+      }
+
+      return res.json({ success: true, message: 'Arifa imesomwa.' });
+    } catch (err) {
+      return res.status(500).json({ error: 'Hitilafu ya kusasisha arifa.' });
+    }
+  });
+
+  // POST /api/notifications/read-all - Mark all notifications as read for current user
+  app.post('/api/notifications/read-all', authenticateToken, (req: AuthRequest, res: Response) => {
+    try {
+      const currentUserId = req.user!.id;
+      const notifs = loadServerNotifications();
+
+      let modified = false;
+      notifs.forEach(n => {
+        if (n.recipientId === 'all' || n.recipientId === currentUserId) {
+          if (!Array.isArray(n.readBy)) n.readBy = [];
+          if (!n.readBy.includes(currentUserId)) {
+            n.readBy.push(currentUserId);
+            modified = true;
+          }
+        }
+      });
+
+      if (modified) {
+        saveServerNotifications(notifs);
+      }
+
+      return res.json({ success: true, message: 'Arifa zote zimewekwa kama zimesomwa.' });
+    } catch (err) {
+      return res.status(500).json({ error: 'Hitilafu ya kusasisha arifa.' });
+    }
+  });
+
+  // GET /api/notifications/preferences - Retrieve notification preferences (Req 31)
+  app.get('/api/notifications/preferences', authenticateToken, (req: AuthRequest, res: Response) => {
+    const users = loadServerUsers();
+    const user = users.find(u => u.id === req.user!.id);
+    const defaultPreferences: NotificationPreferences = {
+      newPosts: true,
+      announcements: true,
+      newMessages: true,
+      studyMaterials: true,
+      pushEnabled: false
+    };
+
+    return res.json({
+      success: true,
+      preferences: user?.notificationPreferences || defaultPreferences
+    });
+  });
+
+  // PUT /api/notifications/preferences - Update notification preferences (Req 31)
+  app.put('/api/notifications/preferences', authenticateToken, (req: AuthRequest, res: Response) => {
+    try {
+      const { newPosts, announcements, newMessages, studyMaterials, pushEnabled } = req.body;
+      const users = loadServerUsers();
+      const user = users.find(u => u.id === req.user!.id);
+
+      if (!user) {
+        return res.status(404).json({ error: 'Mtumiaji hajapatikana.' });
+      }
+
+      user.notificationPreferences = {
+        newPosts: newPosts ?? true,
+        announcements: announcements ?? true,
+        newMessages: newMessages ?? true,
+        studyMaterials: studyMaterials ?? true,
+        pushEnabled: pushEnabled ?? false
+      };
+
+      saveServerUsers(users);
+
+      return res.json({
+        success: true,
+        preferences: user.notificationPreferences,
+        message: 'Mipangilio ya arifa imesasishwa kikamilifu!'
+      });
+    } catch (err) {
+      return res.status(500).json({ error: 'Hitilafu ya kusasisha mipangilio ya arifa.' });
+    }
+  });
+
+  // =============================================================
+  // ADMIN ANNOUNCEMENTS API (Req 27)
+  // Only verified administrator can create official announcements
+  // =============================================================
+
+  // GET /api/announcements - Public announcements visible to all visitors & students
+  app.get('/api/announcements', (req: Request, res: Response) => {
+    const announcements = loadServerAnnouncements();
+    return res.json({
+      success: true,
+      announcements,
+      total: announcements.length
+    });
+  });
+
+  // POST /api/admin/announcements - Publish official announcement (requireAdmin)
+  app.post('/api/admin/announcements', requireAdmin, (req: AuthRequest, res: Response) => {
+    try {
+      const { title, message, priority = 'normal', audience = 'Wanafunzi Wote Tanzania' } = req.body;
+
+      if (!title || !message) {
+        return res.status(400).json({ error: 'Kichwa cha habari na maelezo ya tangazo vinahitajika.' });
+      }
+
+      const announcements = loadServerAnnouncements();
+      const newAnnouncement: StoredAnnouncement = {
+        id: `ann-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        title: title.trim(),
+        message: message.trim(),
+        priority,
+        audience,
+        authorId: req.user!.id,
+        authorName: req.user!.name,
+        createdAt: new Date().toISOString()
+      };
+
+      announcements.unshift(newAnnouncement);
+      saveServerAnnouncements(announcements);
+
+      logAdminAction(
+        req.user!.id,
+        req.user!.name,
+        'Kutangaza Tangazo Rasmi la Kitaifa',
+        newAnnouncement.title
+      );
+
+      // Broadcast notification across Edu-Kan network
+      broadcastNotification({
+        recipientId: 'all',
+        type: 'announcement',
+        title: 'New Edu-Kan announcement',
+        message: `${newAnnouncement.title}: ${newAnnouncement.message}`,
+        senderId: req.user!.id,
+        senderName: req.user!.name,
+        senderAvatar: req.user!.avatar,
+        relatedAnnouncementId: newAnnouncement.id
+      });
+
+      console.log(`📢 [ADMIN ANNOUNCEMENT BROADCAST] "${newAnnouncement.title}" by ${req.user!.name}`);
+
+      return res.status(201).json({
+        success: true,
+        announcement: newAnnouncement,
+        message: 'Tangazo limechapishwa na kusambazwa kwa wanafunzi wote!'
+      });
+    } catch (err: any) {
+      return res.status(500).json({ error: 'Hitilafu ya kuchapisha tangazo.' });
+    }
+  });
+
+  // DELETE /api/admin/announcements/:id - Delete announcement (requireAdmin)
+  app.delete('/api/admin/announcements/:id', requireAdmin, (req: AuthRequest, res: Response) => {
+    try {
+      const { id } = req.params;
+      const announcements = loadServerAnnouncements();
+      const filtered = announcements.filter(a => a.id !== id);
+      saveServerAnnouncements(filtered);
+
+      return res.json({ success: true, message: 'Tangazo limefutwa.' });
+    } catch (err) {
+      return res.status(500).json({ error: 'Hitilafu ya kufuta tangazo.' });
+    }
+  });
+
+  // =============================================================
+  // MESSAGES API - Real Persistent User-to-User Messages (Req 28 & 32)
+  // Strictly authenticated; guests cannot send messages; private data isolated
+  // =============================================================
+
+  // GET /api/messages/conversations - List active conversation threads for current user
+  app.get('/api/messages/conversations', authenticateToken, (req: AuthRequest, res: Response) => {
+    try {
+      const currentUserId = req.user!.id;
+      const messages = loadServerMessages();
+      const users = loadServerUsers();
+
+      // Find all messages involving current user
+      const userMessages = messages.filter(
+        m => m.senderId === currentUserId || m.recipientId === currentUserId
+      );
+
+      // Group by conversation partner
+      const conversationMap: Record<string, {
+        partnerId: string;
+        partnerName: string;
+        partnerAvatar: string;
+        partnerSchool: string;
+        lastMessage: StoredMessage;
+        unreadCount: number;
+      }> = {};
+
+      userMessages.forEach(m => {
+        const partnerId = m.senderId === currentUserId ? m.recipientId : m.senderId;
+        const partnerUser = users.find(u => u.id === partnerId);
+        const partnerName = partnerUser ? partnerUser.name : (m.senderId === currentUserId ? m.recipientName : m.senderName);
+        const partnerAvatar = partnerUser ? partnerUser.avatar : (m.senderId === currentUserId ? 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80' : m.senderAvatar);
+        const partnerSchool = partnerUser ? partnerUser.schoolName : 'Edu-Kan Network';
+
+        const isUnread = m.recipientId === currentUserId && (!Array.isArray(m.readBy) || !m.readBy.includes(currentUserId));
+
+        if (!conversationMap[partnerId]) {
+          conversationMap[partnerId] = {
+            partnerId,
+            partnerName,
+            partnerAvatar,
+            partnerSchool,
+            lastMessage: m,
+            unreadCount: isUnread ? 1 : 0
+          };
+        } else {
+          // If message is newer, update lastMessage
+          if (new Date(m.createdAt) > new Date(conversationMap[partnerId].lastMessage.createdAt)) {
+            conversationMap[partnerId].lastMessage = m;
+          }
+          if (isUnread) {
+            conversationMap[partnerId].unreadCount += 1;
+          }
+        }
+      });
+
+      const conversations = Object.values(conversationMap).sort(
+        (a, b) => new Date(b.lastMessage.createdAt).getTime() - new Date(a.lastMessage.createdAt).getTime()
+      );
+
+      return res.json({ success: true, conversations });
+    } catch (err: any) {
+      return res.status(500).json({ error: 'Hitilafu ya kupata orodha ya soga.' });
+    }
+  });
+
+  // GET /api/messages/thread/:otherUserId - Get messages between current user and other user
+  app.get('/api/messages/thread/:otherUserId', authenticateToken, (req: AuthRequest, res: Response) => {
+    try {
+      const currentUserId = req.user!.id;
+      const { otherUserId } = req.params;
+      const messages = loadServerMessages();
+
+      // Security check: Only fetch messages where current user is sender OR recipient
+      const thread = messages.filter(
+        m => (m.senderId === currentUserId && m.recipientId === otherUserId) ||
+             (m.senderId === otherUserId && m.recipientId === currentUserId)
+      );
+
+      // Sort chronologically
+      thread.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+
+      // Mark incoming messages as read
+      let modified = false;
+      thread.forEach(m => {
+        if (m.recipientId === currentUserId) {
+          if (!Array.isArray(m.readBy)) m.readBy = [];
+          if (!m.readBy.includes(currentUserId)) {
+            m.readBy.push(currentUserId);
+            modified = true;
+          }
+        }
+      });
+      if (modified) {
+        saveServerMessages(messages);
+      }
+
+      return res.json({ success: true, messages: thread });
+    } catch (err) {
+      return res.status(500).json({ error: 'Hitilafu ya kupata ujumbe wa soga.' });
+    }
+  });
+
+  // POST /api/messages/send - Send real message between authenticated users
+  app.post('/api/messages/send', authenticateToken, (req: AuthRequest, res: Response) => {
+    try {
+      const { recipientId, content, attachment, channelId } = req.body;
+      const currentUser = req.user!;
+
+      if (!recipientId || (!content && !attachment)) {
+        return res.status(400).json({ error: 'Mpokeaji na maudhui ya ujumbe vinahitajika.' });
+      }
+
+      const users = loadServerUsers();
+      const recipient = users.find(u => u.id === recipientId);
+
+      // If sending to a specific registered user, verify recipient
+      let resolvedRecipientName = recipient ? recipient.name : 'Mwanajumuiya wa Edu-Kan';
+
+      const messages = loadServerMessages();
+      const newMessage: StoredMessage = {
+        id: `msg-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        senderId: currentUser.id,
+        senderName: currentUser.name,
+        senderAvatar: currentUser.avatar,
+        recipientId,
+        recipientName: resolvedRecipientName,
+        channelId: channelId || null,
+        content: content ? content.trim() : (attachment?.title || 'Kiambatisho cha faili'),
+        attachment: attachment || null,
+        createdAt: new Date().toISOString(),
+        readBy: [currentUser.id]
+      };
+
+      messages.push(newMessage);
+      saveServerMessages(messages);
+
+      // Generate notification for recipient
+      broadcastNotification({
+        recipientId,
+        type: 'message',
+        title: `New message from ${currentUser.name}`,
+        message: newMessage.content.slice(0, 80),
+        senderId: currentUser.id,
+        senderName: currentUser.name,
+        senderAvatar: currentUser.avatar,
+        relatedMessageId: newMessage.id
+      });
+
+      console.log(`💬 [DIRECT MESSAGE] From ${currentUser.name} to ${resolvedRecipientName} (${newMessage.id})`);
+
+      return res.status(201).json({
+        success: true,
+        message: newMessage
+      });
+    } catch (err: any) {
+      return res.status(500).json({ error: 'Hitilafu ya kutuma ujumbe.' });
     }
   });
 

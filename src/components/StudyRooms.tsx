@@ -28,6 +28,8 @@ interface Props {
   questions: QuestionItem[];
   resources: StudyResource[];
   currentUser: UserProfile;
+  isLoggedIn?: boolean;
+  onRequireAuth?: (action: 'post' | 'download' | 'comment' | 'like' | 'message', message?: string) => void;
   onAddQuestion: (q: Partial<QuestionItem>) => void;
   onAddAnswer: (questionId: string, answerText: string) => void;
   onMarkBestAnswer: (questionId: string, answerId: string) => void;
@@ -38,6 +40,8 @@ export const StudyRooms: React.FC<Props> = ({
   questions,
   resources,
   currentUser,
+  isLoggedIn = false,
+  onRequireAuth,
   onAddQuestion,
   onAddAnswer,
   onMarkBestAnswer,
@@ -76,6 +80,12 @@ export const StudyRooms: React.FC<Props> = ({
   };
 
   const handleDownload = (title: string) => {
+    if (!isLoggedIn) {
+      if (onRequireAuth) {
+        onRequireAuth('download', 'Create an account or sign in to download this material.');
+      }
+      return;
+    }
     setDownloadNotice(`Umeipakua "${title}" kikamilifu.`);
     setTimeout(() => {
       setDownloadNotice(null);
@@ -146,6 +156,10 @@ export const StudyRooms: React.FC<Props> = ({
 
   const handleAskSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isLoggedIn) {
+      onRequireAuth?.('post', 'Please create an account or sign in to continue.');
+      return;
+    }
     if (!newTitle.trim() || !newContent.trim()) return;
 
     const finalContent = questionAttachment 
@@ -229,8 +243,14 @@ export const StudyRooms: React.FC<Props> = ({
           </button>
 
           <button
-            onClick={() => setIsAsking(true)}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3.5 py-2 rounded-xl flex items-center gap-1.5 shadow-xs transition-colors shrink-0"
+            onClick={() => {
+              if (!isLoggedIn) {
+                onRequireAuth?.('post', 'Please create an account or sign in to continue.');
+                return;
+              }
+              setIsAsking(true);
+            }}
+            className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3.5 py-2 rounded-xl flex items-center gap-1.5 shadow-xs transition-colors shrink-0 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>Uliza Swali</span>
@@ -524,16 +544,28 @@ export const StudyRooms: React.FC<Props> = ({
                               </span>
                             ) : (
                               <button
-                                onClick={() => handleBestAnswerAward(q.id, ans.id)}
-                                className="text-[10px] text-emerald-700 dark:text-emerald-400 hover:text-emerald-900 dark:hover:text-emerald-300 font-semibold bg-white dark:bg-slate-900 px-2 py-0.5 rounded border border-emerald-300 dark:border-emerald-700"
+                                onClick={() => {
+                                  if (!isLoggedIn) {
+                                    onRequireAuth?.('like', 'Please create an account or sign in to continue.');
+                                    return;
+                                  }
+                                  handleBestAnswerAward(q.id, ans.id);
+                                }}
+                                className="text-[10px] text-emerald-700 dark:text-emerald-400 hover:text-emerald-900 dark:hover:text-emerald-300 font-semibold bg-white dark:bg-slate-900 px-2 py-0.5 rounded border border-emerald-300 dark:border-emerald-700 cursor-pointer"
                               >
                                 Mark as Best Answer
                               </button>
                             )}
 
                             <button
-                              onClick={() => onVoteAnswer(q.id, ans.id, 'up')}
-                              className="flex items-center gap-1 text-gray-500 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-300 text-xs px-1.5 py-0.5 rounded bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700"
+                              onClick={() => {
+                                if (!isLoggedIn) {
+                                  onRequireAuth?.('like', 'Please create an account or sign in to continue.');
+                                  return;
+                                }
+                                onVoteAnswer(q.id, ans.id, 'up');
+                              }}
+                              className="flex items-center gap-1 text-gray-500 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-300 text-xs px-1.5 py-0.5 rounded bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 cursor-pointer"
                             >
                               <ThumbsUp className="w-3 h-3" />
                               <span>{ans.votes}</span>
@@ -595,6 +627,10 @@ export const StudyRooms: React.FC<Props> = ({
                           onChange={(e) => setAnswerInputs({ ...answerInputs, [q.id]: e.target.value })}
                           onKeyDown={(e) => {
                             if (e.key === 'Enter') {
+                              if (!isLoggedIn) {
+                                onRequireAuth?.('comment', 'Please create an account or sign in to continue.');
+                                return;
+                              }
                               const text = answerInputs[q.id]?.trim() || '';
                               const att = answerAttachments[q.id];
                               if (text || att) {
@@ -616,6 +652,10 @@ export const StudyRooms: React.FC<Props> = ({
                         <button
                           type="button"
                           onClick={() => {
+                            if (!isLoggedIn) {
+                              onRequireAuth?.('comment', 'Please create an account or sign in to continue.');
+                              return;
+                            }
                             setActiveAnswerQuestionId(q.id);
                             answerFileInputRef.current?.click();
                           }}
@@ -627,6 +667,10 @@ export const StudyRooms: React.FC<Props> = ({
 
                         <button
                           onClick={() => {
+                            if (!isLoggedIn) {
+                              onRequireAuth?.('comment', 'Please create an account or sign in to continue.');
+                              return;
+                            }
                             const text = answerInputs[q.id]?.trim() || '';
                             const att = answerAttachments[q.id];
                             if (text || att) {

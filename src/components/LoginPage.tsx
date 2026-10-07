@@ -25,6 +25,7 @@ import { saveUserProfileToDb } from '../lib/supabaseService';
 import { getInitialState } from '../lib/store';
 import { sendRegistrationEmails } from '../services/emailService';
 import { registerUserInAdminStore } from '../services/adminRegistrationService';
+import { loginToServer, registerToServer } from '../lib/authService';
 
 interface LoginPageProps {
   isOpen: boolean;
@@ -157,6 +158,16 @@ export const LoginPage: React.FC<LoginPageProps> = ({
     try {
       const idTrimmed = identifier.trim().toLowerCase();
       const passTrimmed = password.trim();
+
+      // 1. Primary: Authenticate against server database
+      const serverRes = await loginToServer(idTrimmed, passTrimmed);
+      if (serverRes.success && serverRes.user) {
+        await saveUserProfileToDb(serverRes.user);
+        setLoading(false);
+        onLoginSuccess(serverRes.user, serverRes.user.role || 'student');
+        onClose();
+        return;
+      }
 
       const isAuthorizedAdminIdentifier =
         idTrimmed === 'nicolousmunisi@gmail.com' ||
@@ -376,8 +387,29 @@ export const LoginPage: React.FC<LoginPageProps> = ({
 
       const chosenTitle = regTitle.trim() || (finalRole === 'admin' ? 'Msimamizi wa Mfumo (Admin)' : 'Mwanafunzi');
 
-      // 1. Attempt Supabase Auth Sign-Up
-      let generatedAuthId = `usr-${Date.now()}`;
+      // 1. Primary: Register on central backend server database
+      const serverRes = await registerToServer({
+        name: trimmedName,
+        email: targetEmail,
+        password: trimmedPassword,
+        phone: trimmedPhone,
+        schoolName: trimmedSchool,
+        level: regLevel,
+        combination: regCombination,
+        title: chosenTitle,
+        role: finalRole,
+        adminCode: adminSecretCode
+      });
+
+      if (!serverRes.success) {
+        setLoading(false);
+        setErrorMsg(serverRes.error || 'Hitilafu ya usajili kwenye seva. Tafadhali jaribu tena.');
+        return;
+      }
+
+      let generatedAuthId = serverRes.user?.id || `usr-${Date.now()}`;
+
+      // 2. Attempt Supabase Auth Sign-Up
       try {
         const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
           email: targetEmail,

@@ -1,0 +1,36 @@
+[
+  {
+    "id": "notif-1791413031856-q1y9",
+    "recipientId": "all",
+    "type": "post",
+    "title": "New post available",
+    "message": "Amina Bakari (Tambaza High School): \"Leo nimeanza kusoma topic ya Organic Chemistry (A-Level). Ni\"",
+    "senderId": "usr-1791413013202-nzkq7",
+    "senderName": "Amina Bakari",
+    "senderAvatar": "https://api.dicebear.com/7.x/initials/svg?seed=Amina%20Bakari&backgroundColor=047857&textColor=ffffff",
+    "relatedPostId": "post-1791413031856-adnzl",
+    "createdAt": "2026-10-07T22:43:51.856Z",
+    "readBy": []
+  },
+  {
+    "id": "notif-welcome-system",
+    "recipientId": "all",
+    "type": "announcement",
+    "title": "New Edu-Kan announcement",
+    "message": "Mfumo wa Edu-Kan sasa umefunguliwa kwa wanafunzi wote wa shule za msingi, sekondari na vyuo vikuu nchini Tanzania.",
+    "senderId": "usr-admin-master",
+    "senderName": "Nicolous Munisi",
+    "senderAvatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80",
+    "createdAt": "2026-10-07T21:23:36.251Z",
+    "readBy": []
+  },
+  {
+    "id": "notif-material-welcome",
+    "recipientId": "all",
+    "type": "material",
+    "title": "New study material has been added",
+    "message": "NECTA Biology Form 6 Past Papers & Mark Schemes 2025 sasa inapatikana kwenye Maktaba ya Kidijitali.",
+    "createdAt": "2026-10-07T20:23:36.251Z",
+    "readBy": []
+  }
+]

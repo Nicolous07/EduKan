@@ -26,6 +26,8 @@ import {
 } from 'lucide-react';
 import { LibraryItem, LibraryLevel, LibraryCategory, UserProfile, UserRole } from '../types';
 import { OfflineIndicator } from './OfflineIndicator';
+import { downloadStudyMaterial } from '../lib/supabaseService';
+import { getAuthToken } from '../lib/authService';
 
 export type DisciplineCategory =
   | 'all'
@@ -41,6 +43,8 @@ interface Props {
   books: LibraryItem[];
   currentUser: UserProfile;
   currentRole: UserRole;
+  isLoggedIn?: boolean;
+  onRequireAuth?: (action: 'download' | 'post' | 'comment' | 'message', message?: string) => void;
   onAddBook: (book: Partial<LibraryItem>) => void;
   onDownloadBook: (bookId: string) => void;
   onToggleSaveBook: (bookId: string) => void;
@@ -60,6 +64,8 @@ export const LibraryView: React.FC<Props> = ({
   books,
   currentUser,
   currentRole,
+  isLoggedIn = false,
+  onRequireAuth,
   onAddBook,
   onDownloadBook,
   onToggleSaveBook
@@ -373,12 +379,56 @@ export const LibraryView: React.FC<Props> = ({
     showToast('Hongera! Kitabu/Mtihani umepakiwa kikamilifu kwenye Maktaba ya Taifa! 📚 (+25 pts)');
   };
 
-  const handleDownload = (book: LibraryItem) => {
-    onDownloadBook(book.id);
-    const totalPages = book.pages || 180;
-    const current = progressMap[book.id];
-    saveProgress(book.id, current?.currentPage || 0, totalPages, true);
-    showToast(`Faili la "${book.title}" linapakuliwa... 📥 (+5 pts)`);
+  const handleDownload = async (book: LibraryItem) => {
+    // Req 22: Guests cannot download materials
+    if (!isLoggedIn || !getAuthToken()) {
+      if (onRequireAuth) {
+        onRequireAuth('download', 'Create an account or sign in to download this material.');
+      }
+      return;
+    }
+
+    try {
+      showToast(`Inathibitisha upakuaji wa "${book.title}"... 📥`);
+      const res = await downloadStudyMaterial(book.id);
+
+      if (!res.success) {
+        if (res.requiresAuth && onRequireAuth) {
+          onRequireAuth('download', 'Create an account or sign in to download this material.');
+          return;
+        }
+        showToast(res.error || 'Imeshindikana kupakua kwa sasa.');
+        return;
+      }
+
+      onDownloadBook(book.id);
+      const totalPages = book.pages || 180;
+      const current = progressMap[book.id];
+      saveProgress(book.id, current?.currentPage || 0, totalPages, true);
+      showToast(`Upakuaji wa "${book.title}" umeanza! (+5 pts)`);
+
+      // Trigger standard browser download if downloadUrl exists
+      if (res.downloadUrl && res.downloadUrl !== '#') {
+        const link = document.createElement('a');
+        link.href = res.downloadUrl;
+        link.download = `${book.title}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    } catch (err) {
+      console.warn('Download error:', err);
+    }
+  };
+
+  const handleOpenUploadModal = () => {
+    if (!isLoggedIn || !getAuthToken()) {
+      if (onRequireAuth) {
+        onRequireAuth('post', 'Please create an account or sign in to upload study materials.');
+      }
+      return;
+    }
+    setIsUploadModalOpen(true);
   };
 
   return (
@@ -419,7 +469,7 @@ export const LibraryView: React.FC<Props> = ({
             <div className="shrink-0 flex items-center gap-2">
               <button
                 id="upload-book-btn"
-                onClick={() => setIsUploadModalOpen(true)}
+                onClick={handleOpenUploadModal}
                 className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold shadow-md hover:shadow-lg transition-all flex items-center gap-2 cursor-pointer active:scale-95"
               >
                 <div className="w-5 h-5 rounded-lg bg-white/20 flex items-center justify-center">

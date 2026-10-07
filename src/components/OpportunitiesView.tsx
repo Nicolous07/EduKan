@@ -25,6 +25,8 @@ import { UniversityHub } from './opportunities/UniversityHub';
 interface Props {
   opportunities: OpportunityItem[];
   currentUser?: UserProfile;
+  isLoggedIn?: boolean;
+  onRequireAuth?: (action: 'post' | 'download' | 'comment' | 'like' | 'message' | 'follow' | 'poll' | 'general', message?: string) => void;
   onToggleSave: (id: string) => void;
   onAwardPoints?: (points: number, reason: string) => void;
 }
@@ -32,6 +34,8 @@ interface Props {
 export const OpportunitiesView: React.FC<Props> = ({
   opportunities,
   currentUser,
+  isLoggedIn = false,
+  onRequireAuth,
   onToggleSave,
   onAwardPoints
 }) => {
@@ -269,7 +273,13 @@ export const OpportunitiesView: React.FC<Props> = ({
                     href={op.link}
                     target="_blank"
                     rel="noreferrer"
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-4 py-2 rounded-xl flex items-center gap-1.5 transition-colors shadow-2xs"
+                    onClick={(e) => {
+                      if (!isLoggedIn) {
+                        e.preventDefault();
+                        onRequireAuth?.('general', 'Create an account or sign in to apply for opportunities.');
+                      }
+                    }}
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-4 py-2 rounded-xl flex items-center gap-1.5 transition-colors shadow-2xs cursor-pointer"
                   >
                     <span>Omba Sasa</span>
                     <ExternalLink className="w-3.5 h-3.5" />

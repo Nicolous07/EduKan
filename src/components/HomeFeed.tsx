@@ -62,6 +62,8 @@ interface Props {
   onOpenQuickAction?: (mode?: 'post' | 'question') => void;
   onOpenLeaderboard?: () => void;
   isOnline?: boolean;
+  isLoggedIn?: boolean;
+  onRequireAuth?: (action: 'post' | 'download' | 'comment' | 'like' | 'message' | 'follow' | 'poll' | 'general', message?: string) => void;
 }
 
 export interface FeedSubjectFilter {
@@ -202,7 +204,9 @@ export const HomeFeed: React.FC<Props> = ({
   onNavigateTab,
   onOpenQuickAction,
   onOpenLeaderboard,
-  isOnline = true
+  isOnline = true,
+  isLoggedIn = false,
+  onRequireAuth
 }) => {
   // Category filter as requested: 'All', 'Masomo', 'Ushauri', 'Burudani'
   const [categoryFilter, setCategoryFilter] = useState<'all' | 'masomo' | 'ushauri' | 'burudani'>('all');
@@ -343,6 +347,16 @@ export const HomeFeed: React.FC<Props> = ({
 
   const handleCreatePost = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Req 19 & 20: Guest cannot create posts
+    if (!isLoggedIn) {
+      if (onRequireAuth) {
+        onRequireAuth('post', 'Please create an account or sign in to continue.');
+      } else {
+        setPostErrorMessage('Kuchapisha kunahitaji akaunti. Tafadhali fungua akaunti au ingia.');
+      }
+      return;
+    }
 
     const hasText = Boolean(postContent.trim());
     const hasMedia = Boolean(attachedMedia);
@@ -1323,6 +1337,10 @@ export const HomeFeed: React.FC<Props> = ({
                     <button
                       type="button"
                       onClick={() => {
+                        if (!isLoggedIn) {
+                          onRequireAuth?.('like', 'Please create an account or sign in to continue.');
+                          return;
+                        }
                         onLikePost(post.id);
                         setReactionToast(post.isLiked ? 'Unliked post' : 'Liked this post! ❤️');
                         setTimeout(() => setReactionToast(null), 2000);
@@ -1497,6 +1515,10 @@ export const HomeFeed: React.FC<Props> = ({
                           onChange={(e) => setCommentInputs({ ...commentInputs, [post.id]: e.target.value })}
                           onKeyDown={(e) => {
                             if (e.key === 'Enter') {
+                              if (!isLoggedIn) {
+                                onRequireAuth?.('comment', 'Please create an account or sign in to continue.');
+                                return;
+                              }
                               const text = commentInputs[post.id]?.trim() || '';
                               const att = commentAttachments[post.id];
                               if (text || att) {
@@ -1530,6 +1552,10 @@ export const HomeFeed: React.FC<Props> = ({
                         <button
                           type="button"
                           onClick={() => {
+                            if (!isLoggedIn) {
+                              onRequireAuth?.('comment', 'Please create an account or sign in to continue.');
+                              return;
+                            }
                             const text = commentInputs[post.id]?.trim() || '';
                             const att = commentAttachments[post.id];
                             if (text || att) {
